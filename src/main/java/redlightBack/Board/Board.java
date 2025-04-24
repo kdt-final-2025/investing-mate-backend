@@ -8,7 +8,6 @@ import redlightBack.common.BaseEntity;
 @Entity
 @Builder
 @AllArgsConstructor
-@RequiredArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Board extends BaseEntity {
