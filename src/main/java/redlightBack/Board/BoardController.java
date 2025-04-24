@@ -24,7 +24,7 @@ public class BoardController {
     //게시판 생성
     //관리자 권한 추가 필요
     @PostMapping("/boards")
-    public BoardCreateResponse createBoard(@LoginMemberId String userId,
+    public BoardCreateResponse createBoard(String userId,
                                            @RequestBody BoardRequest request){
        return boardService.create(userId, request);
     }
