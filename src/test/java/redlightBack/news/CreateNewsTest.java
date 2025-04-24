@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-class NewsTest {
+class CreateNewsTest {
 
     @Mock
     private NewsRepository newsRepository;
