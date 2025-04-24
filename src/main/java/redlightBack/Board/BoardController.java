@@ -22,7 +22,6 @@ public class BoardController {
 
 
     //게시판 생성
-    //TODO @LoginMemberId 추가 필요,
     @PostMapping("/boards")
     public CreateBoardResponse createBoard(@LoginMemberId String userId,
                                            @RequestBody CreateBoardRequest request){
