@@ -8,6 +8,7 @@ import redlightBack.common.BaseEntity;
 @Entity
 @Builder
 @AllArgsConstructor
+@RequiredArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Board extends BaseEntity {
@@ -20,5 +21,8 @@ public class Board extends BaseEntity {
     private String boardName;
     int postCount;
 
+    public Board(String boardName) {
+        this.boardName = boardName;
+    }
 
 }
