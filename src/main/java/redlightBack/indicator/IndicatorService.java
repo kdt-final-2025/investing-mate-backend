@@ -3,21 +3,25 @@ package redlightBack.indicator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import redlightBack.indicator.dto.FavoriteIndicatorRequest;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
 public class IndicatorService {
 
     private final RestTemplate restTemplate;
-    private final IndicatorRepository repo;
+    private final IndicatorRepository indicatorRepository;
+    private final FavoriteIndicatorRepository favoriteIndicatorRepository;
 
-    public IndicatorService(RestTemplate restTemplate, IndicatorRepository repo) {
+    public IndicatorService(RestTemplate restTemplate, IndicatorRepository indicatorRepository, FavoriteIndicatorRepository favoriteIndicatorRepository) {
         this.restTemplate = restTemplate;
-        this.repo = repo;
+        this.indicatorRepository = indicatorRepository;
+        this.favoriteIndicatorRepository = favoriteIndicatorRepository;
     }
 
     public void fetchAndSaveAll() {
@@ -30,7 +34,13 @@ public class IndicatorService {
                     .map(code -> new Indicator(code, null))
                     .collect(Collectors.toList());
 
-            repo.saveAll(indicators);
+            indicatorRepository.saveAll(indicators);
         }
+    }
+
+    public void createFavoriteIndicator(String userId, FavoriteIndicatorRequest request) {
+        Indicator indicator = indicatorRepository.findById(request.indicatorId()).orElseThrow(
+                () -> new NoSuchElementException("해당하는 경제 지표가 없습니다."));
+        favoriteIndicatorRepository.save(new FavoriteIndicator(indicator, userId));
     }
 }
