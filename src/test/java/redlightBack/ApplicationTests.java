@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class RedlightBackApplicationTests {
+class ApplicationTests {
 
 	@Test
 	void contextLoads() {
