@@ -29,6 +29,8 @@ public class News extends BaseEntity {
 
     private String userId;
 
+    private LocalDateTime deletedAt;
+
     protected News() {
     }
 
@@ -38,5 +40,9 @@ public class News extends BaseEntity {
         this.imageUrls = imageUrls;
         this.publishedAt = publishedAt;
         this.userId = userId;
+    }
+
+    public void deleteNews() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

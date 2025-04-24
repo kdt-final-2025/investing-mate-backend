@@ -1,5 +1,6 @@
 package redlightBack.news;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import redlightBack.common.GlobalExceptionHandler;
 import redlightBack.news.dto.NewsRequest;
@@ -50,5 +51,12 @@ public class NewsService {
                 news.getCreatedAt(),
                 news.getUpdatedAt()
         );
+    }
+
+    @Transactional
+    public void delete(Long newsId) {
+        News news = newsRepository.findById(newsId).orElseThrow(
+                () -> new NoSuchElementException("해당하는 뉴스가 없습니다."));
+        news.deleteNews();
     }
 }

@@ -23,4 +23,9 @@ public class NewsRestController {
     public NewsResponse findById(@PathVariable Long newsId) {
         return newsService.findById(newsId);
     }
+
+    @PutMapping("/news/{newsId}")
+    public void delete(@LoginMemberId String userId, @PathVariable Long newsId) {
+        newsService.delete(newsId);
+    }
 }
