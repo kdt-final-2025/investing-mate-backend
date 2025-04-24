@@ -2,34 +2,27 @@ package redlightBack;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import redlightBack.Board.Dto.BoardCreateResponse;
-import redlightBack.Board.Dto.BoardRequest;
+import redlightBack.Board.Dto.CreateBoardResponse;
+import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test")
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class BoardApiTest {
+public class BoardApiTest extends AcceptanceTest {
 
     @LocalServerPort
     int port;
 
     @Autowired
     DatabaseCleanup databaseCleanup;
+
 
     @BeforeEach
     void setUp() {
@@ -40,15 +33,20 @@ public class BoardApiTest {
     @DisplayName("게시판 생성 테스트")
     @Test
     public void Board_Create_test(){
-        BoardCreateResponse response = RestAssured.given().log().all()
+
+        //테스트용 토큰
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+        CreateBoardResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new BoardRequest("자유게시판"))
+                .header("Authorization", "Bearer " + token)
+                .body(new CreateBoardRequest("자유게시판"))
                 .when()
                 .post("boards")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
-                .as(BoardCreateResponse.class);
+                .as(CreateBoardResponse.class);
 
         assertThat(response.boardName()).isEqualTo("자유게시판");
     }
@@ -57,9 +55,9 @@ public class BoardApiTest {
     @Test
     public void 게시판_목록_조회_테스트(){
 
-        BoardCreateResponse board1 = createBoard("자유게시판");
-        BoardCreateResponse board2 = createBoard("공지게시판");
-        BoardCreateResponse board3 = createBoard("주식게시판");
+        CreateBoardResponse board1 = createBoard("자유게시판");
+        CreateBoardResponse board2 = createBoard("공지게시판");
+        CreateBoardResponse board3 = createBoard("주식게시판");
 
 
         List<BoardResponse> boards = RestAssured.given().log().all()
@@ -82,15 +80,15 @@ public class BoardApiTest {
     }
 
 
-    public BoardCreateResponse createBoard(String boardName){
+    public CreateBoardResponse createBoard(String boardName){
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new BoardRequest(boardName))
+                .body(new CreateBoardRequest(boardName))
                 .when()
                 .post("boards")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
-                .as(BoardCreateResponse.class);
+                .as(CreateBoardResponse.class);
     }
 }
