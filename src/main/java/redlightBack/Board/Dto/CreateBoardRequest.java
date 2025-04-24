@@ -1,5 +1,5 @@
 package redlightBack.Board.Dto;
 
-public record BoardRequest(String boardName
+public record CreateBoardRequest(String boardName
                            ) {
 }
