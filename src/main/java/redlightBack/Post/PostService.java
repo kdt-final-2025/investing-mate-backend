@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
 import redlightBack.Board.BoardRepository;
 import redlightBack.Post.Dto.CreatePostRequest;
+import redlightBack.Post.Dto.DetailPostResponse;
 import redlightBack.Post.Dto.PostResponse;
 
 import static redlightBack.Post.QPost.post;
@@ -47,6 +48,25 @@ public class PostService {
                 post.getUpdatedAt());
     }
 
+    public DetailPostResponse getDetailPost (Long postId){
+
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new RuntimeException("해당 게시물이 존재하지 않습니다.")
+        );
+
+        return new DetailPostResponse(post.getId(),
+                post.getPostTitle(),
+                post.getUserId(),
+                post.getViewCount(),
+                post.getContent(),
+                post.getImageUrls(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                post.getLikeCount(),
+                post.isLikedByMe(),
+                post.getCommentCount());
+
+    }
 
 
 
