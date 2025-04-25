@@ -116,7 +116,7 @@ public class BoardApiTest extends AcceptanceTest {
 
         PostResponse post = createPost(new CreatePostRequest(boardId, "제목", "내용", List.of("img1", "img2", "img3")));
         Long postId = post.id();
-        System.out.println("postId = " + postId);
+
 
         DetailPostResponse detailPostResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -130,6 +130,35 @@ public class BoardApiTest extends AcceptanceTest {
         assertThat(detailPostResponse.imageUrls().size()).isEqualTo(3);
         assertThat(detailPostResponse.postTitle()).isEqualTo("제목");
         assertThat(detailPostResponse.content()).isEqualTo("내용");
+    }
+
+    @DisplayName("게시물 수정 테스트")
+    @Test
+    public void 게시물_수정_테스트 (){
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
+
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목", "내용", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
+
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+        PostResponse postResponse = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .pathParam("postId", postId)
+                .body(new CreatePostRequest(boardId, "수정된제목", "수정된내용", List.of("수정이미지1", "수정이미지2", "수정이미지3", "수정이미지4")))
+                .when()
+                .put("posts/{postId}")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(PostResponse.class);
+
+        assertThat(postResponse.postTitle()).isEqualTo("수정된제목");
+        assertThat(postResponse.content()).isEqualTo("수정된내용");
+        assertThat(postResponse.imageUrls().size()).isEqualTo(4);
+
     }
 
 
@@ -165,5 +194,16 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .extract()
                 .as(PostResponse.class);
+    }
+
+    public DetailPostResponse getDetail(Long postId){
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("postId", postId)
+                .get("post/{postId}")
+                .then().log().all()
+                .extract()
+                .as(DetailPostResponse.class);
     }
 }
