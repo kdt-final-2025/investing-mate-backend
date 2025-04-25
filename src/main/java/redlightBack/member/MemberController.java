@@ -13,8 +13,8 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    // 2) 기자 승격 – PATCH, 200 OK
-    @PatchMapping("/{userId}/promote")
+    // 2) 기자 승격 – post, 200 OK
+    @PostMapping("/{userId}/promote")
     @ResponseStatus(HttpStatus.OK)
     public MemberResponseDto promoteToReporter(@LoginMemberId String userId) {
         return memberService.promoteToReporter(userId);
