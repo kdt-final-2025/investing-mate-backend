@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class NewsServiceDeleteTest {
+class DeleteNewsTest {
 
     @Mock
     private NewsRepository newsRepository;
