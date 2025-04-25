@@ -1,10 +1,9 @@
 package redlightBack.Post;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import redlightBack.Post.Dto.CreatePostRequest;
-import redlightBack.Post.Dto.DeletePostResponse;
-import redlightBack.Post.Dto.DetailPostResponse;
-import redlightBack.Post.Dto.PostResponse;
+import redlightBack.Post.Dto.*;
 import redlightBack.loginUtils.LoginMemberId;
 
 @RestController
@@ -42,4 +41,18 @@ public class PostController {
         return postService.delete(userId, postId);
     }
 
+    @GetMapping("/boards/{boardId}/posts")
+    public PostListAndPagingResponse getPostList (
+                                                  @PathVariable Long boardId,
+                                                  @RequestParam (required = false) String postTitle,
+                                                  @RequestParam (required = false) String userId,
+                                                  @RequestParam (required = false) String sortBy,
+                                                  @RequestParam (required = false) String direction,
+                                                  @RequestParam (defaultValue = "0") int pageNumber,
+                                                  @RequestParam (defaultValue = "10") int size){
+
+        Pageable pageable = PageRequest.of(pageNumber, size);
+
+        return postService.getPosts(userId, boardId, postTitle, sortBy, direction, pageable);
+    }
 }

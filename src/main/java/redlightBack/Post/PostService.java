@@ -1,13 +1,15 @@
 package redlightBack.Post;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
 import redlightBack.Board.BoardRepository;
-import redlightBack.Post.Dto.CreatePostRequest;
-import redlightBack.Post.Dto.DeletePostResponse;
-import redlightBack.Post.Dto.DetailPostResponse;
-import redlightBack.Post.Dto.PostResponse;
+import redlightBack.Post.Dto.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static redlightBack.Post.QPost.post;
 
@@ -16,10 +18,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
+    private final QPostRepository qPostRepository;
 
-    public PostService(PostRepository postRepository, BoardRepository boardRepository) {
+    public PostService(PostRepository postRepository, BoardRepository boardRepository, QPostRepository qPostRepository) {
         this.postRepository = postRepository;
         this.boardRepository = boardRepository;
+        this.qPostRepository = qPostRepository;
     }
 
     //게시물 생성
@@ -113,7 +117,34 @@ public class PostService {
     }
 
 
+    //게시글 목록 조회(제목 검색, userId 검색, 좋아요 정렬, 최신순 정렬)
+    public PostListAndPagingResponse getPosts(String userId,
+                                              Long boardId,
+                                              String postTitle,
+                                              String sortBy,
+                                              String direction,
+                                              Pageable pageable) {
 
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new RuntimeException("해당 게시판을 찾을 수 없습니다.")
+        );
 
+        Page<Post> posts = qPostRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, pageable);
 
+        List<PostListResponse> responseList = posts.getContent().stream()
+                .map(list -> new PostListResponse(list.getId(),
+                        list.getPostTitle(),
+                        list.getUserId(),
+                        list.getViewCount(),
+                        list.getCommentCount(),
+                        list.getLikeCount())
+                ).toList();
+
+        PageInfo pageInfo = new PageInfo(posts.getNumber(),
+                posts.getSize(),
+                posts.getNumberOfElements(),
+                posts.getTotalPages());
+
+        return new PostListAndPagingResponse(board.getBoardName(), responseList, pageInfo);
+    }
 }
