@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Post.Dto.CreatePostRequest;
+import redlightBack.Post.Dto.DeletePostResponse;
 import redlightBack.Post.Dto.DetailPostResponse;
 import redlightBack.Post.Dto.PostResponse;
 
@@ -158,7 +159,31 @@ public class BoardApiTest extends AcceptanceTest {
         assertThat(postResponse.postTitle()).isEqualTo("수정된제목");
         assertThat(postResponse.content()).isEqualTo("수정된내용");
         assertThat(postResponse.imageUrls().size()).isEqualTo(4);
+    }
 
+    @DisplayName("게시물 삭제 테스트")
+    @Test
+    public void 게시물_삭제_테스트 (){
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
+
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목", "내용", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
+
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+        DeletePostResponse deletePostResponse = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .pathParam("postId", postId)
+                .when()
+                .delete("/posts/{postId}")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(DeletePostResponse.class);
+
+        assertThat(deletePostResponse.deletedAt()).isNotNull();
     }
 
 
@@ -201,7 +226,7 @@ public class BoardApiTest extends AcceptanceTest {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("postId", postId)
-                .get("post/{postId}")
+                .get("posts/{postId}")
                 .then().log().all()
                 .extract()
                 .as(DetailPostResponse.class);
