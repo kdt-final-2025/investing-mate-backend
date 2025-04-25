@@ -1,5 +1,6 @@
 package redlightBack.Post;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
 import redlightBack.Board.BoardRepository;
@@ -48,6 +49,7 @@ public class PostService {
                 post.getUpdatedAt());
     }
 
+    //게시물 상세조회
     public DetailPostResponse getDetailPost (Long postId){
 
         Post post = postRepository.findById(postId).orElseThrow(
@@ -66,6 +68,30 @@ public class PostService {
                 post.isLikedByMe(),
                 post.getCommentCount());
 
+    }
+
+    //게시물 수정
+    @Transactional
+    public PostResponse update (String userId, Long postId, CreatePostRequest request){
+
+        //TODO 작성자 검증 추가
+
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new RuntimeException("해당 게시물이 존재하지 않습니다")
+        );
+
+        post.updatePost(request.postTitle(),
+                request.content(),
+                request.imageUrls());
+
+        return new PostResponse(post.getBoardId(),
+                post.getId(),
+                userId,
+                post.getPostTitle(),
+                post.getContent(),
+                post.getImageUrls(),
+                post.getCreatedAt(),
+                post.getUpdatedAt());
     }
 
 

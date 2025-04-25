@@ -27,4 +27,11 @@ public class PostController {
         return postService.getDetailPost(postId);
     }
 
+    @PutMapping("posts/{postId}")
+    public PostResponse updatePost (@LoginMemberId String userId,
+                                    @PathVariable Long postId,
+                                    @RequestBody CreatePostRequest request){
+        return postService.update(userId, postId, request);
+    }
+
 }

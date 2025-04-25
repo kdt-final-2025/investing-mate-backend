@@ -50,6 +50,12 @@ public class Post extends BaseEntity {
         this.imageUrls = new ArrayList<>(imageUrls);
     }
 
+    public void updatePost(String postTitle, String content, List<String> imageUrls) {
+        this.postTitle = postTitle;
+        this.content = content;
+        this.imageUrls = imageUrls;
+    }
+
     public void limitationOfImages(List<String> imageUrls){
         if(imageUrls.size() > 5){
             throw new RuntimeException("이미지는 최대 5개까지 첨부할 수 있습니다.");
