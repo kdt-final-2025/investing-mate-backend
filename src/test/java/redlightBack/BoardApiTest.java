@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
-import redlightBack.Post.Dto.CreatePostRequest;
-import redlightBack.Post.Dto.DeletePostResponse;
-import redlightBack.Post.Dto.DetailPostResponse;
-import redlightBack.Post.Dto.PostResponse;
+import redlightBack.Post.Dto.*;
 
 import java.util.List;
 
@@ -184,6 +181,68 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(DeletePostResponse.class);
 
         assertThat(deletePostResponse.deletedAt()).isNotNull();
+    }
+
+    @DisplayName("게시물 목록 조회 테스트")
+    @Test
+    public void 게시물_목록_조회_테스트 (){
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
+
+        PostResponse post1 = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        PostResponse post2 = createPost(new CreatePostRequest(boardId, "제목2", "내용2", List.of("img1", "img2", "img3")));
+        PostResponse post3 = createPost(new CreatePostRequest(boardId, "제목3", "내용3", List.of("img1", "img2", "img3")));
+        PostResponse post4 = createPost(new CreatePostRequest(boardId, "제목4", "내용4", List.of("img1", "img2", "img3")));
+        PostResponse post5 = createPost(new CreatePostRequest(boardId, "제목5", "내용5", List.of("img1", "img2", "img3")));
+        PostResponse post6 = createPost(new CreatePostRequest(boardId, "제목6", "내용6", List.of("img1", "img2", "img3")));
+        PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
+        PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
+
+        PostListAndPagingResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("boardId", boardId)
+                .when()
+                .get("/boards/{boardId}/posts")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(PostListAndPagingResponse.class);
+
+        List<PostListResponse> postListResponses = response.postListResponse();
+
+        assertThat(postListResponses.size()).isEqualTo(8);
+    }
+
+    @DisplayName("게시물 검색 테스트")
+    @Test
+    public void 게시물_검색_테스트 (){
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
+
+        PostResponse post1 = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        PostResponse post2 = createPost(new CreatePostRequest(boardId, "제목2", "내용2", List.of("img1", "img2", "img3")));
+        PostResponse post3 = createPost(new CreatePostRequest(boardId, "제목3", "내용3", List.of("img1", "img2", "img3")));
+        PostResponse post4 = createPost(new CreatePostRequest(boardId, "제목4", "내용4", List.of("img1", "img2", "img3")));
+        PostResponse post5 = createPost(new CreatePostRequest(boardId, "제목5", "내용5", List.of("img1", "img2", "img3")));
+        PostResponse post6 = createPost(new CreatePostRequest(boardId, "제목6", "내용6", List.of("img1", "img2", "img3")));
+        PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
+        PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
+
+        PostListAndPagingResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("boardId", boardId)
+                .queryParam("postTitle", "제목1")
+                .when()
+                .get("/boards/{boardId}/posts")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(PostListAndPagingResponse.class);
+
+        List<PostListResponse> postListResponses = response.postListResponse();
+
+        assertThat(postListResponses.size()).isEqualTo(1);
+        assertThat(postListResponses).anyMatch(post -> post.postTitle().equals("제목1"));
     }
 
 
