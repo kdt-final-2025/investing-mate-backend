@@ -11,6 +11,7 @@ public record DetailPostResponse(Long id,
                                  List<String> imageUrls,
                                  LocalDateTime createdAt,
                                  LocalDateTime updatedAt,
+                                 LocalDateTime deletedAt,
                                  int likeCount,
                                  boolean likedByMe,
                                  int commentCount) {

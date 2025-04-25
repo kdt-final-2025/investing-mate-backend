@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import redlightBack.common.BaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class Post extends BaseEntity {
 
     private int likeCount;
 
+    @Setter
+    private LocalDateTime deletedAt = null;
+
     public Post(Long boardId, String postTitle, String userId, String content, List<String> imageUrls) {
         this.boardId = boardId;
         this.postTitle = postTitle;
@@ -61,4 +65,11 @@ public class Post extends BaseEntity {
             throw new RuntimeException("이미지는 최대 5개까지 첨부할 수 있습니다.");
         }
     }
+
+    public void softDelete (){
+        if(deletedAt == null) {
+            setDeletedAt(LocalDateTime.now());
+        }
+    }
+
 }

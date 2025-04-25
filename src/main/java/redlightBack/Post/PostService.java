@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
 import redlightBack.Board.BoardRepository;
 import redlightBack.Post.Dto.CreatePostRequest;
+import redlightBack.Post.Dto.DeletePostResponse;
 import redlightBack.Post.Dto.DetailPostResponse;
 import redlightBack.Post.Dto.PostResponse;
 
@@ -52,7 +53,7 @@ public class PostService {
     //게시물 상세조회
     public DetailPostResponse getDetailPost (Long postId){
 
-        Post post = postRepository.findById(postId).orElseThrow(
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
                 () -> new RuntimeException("해당 게시물이 존재하지 않습니다.")
         );
 
@@ -64,6 +65,7 @@ public class PostService {
                 post.getImageUrls(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
+                post.getDeletedAt(),
                 post.getLikeCount(),
                 post.isLikedByMe(),
                 post.getCommentCount());
@@ -77,7 +79,7 @@ public class PostService {
         //TODO 작성자 검증 추가
 
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new RuntimeException("해당 게시물이 존재하지 않습니다")
+                () -> new RuntimeException("해당 게시물이 존재하지 않습니다.")
         );
 
         post.updatePost(request.postTitle(),
@@ -92,6 +94,22 @@ public class PostService {
                 post.getImageUrls(),
                 post.getCreatedAt(),
                 post.getUpdatedAt());
+    }
+
+    //게시물 삭제
+    @Transactional
+    public DeletePostResponse delete (String userId, Long postId){
+
+        //TODO 작성자 확인 로직
+
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new RuntimeException("해당 게시물이 존재하지 않습니다.")
+        );
+
+        post.softDelete();
+
+        return new DeletePostResponse(post.getId(),
+                post.getDeletedAt());
     }
 
 

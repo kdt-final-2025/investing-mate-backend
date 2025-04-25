@@ -2,6 +2,7 @@ package redlightBack.Post;
 
 import org.springframework.web.bind.annotation.*;
 import redlightBack.Post.Dto.CreatePostRequest;
+import redlightBack.Post.Dto.DeletePostResponse;
 import redlightBack.Post.Dto.DetailPostResponse;
 import redlightBack.Post.Dto.PostResponse;
 import redlightBack.loginUtils.LoginMemberId;
@@ -32,6 +33,13 @@ public class PostController {
                                     @PathVariable Long postId,
                                     @RequestBody CreatePostRequest request){
         return postService.update(userId, postId, request);
+    }
+
+    @DeleteMapping("posts/{postId}")
+    public DeletePostResponse deletePost (@LoginMemberId String userId,
+                                          @PathVariable Long postId){
+
+        return postService.delete(userId, postId);
     }
 
 }
