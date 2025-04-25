@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
+import redlightBack.Post.Dto.CreatePostRequest;
+import redlightBack.Post.Dto.PostResponse;
 
 import java.util.List;
 
@@ -77,6 +79,34 @@ public class BoardApiTest extends AcceptanceTest {
         assertThat(boards).anyMatch(boardResponse
                 -> boardResponse.boardName().equals("주식게시판"));
     }
+
+    @DisplayName("게시글 생성 테스트")
+    @Test
+    public void 게시글_생성_테스트(){
+
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+        BoardResponse testBoard = createBoard("자유게시판");
+        Long boardId = testBoard.id();
+
+        PostResponse postResponse = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(new CreatePostRequest(boardId, "게시물 제목", "게시물 내용", List.of("url1", "url2", "url3")))
+                .when()
+                .post("posts")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(PostResponse.class);
+
+
+        assertThat(postResponse.boardId()).isEqualTo(boardId);
+        assertThat(postResponse.postTitle()).isEqualTo("게시물 제목");
+        assertThat(postResponse.content()).isEqualTo("게시물 내용");
+        assertThat(postResponse.imageUrls()).isEqualTo(List.of("url1", "url2", "url3"));
+    }
+
+
 
 
     public BoardResponse createBoard(String boardName){
