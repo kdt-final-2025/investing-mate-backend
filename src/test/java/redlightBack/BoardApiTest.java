@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Post.Dto.CreatePostRequest;
+import redlightBack.Post.Dto.DetailPostResponse;
 import redlightBack.Post.Dto.PostResponse;
 
 import java.util.List;
@@ -106,6 +107,31 @@ public class BoardApiTest extends AcceptanceTest {
         assertThat(postResponse.imageUrls()).isEqualTo(List.of("url1", "url2", "url3"));
     }
 
+    @DisplayName("게시물 조회 테스트")
+    @Test
+    public void 게시물_조회_테스트 (){
+
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
+
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목", "내용", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
+        System.out.println("postId = " + postId);
+
+        DetailPostResponse detailPostResponse = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("postId", postId)
+                .get("/posts/{postId}")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(DetailPostResponse.class);
+
+        assertThat(detailPostResponse.imageUrls().size()).isEqualTo(3);
+        assertThat(detailPostResponse.postTitle()).isEqualTo("제목");
+        assertThat(detailPostResponse.content()).isEqualTo("내용");
+    }
+
 
 
 
@@ -123,5 +149,21 @@ public class BoardApiTest extends AcceptanceTest {
                 .statusCode(200)
                 .extract()
                 .as(BoardResponse.class);
+    }
+
+    public PostResponse createPost(CreatePostRequest request){
+
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(new CreatePostRequest(request.boardId(), request.postTitle(), request.content(), List.of("img1", "img2", "img3")))
+                .when()
+                .post("/posts")
+                .then().log().all()
+                .extract()
+                .as(PostResponse.class);
     }
 }
