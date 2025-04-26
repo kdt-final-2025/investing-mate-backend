@@ -198,6 +198,8 @@ public class BoardApiTest extends AcceptanceTest {
         PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
         PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
 
+        deletePost(post8.id());
+
         PostListAndPagingResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("boardId", boardId)
@@ -210,7 +212,7 @@ public class BoardApiTest extends AcceptanceTest {
 
         List<PostListResponse> postListResponses = response.postListResponse();
 
-        assertThat(postListResponses.size()).isEqualTo(8);
+        assertThat(postListResponses.size()).isEqualTo(7);
     }
 
     @DisplayName("게시물 검색 테스트")
@@ -289,5 +291,19 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .extract()
                 .as(DetailPostResponse.class);
+    }
+
+    public DeletePostResponse deletePost (Long postId){
+
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .pathParam("postId", postId)
+                .delete("/posts/{postId}")
+                .then().log().all()
+                .extract()
+                .as(DeletePostResponse.class);
     }
 }
