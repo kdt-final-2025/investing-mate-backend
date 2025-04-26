@@ -27,7 +27,7 @@ public class QPostRepository {
 
         List<Post> postList = queryFactory.select(qPost)
                 .from(qPost)
-                .where(qPost.boardId.eq(boardId), searchByTitle(postTitle), searchByUserId(userId))
+                .where(qPost.boardId.eq(boardId), qPost.deletedAt.isNull(), searchByTitle(postTitle), searchByUserId(userId))
                 .orderBy(orderSpecifiers(sortBy, direction))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -36,7 +36,10 @@ public class QPostRepository {
         Long pageCount = queryFactory
                 .select(qPost.count())
                 .from(qPost)
-                .where(qPost.boardId.eq(boardId), searchByTitle(postTitle), searchByUserId(userId))
+                .where(qPost.boardId.eq(boardId),
+                        qPost.deletedAt.isNull(),
+                        searchByTitle(postTitle),
+                        searchByUserId(userId))
                 .fetchOne();
 
         //null 방지
