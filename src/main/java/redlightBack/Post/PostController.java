@@ -41,9 +41,9 @@ public class PostController {
         return postService.delete(userId, postId);
     }
 
-    @GetMapping("/boards/{boardId}/posts")
+    @GetMapping("/posts")
     public PostListAndPagingResponse getPostList (
-                                                  @PathVariable Long boardId,
+                                                  @RequestParam Long boardId,
                                                   @RequestParam (required = false) String postTitle,
                                                   @RequestParam (required = false) String userId,
                                                   @RequestParam (required = false) String sortBy,
