@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import redlightBack.member.memberDto.MemberRequestDto;
 import redlightBack.member.memberDto.MemberResponseDto;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/members")
 public class MemberController {
@@ -24,16 +26,19 @@ public class MemberController {
 
     @PostMapping("/me")
     public MemberResponseDto provisionUser(@AuthenticationPrincipal Jwt jwt) {
-        // JWT에서 바로 DTO 생성
+        // supabase 기본 claim 중, 이름은 user_metadata 에 담겨 있습니다.
+        @SuppressWarnings("unchecked")
+        Map<String,String> meta = jwt.getClaim("user_metadata");
+        String fullName = meta.getOrDefault("full_name",
+                meta.getOrDefault("name", "Unknown"));
         MemberRequestDto req = new MemberRequestDto(
-                jwt.getSubject(),                   // userId
-                jwt.getClaim("email"),              // email
-                jwt.getClaimAsString("fullname")    // fullname
+                jwt.getSubject(),
+                jwt.getClaim("email"),
+                fullName
         );
-
-        // DTO 하나만 넘기면 됨
         return memberService.provisionUser(req);
     }
+
 
     /**
      * 2) PATCH /members/{userId}/promote
