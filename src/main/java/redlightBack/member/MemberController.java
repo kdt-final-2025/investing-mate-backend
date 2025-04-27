@@ -25,7 +25,7 @@ public class MemberController {
     }
 
     // PATCH /members/{userId}/promote
-    // 일반유저를 기자로 바꿔주는 로직
+    // 일반유저를 기자로 바꿔주는 API
 
     @PatchMapping("/{userId}/promote")
     public MemberResponseDto promoteToReporter(@LoginMemberId String userId) {
