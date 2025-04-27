@@ -1,9 +1,13 @@
 package redlightBack.news;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.news.dto.NewsRequest;
 import redlightBack.news.dto.NewsResponse;
+import redlightBack.news.dto.PageResponse;
 
 @RestController
 public class NewsRestController {
@@ -27,5 +31,14 @@ public class NewsRestController {
     @PutMapping("/news/{newsId}")
     public void delete(@LoginMemberId String userId, @PathVariable Long newsId) {
         newsService.delete(newsId);
+    }
+
+    @GetMapping("/news")
+    public PageResponse getAll(@RequestParam(required = false) String title,
+                               @RequestParam(defaultValue = "1") int page,
+                               @RequestParam(defaultValue = "10") int size,
+                               @RequestParam String sortBy,
+                               @RequestParam String order) {
+        return newsService.getAll(title, page, size, sortBy, order);
     }
 }

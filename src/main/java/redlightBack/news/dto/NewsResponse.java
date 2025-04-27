@@ -10,6 +10,7 @@ public record NewsResponse(
         List<String> imageUrls,
         LocalDateTime publishedAt,
         String userId,
+        int viewCount,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

@@ -29,6 +29,8 @@ public class News extends BaseEntity {
 
     private String userId;
 
+    private int viewCount = 0;
+
     private LocalDateTime deletedAt;
 
     protected News() {
@@ -44,5 +46,9 @@ public class News extends BaseEntity {
 
     public void deleteNews() {
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void increaseViewCount() {
+        this.viewCount++;
     }
 }
