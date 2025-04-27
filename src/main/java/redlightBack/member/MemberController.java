@@ -3,6 +3,7 @@ package redlightBack.member;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.member.memberDto.MemberResponseDto;
 
 @RestController
@@ -27,7 +28,7 @@ public class MemberController {
     // 일반유저를 기자로 바꿔주는 로직
 
     @PatchMapping("/{userId}/promote")
-    public MemberResponseDto promoteToReporter(@PathVariable String userId) {
+    public MemberResponseDto promoteToReporter(@LoginMemberId String userId) {
         return memberService.promoteToReporter(userId);
     }
 }
