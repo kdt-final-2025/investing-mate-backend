@@ -3,6 +3,7 @@ package redlightBack.member.memberDto;
 import redlightBack.member.Member;
 import redlightBack.member.Role;
 
+// DTO ↔ Entity 변환만 담당
 public class MemberMapper {
     public static Member toEntity(MemberRequestDto req) {
         return Member.builder()
