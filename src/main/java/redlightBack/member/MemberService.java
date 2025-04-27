@@ -41,12 +41,16 @@ public class MemberService {
     // 실제 Save 로직
     @Transactional
     public MemberResponseDto provisionUser(MemberRequestDto req) {
+        // ① userId 로 존재 여부 확인
         Member member = memberRepo.findByUserId(req.userId())
+                // ② 없으면 새 엔티티 생성
                 .orElseGet(() -> MemberMapper.toEntity(req));
 
+        // 이메일·이름 최신화
         member.updateProfile(req.email(), req.fullname());
-        Member saved = memberRepo.save(member);
 
+        // insert or update
+        Member saved = memberRepo.save(member);
         return MemberMapper.toResponseDto(saved);
     }
 
