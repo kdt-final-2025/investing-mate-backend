@@ -18,7 +18,6 @@ public class MemberService {
         this.memberRepo = memberRepo;
     }
 
-
     // 1) Jwt → MemberRequestDto 변환
     // 2) Save 로직 (기존 provisionUser) 재활용
 
@@ -36,7 +35,6 @@ public class MemberService {
         );
         return provisionUser(dto);
     }
-
 
     // 실제 Save 로직
     @Transactional
