@@ -7,7 +7,7 @@ import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.member.memberDto.MemberResponseDto;
 
 @RestController
-@RequestMapping("/members")
+@RequestMapping("/member")
 public class MemberController {
 
     private final MemberService memberService;
