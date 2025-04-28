@@ -1,4 +1,4 @@
-package redlightBack.member;
+package redlightBack.member.memberEntity;
 
 import jakarta.persistence.*;
 import lombok.*;

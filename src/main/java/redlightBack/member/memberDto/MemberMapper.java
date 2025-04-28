@@ -1,7 +1,7 @@
 package redlightBack.member.memberDto;
 
-import redlightBack.member.Member;
-import redlightBack.member.Role;
+import redlightBack.member.memberEntity.Member;
+import redlightBack.member.memberEntity.Role;
 
 // DTO ↔ Entity 변환만 담당
 public class MemberMapper {

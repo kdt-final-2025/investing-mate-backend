@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import redlightBack.member.memberDto.MemberMapper;
 import redlightBack.member.memberDto.MemberRequestDto;
 import redlightBack.member.memberDto.MemberResponseDto;
+import redlightBack.member.memberEntity.Member;
 
 import java.util.Map;
 import java.util.Optional;
@@ -13,10 +14,10 @@ import java.util.Optional;
 @Service
 public class MemberService {
 
-    private final MemberRepository memberRepo;
+    private final MemberRepository memberRepository;
 
-    public MemberService(MemberRepository memberRepo) {
-        this.memberRepo = memberRepo;
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     // 1) Jwt → MemberRequestDto 변환
@@ -52,24 +53,24 @@ public class MemberService {
 
     // 실제 Save 로직
     @Transactional
-    public MemberResponseDto provisionUser(MemberRequestDto req) {
+    public MemberResponseDto provisionUser(MemberRequestDto memberRequestDto) {
         // ① userId 로 존재 여부 확인
-        Member member = memberRepo.findByUserId(req.userId())
+        Member member = memberRepository.findByUserId(memberRequestDto.userId())
                 // ② 없으면 새 엔티티 생성
-                .orElseGet(() -> MemberMapper.toEntity(req));
+                .orElseGet(() -> MemberMapper.toEntity(memberRequestDto));
 
         // 이메일·이름 최신화
-        member.updateProfile(req.email(), req.fullname());
+        member.updateProfile(memberRequestDto.email(), memberRequestDto.fullname());
 
         // insert or update
-        Member saved = memberRepo.save(member);
+        Member saved = memberRepository.save(member);
         return MemberMapper.toResponseDto(saved);
     }
 
     //일반유저를 기자로 바꿔주는 로직
     @Transactional
     public MemberResponseDto promoteToReporter(String userId) {
-        Member member = memberRepo.findByUserId(userId)
+        Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
         member.upgradeToReporter();
         return MemberMapper.toResponseDto(member);

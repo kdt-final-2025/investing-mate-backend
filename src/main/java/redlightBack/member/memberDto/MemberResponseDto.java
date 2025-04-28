@@ -1,6 +1,6 @@
 package redlightBack.member.memberDto;
 
-import redlightBack.member.Role;
+import redlightBack.member.memberEntity.Role;
 
 // 사용자 정보 응답용 DTO
 public record MemberResponseDto(
