@@ -24,18 +24,27 @@ public class MemberService {
 
     @Transactional
     public MemberResponseDto provisionUserFromJwt(Jwt jwt) {
-        // 1) user_metadata 전체를 Map<String,Object> 로 받고
+        // 1) user_metadata 클레임 자체가 없으면 빈 맵으로 대체
         @SuppressWarnings("unchecked")
-        Map<String, Object> rawMeta = (Map<String, Object>) jwt.getClaim("user_metadata");
+        Map<String, Object> rawMeta = Optional.ofNullable(jwt.getClaim("user_metadata"))
+                .filter(m -> m instanceof Map)
+                .map(m -> (Map<String, Object>) m)
+                .orElseGet(Map::of);
 
-        // 2) 필요한 키만 toString() 으로 안전하게 변환
+        // 2) full_name → name → "Unknown" 순으로 안전하게 꺼내기
         String fullName = Optional.ofNullable(rawMeta.get("full_name"))
-                .orElse(rawMeta.get("name"))
-                .toString();
+                .or(() -> Optional.ofNullable(rawMeta.get("name")))
+                .map(Object::toString)
+                .orElse("Unknown");
+
+        // 3) 이메일도 toString() 으로 안전하게 추출 (또는 getClaimAsString)
+        String email = Optional.ofNullable(jwt.getClaim("email"))
+                .map(Object::toString)
+                .orElseThrow(() -> new IllegalArgumentException("JWT 에 email 클레임이 없습니다"));
 
         MemberRequestDto dto = new MemberRequestDto(
-                jwt.getSubject(),
-                jwt.getClaim("email"),
+                jwt.getSubject(),  // sub
+                email,
                 fullName
         );
         return provisionUser(dto);
