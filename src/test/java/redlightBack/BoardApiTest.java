@@ -83,7 +83,7 @@ public class BoardApiTest extends AcceptanceTest {
     @Test
     public void 게시글_생성_테스트(){
 
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+        String token = generateTestToken();
         BoardResponse testBoard = createBoard("자유게시판");
         Long boardId = testBoard.id();
 
@@ -116,14 +116,14 @@ public class BoardApiTest extends AcceptanceTest {
         Long postId = post.id();
 
 
-        DetailPostResponse detailPostResponse = RestAssured.given().log().all()
+        PostResponse detailPostResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("postId", postId)
                 .get("/posts/{postId}")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
-                .as(DetailPostResponse.class);
+                .as(PostResponse.class);
 
         assertThat(detailPostResponse.imageUrls().size()).isEqualTo(3);
         assertThat(detailPostResponse.postTitle()).isEqualTo("제목");
@@ -139,7 +139,7 @@ public class BoardApiTest extends AcceptanceTest {
         PostResponse post = createPost(new CreatePostRequest(boardId, "제목", "내용", List.of("img1", "img2", "img3")));
         Long postId = post.id();
 
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+        String token = generateTestToken();
 
         PostResponse postResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -167,7 +167,7 @@ public class BoardApiTest extends AcceptanceTest {
         PostResponse post = createPost(new CreatePostRequest(boardId, "제목", "내용", List.of("img1", "img2", "img3")));
         Long postId = post.id();
 
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+        String token = generateTestToken();
 
         DeletePostResponse deletePostResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -252,7 +252,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     public BoardResponse createBoard(String boardName){
 
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+        String token = generateTestToken();
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -268,8 +268,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     public PostResponse createPost(CreatePostRequest request){
 
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
-
+        String token = generateTestToken();
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -282,7 +281,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(PostResponse.class);
     }
 
-    public DetailPostResponse getDetail(Long postId){
+    public PostResponse getDetail(Long postId){
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -290,12 +289,12 @@ public class BoardApiTest extends AcceptanceTest {
                 .get("posts/{postId}")
                 .then().log().all()
                 .extract()
-                .as(DetailPostResponse.class);
+                .as(PostResponse.class);
     }
 
     public DeletePostResponse deletePost (Long postId){
 
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+        String token = generateTestToken();
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -305,5 +304,9 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .extract()
                 .as(DeletePostResponse.class);
+    }
+
+    public String generateTestToken(){
+        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
     }
 }
