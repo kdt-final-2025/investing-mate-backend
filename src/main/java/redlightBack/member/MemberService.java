@@ -1,13 +1,14 @@
 package redlightBack.member;
 
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.oauth2.jwt.Jwt;
 import redlightBack.member.memberDto.MemberMapper;
 import redlightBack.member.memberDto.MemberRequestDto;
 import redlightBack.member.memberDto.MemberResponseDto;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class MemberService {
@@ -23,10 +24,14 @@ public class MemberService {
 
     @Transactional
     public MemberResponseDto provisionUserFromJwt(Jwt jwt) {
+        // 1) user_metadata 전체를 Map<String,Object> 로 받고
         @SuppressWarnings("unchecked")
-        Map<String, String> meta = jwt.getClaim("user_metadata");
-        String fullName = meta.getOrDefault("full_name",
-                meta.getOrDefault("name", "Unknown"));
+        Map<String, Object> rawMeta = (Map<String, Object>) jwt.getClaim("user_metadata");
+
+        // 2) 필요한 키만 toString() 으로 안전하게 변환
+        String fullName = Optional.ofNullable(rawMeta.get("full_name"))
+                .orElse(rawMeta.get("name"))
+                .toString();
 
         MemberRequestDto dto = new MemberRequestDto(
                 jwt.getSubject(),
