@@ -32,31 +32,4 @@ public class SecurityConfig {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).build();
         return decoder;
     }
-
-    @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // (1) CORS 활성화
-                .cors(Customizer -> {})
-
-                // (2) CSRF 끄기
-                .csrf(AbstractHttpConfigurer::disable)
-
-                // (3) 기본 인증/Form 로그인 끄기
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-
-                // (4) 인가 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/members/me").authenticated()
-                        .anyRequest().permitAll()
-                )
-
-                // (5) JWT Resource Server 설정
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults())
-                );
-
-        return http.build();
-    }
 }
