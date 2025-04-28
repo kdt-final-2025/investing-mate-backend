@@ -4,6 +4,8 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
+import redlightBack.Post.Enum.Direction;
+import redlightBack.Post.Enum.SortBy;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class PostQueryRepository {
         this.queryFactory = queryFactory;
     }
 
-    public List<Post> searchAndOrderingPosts (Long boardId, String postTitle, String userId, String sortBy, String direction, Long offset, int size){
+    public List<Post> searchAndOrderingPosts (Long boardId, String postTitle, String userId, SortBy sortBy, Direction direction, Long offset, int size){
 
         return queryFactory.select(qPost)
                 .from(qPost)
@@ -39,12 +41,12 @@ public class PostQueryRepository {
     }
 
     //정렬 조건
-    private OrderSpecifier<?>[] orderSpecifiers (String sortBy, String direction){
+    private OrderSpecifier<?>[] orderSpecifiers (SortBy sortBy, Direction direction){
 
-        boolean asc = "asc".equals(direction);
+        boolean asc = direction.equals(Direction.ASC);
 
         //좋아요 정렬 조건 있을 때
-        if("likeCount".equals(sortBy)){
+        if(sortBy.equals(SortBy.MOST_LIKED)){
             if(asc){
                 return new OrderSpecifier<?>[]{
                         qPost.likeCount.desc(),

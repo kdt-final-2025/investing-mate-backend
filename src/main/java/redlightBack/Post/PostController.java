@@ -5,6 +5,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.Post.Dto.*;
+import redlightBack.Post.Enum.Direction;
+import redlightBack.Post.Enum.SortBy;
 import redlightBack.loginUtils.LoginMemberId;
 
 @RestController
@@ -44,13 +46,13 @@ public class PostController {
 
     @GetMapping("/posts")
     public PostListAndPagingResponse getPostList (
-                                                  @RequestParam Long boardId,
-                                                  @RequestParam (required = false) String postTitle,
-                                                  @RequestParam (required = false) String userId,
-                                                  @RequestParam (required = false) String sortBy,
-                                                  @RequestParam (required = false) String direction,
-                                                  @RequestParam (defaultValue = "1") int pageNumber,
-                                                  @RequestParam (defaultValue = "10") int size){
+            @RequestParam Long boardId,
+            @RequestParam (required = false) String postTitle,
+            @RequestParam (required = false) String userId,
+            @RequestParam (defaultValue = "NEWEST")SortBy sortBy,
+            @RequestParam (defaultValue = "DESC")Direction direction,
+            @RequestParam (defaultValue = "1") int pageNumber,
+            @RequestParam (defaultValue = "10") int size){
 
         Pageable pageable = PageRequest.of(pageNumber -1 , size);
 

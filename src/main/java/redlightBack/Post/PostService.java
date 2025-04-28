@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
 import redlightBack.Board.BoardRepository;
 import redlightBack.Post.Dto.*;
+import redlightBack.Post.Enum.Direction;
+import redlightBack.Post.Enum.SortBy;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -87,8 +89,8 @@ public class PostService {
     public PostListAndPagingResponse getPosts(String userId,
                                               Long boardId,
                                               String postTitle,
-                                              String sortBy,
-                                              String direction,
+                                              SortBy sortBy,
+                                              Direction direction,
                                               Pageable pageable) {
 
         Board board = boardRepository.findById(boardId).orElseThrow(
