@@ -16,12 +16,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
-    private final QPostRepository qPostRepository;
+    private final PostQueryRepository postQueryRepository;
 
-    public PostService(PostRepository postRepository, BoardRepository boardRepository, QPostRepository qPostRepository) {
+    public PostService(PostRepository postRepository, BoardRepository boardRepository, PostQueryRepository postQueryRepository) {
         this.postRepository = postRepository;
         this.boardRepository = boardRepository;
-        this.qPostRepository = qPostRepository;
+        this.postQueryRepository = postQueryRepository;
     }
 
     //게시물 생성

@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class QPostRepository {
+public class PostQueryRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QPost qPost = QPost.post;
 
-    public QPostRepository(JPAQueryFactory queryFactory) {
+    public PostQueryRepository(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
     }
 
