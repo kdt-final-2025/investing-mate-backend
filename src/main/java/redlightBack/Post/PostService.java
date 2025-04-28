@@ -18,11 +18,13 @@ public class PostService {
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
     private final PostQueryRepository postQueryRepository;
+    private final PostMapper postMapper;
 
-    public PostService(PostRepository postRepository, BoardRepository boardRepository, PostQueryRepository postQueryRepository) {
+    public PostService(PostRepository postRepository, BoardRepository boardRepository, PostQueryRepository postQueryRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
         this.boardRepository = boardRepository;
         this.postQueryRepository = postQueryRepository;
+        this.postMapper = postMapper;
     }
 
     //게시물 생성
@@ -39,7 +41,7 @@ public class PostService {
 
         postRepository.save(post);
 
-        return toPostResponse(post);
+        return postMapper.toPostResponse(post);
     }
 
     //게시물 상세조회
@@ -49,7 +51,7 @@ public class PostService {
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
-        return toPostResponse(post);
+        return postMapper.toPostResponse(post);
     }
 
     //게시물 수정
@@ -66,7 +68,7 @@ public class PostService {
                 request.content(),
                 request.imageUrls());
 
-        return toPostResponse(post);
+        return postMapper.toPostResponse(post);
     }
 
     //게시물 삭제
@@ -123,18 +125,4 @@ public class PostService {
         return new PostListAndPagingResponse(board.getBoardName(), responseList, pageInfo);
     }
 
-    public PostResponse toPostResponse (Post post){
-        return new PostResponse(post.getBoardId(),
-                post.getId(),
-                post.getPostTitle(),
-                post.getUserId(),
-                post.getViewCount(),
-                post.getContent(),
-                post.getImageUrls(),
-                post.getCreatedAt(),
-                post.getUpdatedAt(),
-                post.getLikeCount(),
-                post.isLikedByMe(),
-                post.getCommentCount());
-    }
 }
