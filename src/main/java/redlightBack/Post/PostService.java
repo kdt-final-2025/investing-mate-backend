@@ -30,8 +30,7 @@ public class PostService {
         Board board = boardRepository.findById(request.boardId()).orElseThrow(
                 () -> new NoSuchElementException("존재하지 않는 게시판입니다."));
 
-
-        Post post = new Post(request.boardId(),
+        Post post = new Post(board.getId(),
                 request.postTitle(),
                 userId,
                 request.content(),
@@ -42,36 +41,17 @@ public class PostService {
 
         postRepository.save(post);
 
-        return new PostResponse(board.getId(),
-                post.getId(),
-                userId,
-                post.getPostTitle(),
-                post.getContent(),
-                post.getImageUrls(),
-                post.getCreatedAt(),
-                post.getUpdatedAt());
+        return toPostResponse(post);
     }
 
     //게시물 상세조회
-    public DetailPostResponse getDetailPost (Long postId){
+    public PostResponse getDetailPost (Long postId){
 
         Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
-        return new DetailPostResponse(post.getId(),
-                post.getPostTitle(),
-                post.getUserId(),
-                post.getViewCount(),
-                post.getContent(),
-                post.getImageUrls(),
-                post.getCreatedAt(),
-                post.getUpdatedAt(),
-                post.getDeletedAt(),
-                post.getLikeCount(),
-                post.isLikedByMe(),
-                post.getCommentCount());
-
+        return toPostResponse(post);
     }
 
     //게시물 수정
@@ -88,14 +68,7 @@ public class PostService {
                 request.content(),
                 request.imageUrls());
 
-        return new PostResponse(post.getBoardId(),
-                post.getId(),
-                userId,
-                post.getPostTitle(),
-                post.getContent(),
-                post.getImageUrls(),
-                post.getCreatedAt(),
-                post.getUpdatedAt());
+        return toPostResponse(post);
     }
 
     //게시물 삭제
@@ -144,5 +117,20 @@ public class PostService {
                 posts.getTotalPages());
 
         return new PostListAndPagingResponse(board.getBoardName(), responseList, pageInfo);
+    }
+
+    public PostResponse toPostResponse (Post post){
+        return new PostResponse(post.getBoardId(),
+                post.getId(),
+                post.getPostTitle(),
+                post.getUserId(),
+                post.getViewCount(),
+                post.getContent(),
+                post.getImageUrls(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                post.getLikeCount(),
+                post.isLikedByMe(),
+                post.getCommentCount());
     }
 }

@@ -23,7 +23,7 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public DetailPostResponse getPost (@PathVariable Long postId){
+    public PostResponse getPost (@PathVariable Long postId){
         return postService.getDetailPost(postId);
     }
 
