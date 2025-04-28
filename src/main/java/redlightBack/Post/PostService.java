@@ -80,8 +80,7 @@ public class PostService {
 
         post.softDelete();
 
-        return new DeletePostResponse(post.getId(),
-                post.getDeletedAt());
+        return new DeletePostResponse(post.getDeletedAt());
     }
 
 
