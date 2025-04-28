@@ -66,13 +66,4 @@ public class MemberService {
         Member saved = memberRepository.save(member);
         return MemberMapper.toResponseDto(saved);
     }
-
-    //일반유저를 기자로 바꿔주는 로직
-    @Transactional
-    public MemberResponseDto promoteToReporter(String userId) {
-        Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
-        member.upgradeToReporter();
-        return MemberMapper.toResponseDto(member);
-    }
 }
