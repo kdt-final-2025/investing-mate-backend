@@ -1,9 +1,8 @@
-package redlightBack.common.Comment;
+package redlightBack.common.Comment.Domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import redlightBack.common.BaseEntity;
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"comment_id", "user_id"})
 })
-public class CommentLike {
+public class CommentLike extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +24,11 @@ public class CommentLike {
     @Column(nullable = false)
     private String userId;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private  Comment comment;
+
+    public CommentLike(Long commentId, String userId) {
+
+    }
 }

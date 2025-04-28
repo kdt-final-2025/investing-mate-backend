@@ -3,8 +3,9 @@ package redlightBack.common.Comment.Dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record CommentResponse(
-        List<CommentItem> items
+public record CommentResponseAndPaging(
+                                       List<CommentResponse.CommentItem> items,
+                                       PageMeta pageMeta
 ) {
     public record CommentItem(
             Long commentId,
@@ -13,7 +14,7 @@ public record CommentResponse(
             int likeCount,
             boolean likedByMe,
             LocalDateTime createdAt,
-            List<ReplyItem> replies // 대댓글
+            List<CommentResponse.CommentItem.ReplyItem> replies // 대댓글
     ) {
         public record ReplyItem(
                 Long commentId,
@@ -25,4 +26,10 @@ public record CommentResponse(
         ) {}
     }
 
+    public record PageMeta(
+            int totalPage,
+            int totalCount,
+            int pageNumber,
+            int pageSize
+    ) {}
 }
