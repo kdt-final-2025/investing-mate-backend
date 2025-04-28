@@ -60,12 +60,6 @@ public class Post extends BaseEntity {
         this.imageUrls = imageUrls;
     }
 
-    public void limitationOfImages(List<String> imageUrls){
-        if(imageUrls.size() > 5){
-            throw new RuntimeException("이미지는 최대 5개까지 첨부할 수 있습니다.");
-        }
-    }
-
     public void softDelete (){
         if(deletedAt == null) {
             setDeletedAt(LocalDateTime.now());
