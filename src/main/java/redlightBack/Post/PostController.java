@@ -1,5 +1,6 @@
 package redlightBack.Post;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class PostController {
 
     @PostMapping("/posts")
     public PostResponse createPost (@LoginMemberId String userId,
-                                    @RequestBody CreatePostRequest request){
+                                    @Valid @RequestBody CreatePostRequest request){
 
         return postService.create(userId, request);
     }

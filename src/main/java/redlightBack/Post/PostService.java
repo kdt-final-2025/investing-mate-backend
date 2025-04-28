@@ -36,9 +36,6 @@ public class PostService {
                 request.content(),
                 request.imageUrls());
 
-        //이미지 첨부 5개 제한
-        post.limitationOfImages(request.imageUrls());
-
         postRepository.save(post);
 
         return toPostResponse(post);
