@@ -1,7 +1,6 @@
 package redlightBack.Post;
 
 import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
@@ -96,9 +95,15 @@ public class PostService {
                 () -> new NoSuchElementException("해당 게시판을 찾을 수 없습니다.")
         );
 
-        Page<Post> posts = qPostRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, pageable);
 
-        List<PostListResponse> responseList = posts.getContent().stream()
+        int size = pageable.getPageSize();
+        Long offset = pageable.getOffset();
+        long totalElements = postQueryRepository.countPosts(boardId, postTitle, userId);
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+
+        List<Post> posts = postQueryRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, offset, size);
+
+        List<PostListResponse> responseList = posts.stream()
                 .map(list -> new PostListResponse(list.getId(),
                         list.getPostTitle(),
                         list.getUserId(),
@@ -107,10 +112,11 @@ public class PostService {
                         list.getLikeCount())
                 ).toList();
 
-        PageInfo pageInfo = new PageInfo(posts.getNumber(),
-                posts.getSize(),
-                posts.getNumberOfElements(),
-                posts.getTotalPages());
+        PageInfo pageInfo = new PageInfo(pageable.getPageNumber() + 1,
+                pageable.getPageSize(),
+                totalElements,
+                totalPages
+                );
 
         return new PostListAndPagingResponse(board.getBoardName(), responseList, pageInfo);
     }

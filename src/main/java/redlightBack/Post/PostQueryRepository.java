@@ -23,29 +23,15 @@ public class PostQueryRepository {
         this.queryFactory = queryFactory;
     }
 
-    public Page<Post> searchAndOrderingPosts (Long boardId, String postTitle, String userId, String sortBy, String direction, Pageable pageable){
+    public List<Post> searchAndOrderingPosts (Long boardId, String postTitle, String userId, String sortBy, String direction, Long offset, int size){
 
-        List<Post> postList = queryFactory.select(qPost)
+        return queryFactory.select(qPost)
                 .from(qPost)
                 .where(qPost.boardId.eq(boardId), qPost.deletedAt.isNull(), searchByTitle(postTitle), searchByUserId(userId))
                 .orderBy(orderSpecifiers(sortBy, direction))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .offset(offset)
+                .limit(size)
                 .fetch();
-
-        Long pageCount = queryFactory
-                .select(qPost.count())
-                .from(qPost)
-                .where(qPost.boardId.eq(boardId),
-                        qPost.deletedAt.isNull(),
-                        searchByTitle(postTitle),
-                        searchByUserId(userId))
-                .fetchOne();
-
-        //null 방지
-        long safePageCount = (pageCount != null) ? pageCount : 0L;
-
-        return new PageImpl<>(postList, pageable, safePageCount);
     }
 
     //제목 검색 조건
@@ -87,6 +73,18 @@ public class PostQueryRepository {
                 qPost.createdAt.desc()
         };
 
+    }
+
+    public long countPosts(Long boardId, String postTitle, String userId){
+        Long totalElements = queryFactory.select(qPost.count())
+                .from(qPost)
+                .where(qPost.boardId.eq(boardId),
+                        qPost.deletedAt.isNull(),
+                        searchByTitle(postTitle),
+                        searchByUserId(userId))
+                .fetchOne();
+
+        return totalElements != null ? totalElements : 0L;
     }
 
 }

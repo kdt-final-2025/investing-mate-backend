@@ -49,10 +49,10 @@ public class PostController {
                                                   @RequestParam (required = false) String userId,
                                                   @RequestParam (required = false) String sortBy,
                                                   @RequestParam (required = false) String direction,
-                                                  @RequestParam (defaultValue = "0") int pageNumber,
+                                                  @RequestParam (defaultValue = "1") int pageNumber,
                                                   @RequestParam (defaultValue = "10") int size){
 
-        Pageable pageable = PageRequest.of(pageNumber, size);
+        Pageable pageable = PageRequest.of(pageNumber -1 , size);
 
         return postService.getPosts(userId, boardId, postTitle, sortBy, direction, pageable);
     }

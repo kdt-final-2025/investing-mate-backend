@@ -2,6 +2,6 @@ package redlightBack.Post.Dto;
 
 public record PageInfo(int pageNumber,
                        int size,
-                       int totalElements,
+                       long totalElements,
                        int totalPages) {
 }
