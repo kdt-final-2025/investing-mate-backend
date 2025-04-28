@@ -10,6 +10,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Post.Dto.*;
+import redlightBack.Post.Enum.Direction;
+import redlightBack.Post.Enum.SortBy;
 
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class BoardApiTest extends AcceptanceTest {
     public void Board_Create_test(){
 
         //테스트용 토큰
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+        String token = generateTestToken();
 
         BoardResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -245,6 +247,72 @@ public class BoardApiTest extends AcceptanceTest {
 
         assertThat(postListResponses.size()).isEqualTo(1);
         assertThat(postListResponses).anyMatch(post -> post.postTitle().equals("제목1"));
+    }
+
+    @DisplayName("게시물 정렬 테스트")
+    @Test
+    public void 게시물_정렬_테스트_내림차순 (){
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
+
+        PostResponse post1 = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        PostResponse post2 = createPost(new CreatePostRequest(boardId, "제목2", "내용2", List.of("img1", "img2", "img3")));
+        PostResponse post3 = createPost(new CreatePostRequest(boardId, "제목3", "내용3", List.of("img1", "img2", "img3")));
+        PostResponse post4 = createPost(new CreatePostRequest(boardId, "제목4", "내용4", List.of("img1", "img2", "img3")));
+        PostResponse post5 = createPost(new CreatePostRequest(boardId, "제목5", "내용5", List.of("img1", "img2", "img3")));
+        PostResponse post6 = createPost(new CreatePostRequest(boardId, "제목6", "내용6", List.of("img1", "img2", "img3")));
+        PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
+        PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
+
+        PostListAndPagingResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .queryParam("boardId", boardId)
+                .queryParam("sortBy", SortBy.NEWEST)
+                .queryParam("direction", Direction.DESC)
+                .when()
+                .get("/posts")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(PostListAndPagingResponse.class);
+
+        List<PostListResponse> postListResponses = response.postListResponse();
+
+        assertThat(postListResponses.get(0).postTitle()).isEqualTo("제목8");
+
+    }
+
+    @DisplayName("게시물 정렬 테스트")
+    @Test
+    public void 게시물_정렬_테스트_오름차순 (){
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
+
+        PostResponse post1 = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        PostResponse post2 = createPost(new CreatePostRequest(boardId, "제목2", "내용2", List.of("img1", "img2", "img3")));
+        PostResponse post3 = createPost(new CreatePostRequest(boardId, "제목3", "내용3", List.of("img1", "img2", "img3")));
+        PostResponse post4 = createPost(new CreatePostRequest(boardId, "제목4", "내용4", List.of("img1", "img2", "img3")));
+        PostResponse post5 = createPost(new CreatePostRequest(boardId, "제목5", "내용5", List.of("img1", "img2", "img3")));
+        PostResponse post6 = createPost(new CreatePostRequest(boardId, "제목6", "내용6", List.of("img1", "img2", "img3")));
+        PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
+        PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
+
+        PostListAndPagingResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .queryParam("boardId", boardId)
+                .queryParam("sortBy", SortBy.NEWEST)
+                .queryParam("direction", Direction.ASC)
+                .when()
+                .get("/posts")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(PostListAndPagingResponse.class);
+
+        List<PostListResponse> postListResponses = response.postListResponse();
+
+        assertThat(postListResponses.get(0).postTitle()).isEqualTo("제목1");
+
     }
 
 
