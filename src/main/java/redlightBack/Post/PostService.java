@@ -9,9 +9,7 @@ import redlightBack.Board.BoardRepository;
 import redlightBack.Post.Dto.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static redlightBack.Post.QPost.post;
+import java.util.NoSuchElementException;
 
 @Service
 public class PostService {
@@ -30,7 +28,7 @@ public class PostService {
     public PostResponse create (String userId, CreatePostRequest request){
 
         Board board = boardRepository.findById(request.boardId()).orElseThrow(
-                () -> new RuntimeException("존재하지 않는 게시판입니다."));
+                () -> new NoSuchElementException("존재하지 않는 게시판입니다."));
 
 
         Post post = new Post(request.boardId(),
@@ -58,7 +56,7 @@ public class PostService {
     public DetailPostResponse getDetailPost (Long postId){
 
         Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
-                () -> new RuntimeException("해당 게시물이 존재하지 않습니다.")
+                () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
         return new DetailPostResponse(post.getId(),
@@ -83,7 +81,7 @@ public class PostService {
         //TODO 작성자 검증 추가
 
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new RuntimeException("해당 게시물이 존재하지 않습니다.")
+                () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
         post.updatePost(request.postTitle(),
@@ -107,7 +105,7 @@ public class PostService {
         //TODO 작성자 확인 로직
 
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new RuntimeException("해당 게시물이 존재하지 않습니다.")
+                () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
         post.softDelete();
@@ -126,7 +124,7 @@ public class PostService {
                                               Pageable pageable) {
 
         Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new RuntimeException("해당 게시판을 찾을 수 없습니다.")
+                () -> new NoSuchElementException("해당 게시판을 찾을 수 없습니다.")
         );
 
         Page<Post> posts = qPostRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, pageable);
