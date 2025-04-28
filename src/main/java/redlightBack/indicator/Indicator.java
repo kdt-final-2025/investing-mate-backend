@@ -5,12 +5,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
+import redlightBack.common.BaseEntity;
 
 import java.time.LocalDate;
 
 @Getter
 @Entity
-public class Indicator {
+public class Indicator extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
