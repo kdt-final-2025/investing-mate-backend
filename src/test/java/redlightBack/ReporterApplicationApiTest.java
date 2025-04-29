@@ -29,11 +29,13 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+
+    // 아래의 토큰 2개는 만료기한이 없습니다.
     private static final String ADMIN_TOKEN =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyfQ.wgymko0W49YTPR0JoQ-AnrAoLbeF9DHn-naNDyNDfjQ";
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSJ9.LPHUzJyH03G6HsWFkWl6XIfiITDJ7UoL8GJCKuH1Sck";
 
     private static final String USER_TOKEN =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiaWF0IjoxNTE2MjM5MDIyfQ.TPOV2eduDGVzivHON0GAcWSDkSRUB32bsGNlJ9giUG4";
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.ukq8HAkCNiMuABuZAnmiXX-Z2Lw8AR13aC93GJ6p_yo";
 
     @BeforeEach
     void setUp() {
