@@ -49,24 +49,42 @@ public class ReporterApplicationService {
         return ReporterApplicationMapper.toDto(saved);
     }
 
-
-    // 로그인된 사용자의 ReporterApplication을 조회
+    // 로그인된 사용자의 Application 조회
     @Transactional(readOnly = true)
     public ApplicationResponseDto getMyApplication(String userId) {
         return reporterApplicationRepository
                 .findByMember_UserId(userId)
-                .map(ReporterApplicationMapper::toDto)
+                .map(e -> ReporterApplicationMapper.toDto(e))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "신청 내역이 없습니다."
                 ));
     }
 
+    // 로그인된 사용자 재신청
+    @Transactional
+    public ApplicationResponseDto resubmit(String userId) {
+        ReporterApplication app = reporterApplicationRepository.findByMember_UserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "신청 내역이 없습니다"
+                ));
+
+        try {
+            app.resubmit();
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage()
+            );
+        }
+        // dirty checking → 자동 저장
+        return ReporterApplicationMapper.toDto(app);
+    }
+
     // 관리자 전용: 다중 상태 조회
     @Transactional(readOnly = true)
     public List<ApplicationResponseDto> listByStatuses(List<RequestStatus> statuses) {
         return reporterApplicationRepository.findByStatusIn(statuses).stream()
-                .map(ReporterApplicationMapper::toDto)
+                .map(e -> ReporterApplicationMapper.toDto(e))
                 .collect(Collectors.toList());
     }
 
@@ -99,10 +117,10 @@ public class ReporterApplicationService {
 
     // 관리자 권한 확인
     public void authorizeAdmin(String userId) {
-        Member m = memberRepository.findByUserId(userId)
+        Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다: " + userId));
-        if (m.getRole() != Role.ADMINISTRATOR) {
+        if (member.getRole() != Role.ADMINISTRATOR) {
             throw new AccessDeniedException("관리자 권한이 필요합니다.");
         }
     }

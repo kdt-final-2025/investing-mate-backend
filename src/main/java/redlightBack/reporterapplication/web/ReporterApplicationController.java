@@ -21,10 +21,11 @@ public class ReporterApplicationController {
 
     // 1) 사용자 → 기자 신청
     @PostMapping
-    public ApplicationResponseDto apply(@LoginMemberId String userId) {
+    public ApplicationResponseDto apply(
+            @LoginMemberId String userId
+    ) {
         return service.apply(userId);
     }
-
 
     // 2) 사용자 → 본인 신청 상태 조회 - 신청 기록이 없으면 404 반환
     @GetMapping("/me")
@@ -34,7 +35,15 @@ public class ReporterApplicationController {
         return service.getMyApplication(userId);
     }
 
-    // 3) 관리자 → 다중 대기&반려 목록 조회
+    // 3) 사용자 → 본인 재신청 (반려된 경우에만 가능)
+    @PutMapping("/me")
+    public ApplicationResponseDto resubmit(
+            @LoginMemberId String userId
+    ) {
+        return service.resubmit(userId);
+    }
+
+    // 4) 관리자 → 다중 대기 & 반려 목록 조회
     @GetMapping("/admin")
     public List<ApplicationResponseDto> listByStatuses(
             @LoginMemberId String userId,
@@ -44,7 +53,7 @@ public class ReporterApplicationController {
         return service.listByStatuses(statuses);
     }
 
-    // 4) 관리자 → 다중 승인/반려 처리
+    // 5) 관리자 → 다중 승인/반려 처리
     @PatchMapping("/admin")
     public List<ApplicationResponseDto> process(
             @LoginMemberId String userId,

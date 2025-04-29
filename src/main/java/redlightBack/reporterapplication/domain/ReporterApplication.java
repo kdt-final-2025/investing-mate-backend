@@ -9,10 +9,12 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor @Builder
+@AllArgsConstructor
+@Builder
 public class ReporterApplication {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -35,6 +37,16 @@ public class ReporterApplication {
                 .status(RequestStatus.PENDING)
                 .appliedAt(LocalDateTime.now())
                 .build();
+    }
+
+    //반려 상태에서만 재신청
+    public void resubmit() {
+        if (this.status != RequestStatus.REJECTED) {
+            throw new IllegalStateException("REJECTED 상태에서만 재신청이 가능합니다");
+        }
+        this.status = RequestStatus.PENDING;
+        this.appliedAt = LocalDateTime.now();
+        this.processedAt = null;
     }
 
     // 승인(관리자)
