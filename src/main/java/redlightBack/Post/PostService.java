@@ -120,7 +120,8 @@ public class PostService {
                         list.getUserId(),
                         list.getViewCount(),
                         list.getCommentCount(),
-                        list.getLikeCount())
+                        list.getLikeCount(),
+                        list.getCreatedAt())
                 ).toList();
 
         PageInfo pageInfo = new PageInfo(pageable.getPageNumber() + 1,
