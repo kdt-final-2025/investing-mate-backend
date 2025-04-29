@@ -2,12 +2,13 @@ package redlightBack.stock;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.stock.dto.FavoriteStockListResponse;
 import redlightBack.stock.dto.FavoriteStockRequest;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 public class StockRestController {
 

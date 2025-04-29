@@ -2,13 +2,14 @@ package redlightBack.news;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.news.dto.NewsRequest;
 import redlightBack.news.dto.NewsResponse;
 import redlightBack.news.dto.PageResponse;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 public class NewsRestController {
 

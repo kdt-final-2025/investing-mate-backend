@@ -2,6 +2,7 @@ package redlightBack.stock;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import redlightBack.stock.dto.FavoriteStockListResponse;
 import redlightBack.stock.dto.FavoriteStockRequest;
@@ -10,7 +11,7 @@ import redlightBack.stock.dto.FavoriteStockResponse;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class StockService {
 

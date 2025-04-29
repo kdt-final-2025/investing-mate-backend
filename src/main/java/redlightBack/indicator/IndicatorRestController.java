@@ -2,12 +2,13 @@ package redlightBack.indicator;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.indicator.dto.FavoriteIndicatorRequest;
 import redlightBack.indicator.dto.FavoriteIndicatorsListResponse;
 import redlightBack.loginUtils.LoginMemberId;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 public class IndicatorRestController {
 

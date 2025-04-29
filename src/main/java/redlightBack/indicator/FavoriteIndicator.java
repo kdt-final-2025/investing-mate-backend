@@ -1,11 +1,12 @@
 package redlightBack.indicator;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import redlightBack.common.BaseEntity;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
 public class FavoriteIndicator extends BaseEntity {
