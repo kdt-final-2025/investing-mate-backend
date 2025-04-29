@@ -40,7 +40,7 @@ class CreateFavoriteIndicatorTest {
     @Test
     void createFavoriteIndicator_success() {
         // given: DB에 존재하는 지표
-        Indicator indicator = new Indicator("Some Name", null);
+        Indicator indicator = new Indicator("Some Name");
         // private Long id 필드에 EXISTING_ID 값 세팅
         ReflectionTestUtils.setField(indicator, "id", EXISTING_ID);
 

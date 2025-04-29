@@ -17,11 +17,11 @@ public class Indicator extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 예: WB_WDI_SP_POP_TOTL
+    private Long id;
 
-    private String name;        // 예: Total Population
+    private String name;
 
-    public Indicator(String name, LocalDate nextReleaseDate) {
+    public Indicator(String name) {
         this.name = name;
     }
 }

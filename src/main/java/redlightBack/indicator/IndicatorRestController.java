@@ -13,6 +13,11 @@ public class IndicatorRestController {
 
     private final IndicatorService indicatorService;
 
+    @GetMapping("/indicators")
+    public void fetchAndSaveAll() {
+        indicatorService.fetchAndSaveAll();
+    }
+
     @PostMapping("/indicators/favorites")
     public void createFavoriteIndicator(@LoginMemberId String userId, @Valid @RequestBody FavoriteIndicatorRequest request) {
         indicatorService.createFavoriteIndicator(userId, request);
