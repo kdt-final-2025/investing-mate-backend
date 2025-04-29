@@ -58,4 +58,16 @@ public class PostController {
 
         return postService.getPosts(userId, boardId, postTitle, sortBy, direction, pageable);
     }
+
+    @GetMapping("/boards/liked")
+    public LikedPostListAndPagingResponse getLikedPostList (@LoginMemberId String userId,
+                                                            @RequestParam (defaultValue = "1") int pageNumber,
+                                                            @RequestParam (defaultValue = "10") int size){
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
+
+        return postService.likedPostList(userId, pageable);
+    }
+
+
 }
