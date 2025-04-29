@@ -1,13 +1,12 @@
 package redlightBack.news;
 
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.news.dto.NewsRequest;
 import redlightBack.news.dto.NewsResponse;
-import redlightBack.news.dto.PageResponse;
+import redlightBack.news.dto.NewsPageResponse;
 
 @RequiredArgsConstructor
 @RestController
@@ -31,11 +30,11 @@ public class NewsRestController {
     }
 
     @GetMapping("/news")
-    public PageResponse getAll(@RequestParam(required = false) String title,
-                               @RequestParam(defaultValue = "1") int page,
-                               @RequestParam(defaultValue = "10") int size,
-                               @RequestParam String sortBy,
-                               @RequestParam String order) {
+    public NewsPageResponse getAll(@RequestParam(required = false) String title,
+                                   @RequestParam(defaultValue = "1") int page,
+                                   @RequestParam(defaultValue = "10") int size,
+                                   @RequestParam String sortBy,
+                                   @RequestParam String order) {
         return newsService.getAll(title, page, size, sortBy, order);
     }
 }

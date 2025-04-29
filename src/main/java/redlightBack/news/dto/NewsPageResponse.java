@@ -2,7 +2,7 @@ package redlightBack.news.dto;
 
 import java.util.List;
 
-public record PageResponse(
+public record NewsPageResponse(
         int totalPage,
         int currentPage,
         int pageSize,

@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Pageable;
 import redlightBack.news.dto.NewsResponse;
-import redlightBack.news.dto.PageResponse;
+import redlightBack.news.dto.NewsPageResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,7 +62,7 @@ class GetAllNewsTest {
                 .willReturn(2L);
 
         // when
-        PageResponse result = newsService.getAll(titleFilter, page, size, sortBy, order);
+        NewsPageResponse result = newsService.getAll(titleFilter, page, size, sortBy, order);
 
         // then
         assertEquals(2, result.totalPage(), "총 페이지 수가 맞아야 한다");
@@ -104,7 +104,7 @@ class GetAllNewsTest {
                 .willReturn(0L);
 
         // when
-        PageResponse result = newsService.getAll(titleFilter, page, size, sortBy, order);
+        NewsPageResponse result = newsService.getAll(titleFilter, page, size, sortBy, order);
 
         // then
         assertEquals(1, result.totalPage(), "0건일 때는 페이지 수 1");

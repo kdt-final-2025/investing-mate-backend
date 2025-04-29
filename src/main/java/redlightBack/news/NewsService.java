@@ -1,6 +1,5 @@
 package redlightBack.news;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redlightBack.news.dto.NewsRequest;
 import redlightBack.news.dto.NewsResponse;
-import redlightBack.news.dto.PageResponse;
+import redlightBack.news.dto.NewsPageResponse;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -66,13 +65,13 @@ public class NewsService {
         news.deleteNews();
     }
 
-    public PageResponse getAll(String title, int page, int size, String sortBy, String order) {
+    public NewsPageResponse getAll(String title, int page, int size, String sortBy, String order) {
         Sort sort = Sort.by(sortBy, order);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         List<News> news = newsQueryRepository.findAll(title, pageable);
         long totalCount = newsQueryRepository.totalCount(title);
         int totalPage = (int) Math.ceil((double) (totalCount - 1) / pageable.getPageSize()) + 1;
-        return new PageResponse(
+        return new NewsPageResponse(
                 totalPage,
                 page,
                 size,
