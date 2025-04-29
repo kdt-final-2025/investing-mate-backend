@@ -1,5 +1,6 @@
 package redlightBack.news;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
@@ -14,7 +15,7 @@ public class NewsRestController {
     private final NewsService newsService;
 
     @PostMapping("/news")
-    public NewsResponse create(@LoginMemberId String userId, @RequestBody NewsRequest request) {
+    public NewsResponse create(@LoginMemberId String userId, @Valid @RequestBody NewsRequest request) {
         return newsService.create(userId, request);
     }
 

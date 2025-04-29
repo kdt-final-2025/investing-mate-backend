@@ -1,5 +1,6 @@
 package redlightBack.indicator;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.indicator.dto.FavoriteIndicatorRequest;
@@ -13,7 +14,7 @@ public class IndicatorRestController {
     private final IndicatorService indicatorService;
 
     @PostMapping("/indicators/favorites")
-    public void createFavoriteIndicator(@LoginMemberId String userId, @RequestBody FavoriteIndicatorRequest request) {
+    public void createFavoriteIndicator(@LoginMemberId String userId, @Valid @RequestBody FavoriteIndicatorRequest request) {
         indicatorService.createFavoriteIndicator(userId, request);
     }
 

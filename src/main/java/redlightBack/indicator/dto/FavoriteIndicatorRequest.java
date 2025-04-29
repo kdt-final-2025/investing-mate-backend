@@ -1,6 +1,8 @@
 package redlightBack.indicator.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public record FavoriteIndicatorRequest(
-        Long indicatorId
+        @NotNull Long indicatorId
 ) {
 }

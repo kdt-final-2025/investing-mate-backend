@@ -1,12 +1,14 @@
 package redlightBack.news.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record NewsRequest(
-        String title,
-        String description,
+        @NotNull String title,
+        @NotNull String description,
         List<String> imageUrls,
-        LocalDateTime publishedAt
+        @NotNull LocalDateTime publishedAt
 ) {
 }

@@ -1,5 +1,6 @@
 package redlightBack.stock;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
@@ -13,7 +14,7 @@ public class StockRestController {
     private final StockService stockService;
 
     @PostMapping("/stocks/favorites")
-    public void createFavoriteStock(@LoginMemberId String userId, @RequestBody FavoriteStockRequest request) {
+    public void createFavoriteStock(@LoginMemberId String userId, @Valid @RequestBody FavoriteStockRequest request) {
         stockService.createFavoriteStock(userId, request);
     }
 
