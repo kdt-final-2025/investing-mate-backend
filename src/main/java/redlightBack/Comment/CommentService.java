@@ -32,12 +32,15 @@ public class CommentService {
         Post post = postRepository.findById(request.postId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
+        Comment parent = request.parent() != null ? request.parent().parent() : null;
+
         Comment comment = new Comment(
                 userId,
                 request.content(),
-                post,
-                request.parentId()
+                post.getId(),
+                parent
         );
+
         commentRepository.save(comment);
 
         return new CommentResponse(comment.getId(),
@@ -78,7 +81,7 @@ public class CommentService {
 
     //댓글 조회 및 페이징 및 트리구조
     public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable) {
-        Page<Comment> commentPage = commentRepository.findByAllPostId(postId, pageable);  // 댓글 + 대댓글 다 조회
+        Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);  // 댓글 + 대댓글 다 조회
 
         // 평면 → 트리로 변환
         List<CommentResponse> comments = commentTreeBuilder.build(commentPage.getContent());

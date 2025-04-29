@@ -32,7 +32,7 @@ public class CommentTreeBuilder {
 
         // 2차로 부모-자식 연결
         for (Comment comment : flatComments) {
-            Long parentId = comment.getParentId();
+            Long parentId = comment.getParent().getId();
             CommentResponse child = commentMap.get(comment.getId());
 
             if (parentId == null) {

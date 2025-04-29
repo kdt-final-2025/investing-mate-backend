@@ -2,7 +2,7 @@ package redlightBack.Comment.Dto;
 
 public record CreateCommentRequest(
         Long postId,
-        Long parentId,
+        CreateReplyRequest parent,
         String content
 ) {
 }

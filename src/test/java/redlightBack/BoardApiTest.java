@@ -7,8 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
+import redlightBack.Board.Dto.CreateBoardRequest;
+import redlightBack.Comment.Dto.CreateCommentRequest;
 import redlightBack.Post.Dto.*;
 import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
@@ -313,6 +314,58 @@ public class BoardApiTest extends AcceptanceTest {
 
         assertThat(postListResponses.get(0).postTitle()).isEqualTo("제목1");
 
+    }
+
+//    @Test
+//    public void 댓글_생성_테스트(){
+//        BoardResponse board = createBoard("게시판이름");
+//        Long boardId = board.id();
+//        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+//        Long postId = post.id();
+//
+//        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMiIsImlhdCI6MTUxNjIzOTAyMn0.d4-EAJSW6QZLPsrJBMf2plzsYMpqSa0xkn5u-1rhYrs"; // 실제 JWT 토큰
+//
+//        CreateCommentRequest commentRequest = new CreateCommentRequest(post.id(), null, "This is a test comment.");
+//
+//        RestAssured.given().log().all()
+//                .contentType(ContentType.JSON)
+//                .header("Authorization", "Bearer " + validJwtToken)
+//                .body(commentRequest)
+//                .when()
+//                .post("/comments")
+//                .then().log().all()
+//                .statusCode(200);
+//    }
+
+    @Test
+    public void 댓글_생성_테스트() {
+        // 1. 게시판 생성
+        BoardResponse board = createBoard("게시판이름");
+        Long boardId = board.id();
+
+        // 2. 게시글 생성
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        Long postId = post.id();  // 여기까지 OK
+
+        // 3. JWT 토큰 준비
+        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMiIsImlhdCI6MTUxNjIzOTAyMn0.d4-EAJSW6QZLPsrJBMf2plzsYMpqSa0xkn5u-1rhYrs";
+
+        // 4. 댓글 작성 요청 (postId만 넘김)
+        CreateCommentRequest commentRequest = new CreateCommentRequest(
+                postId,     // postId: 게시글 ID를 넘긴다
+                null,       // parentId: null (댓글이니까 부모 없음)
+                "This is a test comment."  // 내용
+        );
+
+        // 5. API 호출 및 검증
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .body(commentRequest)
+                .when()
+                .post("/comments")
+                .then().log().all()
+                .statusCode(200);
     }
 
 

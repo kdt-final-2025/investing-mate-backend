@@ -20,7 +20,7 @@ public class CommentController {
     public final CommentService commentService;
 
 
-    @PostMapping("")
+    @PostMapping("/comments")
     public CommentResponse createComment(@LoginMemberId String userId,
                                          @RequestBody CreateCommentRequest request){
      return commentService.save(userId,request);
@@ -28,8 +28,9 @@ public class CommentController {
 
     //댓글+대댓글 조회
     @GetMapping("")
-    public CommentResponseAndPaging getCommentTree(@RequestParam Long postId
-    , @RequestParam(defaultValue = "1") int size , @RequestParam(defaultValue = "150") int pageNumber ){
+    public CommentResponseAndPaging getCommentTree(@RequestParam Long postId,
+                                                   @RequestParam(defaultValue = "1") int size,
+                                                   @RequestParam(defaultValue = "150") int pageNumber ){
 
         Pageable pageable = PageRequest.of(pageNumber -1, size);
 

@@ -3,11 +3,10 @@ package redlightBack.Comment.Domain;
 import jakarta.persistence.*;
 import lombok.*;
 import redlightBack.common.BaseEntity;
-@RequiredArgsConstructor
+
 @NoArgsConstructor
 @Getter
 @ToString
-@EqualsAndHashCode
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"comment_id", "user_id"})
@@ -17,9 +16,6 @@ public class CommentLike extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    private Long commentId;
 
     @Column(nullable = false)
     private String userId;

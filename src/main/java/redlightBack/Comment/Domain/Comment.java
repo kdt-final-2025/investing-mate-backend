@@ -2,16 +2,14 @@ package redlightBack.Comment.Domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import redlightBack.Post.Post;
 import redlightBack.common.BaseEntity;
 
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
+
 @NoArgsConstructor
 @Getter
 @ToString
-@EqualsAndHashCode
 @Entity
 public class Comment extends BaseEntity {
     @Id
@@ -26,7 +24,12 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private String userId;
 
-    private Long parentId; // null이면 일반 댓글, 있으면 대댓글
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
+
+//    private Long parentId; // null이면 일반 댓글, 있으면 대댓글
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
@@ -40,7 +43,7 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private boolean deleted = false;//소프트 삭제
 
-    public Comment(String userId, String content, Post post, Long aLong) {
+    public Comment(String userId, String content, Long post, Long aLong) {
 
     }
 
@@ -50,6 +53,13 @@ public class Comment extends BaseEntity {
         this.content = content;
         this.likeCount = likeCount;
         this.likedByMe = likedByMe;
+    }
+
+    public Comment(String userId, String content, Long postId, Comment parent) {
+        this.userId = userId;
+        this.content = content;
+        this.postId = postId;
+        this.parent = parent;
     }
 
     public void deletedAt(){
