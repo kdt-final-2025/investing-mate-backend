@@ -1,6 +1,7 @@
 package redlightBack.indicator;
 
 import com.querydsl.core.types.OrderSpecifier;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -45,6 +46,7 @@ public class IndicatorService {
         }
     }
 
+    @Transactional
     public void createFavoriteIndicator(String userId, FavoriteIndicatorRequest request) {
         Indicator indicator = indicatorRepository.findById(request.indicatorId()).orElseThrow(
                 () -> new NoSuchElementException("해당하는 경제 지표가 없습니다."));
@@ -55,7 +57,7 @@ public class IndicatorService {
                                                           int page,
                                                           int size,
                                                           SortType sortType) {
-        OrderSpecifier<?> orderSpecifier = sortType.getOrder(indicator);
+        OrderSpecifier<?> orderSpecifier = sortType.getOrder(QFavoriteIndicator.favoriteIndicator);
         long totalCount = indicatorQueryRepository.totalCount(userId);
         long offset = (long) (page - 1) * size;
         List<FavoriteIndicator> favoriteIndicators = indicatorQueryRepository.getAll(

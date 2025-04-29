@@ -25,8 +25,6 @@ public class StockQueryRepository {
             int page,
             int size
     ) {
-        // --- 동적 WHERE 절 조립 ---
-        BooleanExpression byUser = favoriteStock.userId.eq(userId);
         // --- 동적 ORDER BY 조립 ---
         OrderSpecifier<?> orderSpec;
         boolean asc = "asc".equalsIgnoreCase(order);
@@ -50,7 +48,7 @@ public class StockQueryRepository {
         return queryFactory
                 .selectFrom(stock)
                 .join(favoriteStock).on(favoriteStock.stock.eq(stock))
-                .where(byUser)       // null 인 조건은 자동 무시
+                .where(favoriteStock.userId.eq(userId))       // null 인 조건은 자동 무시
                 .orderBy(orderSpec)
                 .offset(offset)
                 .limit(limit)

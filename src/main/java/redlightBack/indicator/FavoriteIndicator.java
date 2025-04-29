@@ -2,10 +2,11 @@ package redlightBack.indicator;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import redlightBack.common.BaseEntity;
 
 @Getter
 @Entity
-public class FavoriteIndicator {
+public class FavoriteIndicator extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

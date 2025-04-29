@@ -1,21 +1,20 @@
 package redlightBack.indicator;
 
-
 import com.querydsl.core.types.OrderSpecifier;
 
 public enum SortType {
     LATEST {
         @Override
-        public OrderSpecifier<?> getOrder(QIndicator indicator) {
-            return indicator.createdAt.desc();
+        public OrderSpecifier<?> getOrder(QFavoriteIndicator fav) {
+            return fav.createdAt.desc();
         }
     },
     OLDEST {
         @Override
-        public OrderSpecifier<?> getOrder(QIndicator indicator) {
-            return indicator.createdAt.asc();
+        public OrderSpecifier<?> getOrder(QFavoriteIndicator fav) {
+            return fav.createdAt.asc();
         }
     };
 
-    public abstract OrderSpecifier<?> getOrder(QIndicator indicator);
+    public abstract OrderSpecifier<?> getOrder(QFavoriteIndicator fav);
 }
