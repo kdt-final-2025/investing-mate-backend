@@ -18,6 +18,8 @@ public class Stock {
 
     private String code;
 
+    private Long marketCap;
+
     protected Stock() {
     }
 
