@@ -1,8 +1,10 @@
 package redlightBack.stock;
 
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import redlightBack.stock.dto.FavoriteStockListResponse;
 import redlightBack.stock.dto.FavoriteStockRequest;
@@ -10,7 +12,6 @@ import redlightBack.stock.dto.FavoriteStockResponse;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -46,12 +47,11 @@ public class StockService {
                                             int size,
                                             String sortBy,
                                             String order) {
+        Sort sort = Sort.by(sortBy, order);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         List<Stock> stocks = stockQueryRepository.getAll(
                 userId,
-                sortBy,
-                order,
-                page,
-                size);
+                pageable);
         long totalCount = stockQueryRepository.totalCount(userId);
         long totalPages = (totalCount + size - 1) / size;
         List<FavoriteStockResponse> responses = stocks.stream()

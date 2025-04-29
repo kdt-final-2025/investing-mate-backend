@@ -3,8 +3,11 @@ package redlightBack.stock;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -18,40 +21,48 @@ public class StockQueryRepository {
         this.queryFactory = queryFactory;
     }
 
-    public List<Stock> getAll(
-            String userId,
-            String sortBy,
-            String order,
-            int page,
-            int size
-    ) {
-        // --- 동적 ORDER BY 조립 ---
-        OrderSpecifier<?> orderSpec;
-        boolean asc = "asc".equalsIgnoreCase(order);
-        if ("marketCap".equals(sortBy)) {
-            orderSpec = asc
-                    ? stock.marketCap.asc()
-                    : stock.marketCap.desc();
-        } else if ("code".equals(sortBy)) {
-            orderSpec = asc
-                    ? stock.code.asc()
-                    : stock.code.desc();
-        } else {
-            // 기본 정렬: id 오름차순
-            orderSpec = stock.id.asc();
-        }
+    public List<Stock> getAll(String userId, Pageable pageable) {
+        // --- Pageable 에서 Sort 꺼내서 QueryDSL OrderSpecifier 로 변환 ---
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+        Sort sort = pageable.getSort();
 
-        // --- 페이징용 offset, limit 계산 ---
-        long offset = (long) page * size;
-        long limit = size;
+        if (sort.isUnsorted()) {
+            // 정렬 조건이 없으면 기본으로 ID 오름차순
+            orderSpecifiers.add(stock.id.asc());
+        } else {
+            for (Sort.Order o : sort) {
+                String prop = o.getProperty();
+                boolean asc = o.isAscending();
+
+                switch (prop) {
+                    case "marketCap":
+                        orderSpecifiers.add(asc
+                                ? stock.marketCap.asc()
+                                : stock.marketCap.desc());
+                        break;
+
+                    case "code":
+                        orderSpecifiers.add(asc
+                                ? stock.code.asc()
+                                : stock.code.desc());
+                        break;
+
+                    default:
+                        // 그 외 컬럼은 ID 정렬로 대체
+                        orderSpecifiers.add(asc
+                                ? stock.id.asc()
+                                : stock.id.desc());
+                }
+            }
+        }
 
         return queryFactory
                 .selectFrom(stock)
                 .join(favoriteStock).on(favoriteStock.stock.eq(stock))
-                .where(favoriteStock.userId.eq(userId))       // null 인 조건은 자동 무시
-                .orderBy(orderSpec)
-                .offset(offset)
-                .limit(limit)
+                .where(favoriteStock.userId.eq(userId))
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier<?>[0]))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
     }
 
