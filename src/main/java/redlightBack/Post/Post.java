@@ -35,13 +35,19 @@ public class Post extends BaseEntity {
     @CollectionTable(name = "post_image_urls", joinColumns = @JoinColumn(name = "post_id"))
     private List<String> imageUrls;
 
-    private int viewCount;
+    @Column(nullable = false)
+    private int viewCount = 0;
 
-    private int commentCount;
+    @Column(nullable = false)
+    private int commentCount = 0;
 
     private boolean likedByMe = false;
 
-    private int likeCount;
+    @Column(nullable = false)
+    private int likeCount = 0;
+
+    @OneToMany(mappedBy = "post")
+    private List<PostLike> postLikes;
 
     @Setter
     private LocalDateTime deletedAt = null;
