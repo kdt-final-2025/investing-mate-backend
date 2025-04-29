@@ -63,6 +63,61 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
         memberRepository.save(general);
     }
 
+    @DisplayName("Reporter 신청 - 성공 테스트")
+    @Test
+    public void applyReporter_success() {
+        ApplicationResponseDto response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(ApplicationResponseDto.class);
+        assertThat(response.userId()).isEqualTo("2");
+        assertThat(response.status()).isEqualTo(RequestStatus.PENDING);
+        assertThat(response.applicationId()).isNotNull();
+        assertThat(response.appliedAt()).isNotNull();
+    }
+
+    @DisplayName("Reporter 신청 - 중복 신청 시 Conflict")
+    @Test
+    public void applyReporter_conflict() {
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications");
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().log().all()
+                .statusCode(409);
+    }
+
+    @DisplayName("Reporter 신청 조회 - 본인")
+    @Test
+    public void getMyApplication_success() {
+        ApplicationResponseDto created = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+        ApplicationResponseDto response = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .get("reporter-applications/me")
+                .then().log().all()
+                .statusCode(200)
+                .extract().as(ApplicationResponseDto.class);
+        assertThat(response.applicationId()).isEqualTo(created.applicationId());
+        assertThat(response.userId()).isEqualTo("2");
+    }
+
     @DisplayName("관리자 - 모든 대기 및 반려 상태 조회")
     @Test
     public void listAllPendingAndRejected_asAdmin() {
