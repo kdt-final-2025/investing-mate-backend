@@ -16,7 +16,7 @@ public class ReporterApplication {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Member member;
 
     @Enumerated(EnumType.STRING)

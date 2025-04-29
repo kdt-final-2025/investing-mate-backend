@@ -25,7 +25,16 @@ public class ReporterApplicationController {
         return service.apply(userId);
     }
 
-    // 2) 관리자 → 다중 대기&반려 목록 조회
+
+    // 2) 사용자 → 본인 신청 상태 조회 - 신청 기록이 없으면 404 반환
+    @GetMapping("/me")
+    public ApplicationResponseDto getMyApplication(
+            @LoginMemberId String userId
+    ) {
+        return service.getMyApplication(userId);
+    }
+
+    // 3) 관리자 → 다중 대기&반려 목록 조회
     @GetMapping("/admin")
     public List<ApplicationResponseDto> listByStatuses(
             @LoginMemberId String userId,
@@ -35,7 +44,7 @@ public class ReporterApplicationController {
         return service.listByStatuses(statuses);
     }
 
-    // 3) 관리자 → 다중 승인/반려 처리
+    // 4) 관리자 → 다중 승인/반려 처리
     @PatchMapping("/admin")
     public List<ApplicationResponseDto> process(
             @LoginMemberId String userId,

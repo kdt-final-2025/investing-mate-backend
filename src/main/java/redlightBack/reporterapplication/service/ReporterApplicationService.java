@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class ReporterApplicationService {
 
     private final ReporterApplicationRepository reporterApplicationRepository;
-    private final MemberRepository memberRepository             ;
+    private final MemberRepository memberRepository;
 
     public ReporterApplicationService(
             ReporterApplicationRepository reporterApplicationRepository,
@@ -47,6 +47,19 @@ public class ReporterApplicationService {
         ReporterApplication app = ReporterApplication.applyFor(member);
         ReporterApplication saved = reporterApplicationRepository.save(app);
         return ReporterApplicationMapper.toDto(saved);
+    }
+
+
+    // 로그인된 사용자의 ReporterApplication을 조회
+    @Transactional(readOnly = true)
+    public ApplicationResponseDto getMyApplication(String userId) {
+        return reporterApplicationRepository
+                .findByMember_UserId(userId)
+                .map(ReporterApplicationMapper::toDto)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "신청 내역이 없습니다."
+                ));
     }
 
     // 관리자 전용: 다중 상태 조회
