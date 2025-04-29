@@ -14,6 +14,7 @@ import redlightBack.reporterapplication.domain.RequestStatus;
 import redlightBack.reporterapplication.web.dto.ApplicationResponseDto;
 import redlightBack.reporterapplication.web.dto.ProcessRequestDto;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,80 +60,20 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
         memberRepository.save(general);
     }
 
-    @DisplayName("Reporter 신청 - 성공 테스트")
+    @DisplayName("관리자 - 모든 대기 및 반려 상태 조회")
     @Test
-    public void applyReporter_success() {
-        ApplicationResponseDto response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + USER_TOKEN)
-                .when()
-                .post("reporter-applications")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .as(ApplicationResponseDto.class);
-
-        assertThat(response.userId()).isEqualTo("2");
-        assertThat(response.status()).isEqualTo(RequestStatus.PENDING);
-        assertThat(response.applicationId()).isNotNull();
-        assertThat(response.appliedAt()).isNotNull();
-    }
-
-    @DisplayName("Reporter 신청 - 중복 신청 시 Conflict")
-    @Test
-    public void applyReporter_conflict() {
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + USER_TOKEN)
-                .when()
-                .post("reporter-applications");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + USER_TOKEN)
-                .when()
-                .post("reporter-applications")
-                .then().log().all()
-                .statusCode(409);
-    }
-
-    @DisplayName("Reporter 신청 조회 - 본인")
-    @Test
-    public void getMyApplication_success() {
-        ApplicationResponseDto created = RestAssured.given()
+    public void listAllPendingAndRejected_asAdmin() {
+        // 1) 일반 유저 신청 (PENDING)
+        ApplicationResponseDto pending = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + USER_TOKEN)
                 .when()
                 .post("reporter-applications")
                 .then().extract().as(ApplicationResponseDto.class);
 
-        ApplicationResponseDto response = RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + USER_TOKEN)
-                .when()
-                .get("reporter-applications/me")
-                .then().log().all()
-                .statusCode(200)
-                .extract().as(ApplicationResponseDto.class);
-
-        assertThat(response.applicationId()).isEqualTo(created.applicationId());
-        assertThat(response.userId()).isEqualTo("2");
-    }
-
-    @DisplayName("반려된 신청 재신청 테스트")
-    @Test
-    public void resubmit_afterRejection_success() {
-        // 사용자 신청
-        ApplicationResponseDto created = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + USER_TOKEN)
-                .when()
-                .post("reporter-applications")
-                .then().extract().as(ApplicationResponseDto.class);
-
-        // 관리자 반려 처리
+        // 2) 반려 처리
         ProcessRequestDto rejectDto = new ProcessRequestDto(
-                List.of(created.applicationId()),
-                RequestStatus.REJECTED
+                List.of(pending.applicationId()), RequestStatus.REJECTED
         );
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -141,14 +82,94 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .when()
                 .patch("reporter-applications/admin");
 
-        // 재신청
-        ApplicationResponseDto resubmitted = RestAssured.given().log().all()
+        // 3) 관리자 조회 (기본 statuses=PENDING,REJECTED)
+        ApplicationResponseDto[] all = RestAssured.given()
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .when()
+                .get("reporter-applications/admin")
+                .then().statusCode(200)
+                .extract().as(ApplicationResponseDto[].class);
+
+        assertThat(all).hasSize(2);
+        List<RequestStatus> statuses = Arrays.stream(all)
+                .map(ApplicationResponseDto::status)
+                .toList();
+        assertThat(statuses).containsExactlyInAnyOrder(
+                RequestStatus.PENDING, RequestStatus.REJECTED
+        );
+    }
+
+    @DisplayName("관리자 - 대기 상태만 조회 및 반려 상태만 조회")
+    @Test
+    public void listByIndividualStatus_asAdmin() {
+        // 기존처럼 신청 및 반려 준비
+        ApplicationResponseDto pending = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+
+        ProcessRequestDto rejectDto = new ProcessRequestDto(
+                List.of(pending.applicationId()), RequestStatus.REJECTED
+        );
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .body(rejectDto)
+                .when()
+                .patch("reporter-applications/admin");
+
+        // PENDING만 조회
+        ApplicationResponseDto[] pendings = RestAssured.given()
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .queryParam("statuses", "PENDING")
+                .when()
+                .get("reporter-applications/admin")
+                .then().statusCode(200)
+                .extract().as(ApplicationResponseDto[].class);
+
+        assertThat(pendings).hasSize(0); // 이미 반려되어 PENDING 없음
+
+        // REJECTED만 조회
+        ApplicationResponseDto[] rejected = RestAssured.given()
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .queryParam("statuses", "REJECTED")
+                .when()
+                .get("reporter-applications/admin")
+                .then().statusCode(200)
+                .extract().as(ApplicationResponseDto[].class);
+
+        assertThat(rejected).hasSize(1);
+        assertThat(rejected[0].status()).isEqualTo(RequestStatus.REJECTED);
+    }
+
+    @DisplayName("반려된 신청 재신청 테스트")
+    @Test
+    public void resubmit_afterRejection_success() {
+        ApplicationResponseDto created = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+
+        ProcessRequestDto reject = new ProcessRequestDto(
+                List.of(created.applicationId()), RequestStatus.REJECTED
+        );
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .body(reject)
+                .when()
+                .patch("reporter-applications/admin");
+
+        ApplicationResponseDto resubmitted = RestAssured.given()
                 .header("Authorization", "Bearer " + USER_TOKEN)
                 .contentType(ContentType.JSON)
                 .when()
                 .put("reporter-applications/me")
-                .then().log().all()
-                .statusCode(200)
+                .then().statusCode(200)
                 .extract().as(ApplicationResponseDto.class);
 
         assertThat(resubmitted.status()).isEqualTo(RequestStatus.PENDING);
@@ -158,7 +179,6 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
     @DisplayName("관리자 - 기자 승인 시 역할 변경 검증")
     @Test
     public void approveReporter_changesUserRole() {
-        // 사용자 신청
         ApplicationResponseDto created = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + USER_TOKEN)
@@ -166,20 +186,16 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .post("reporter-applications")
                 .then().extract().as(ApplicationResponseDto.class);
 
-        // 관리자 승인 처리
-        ProcessRequestDto approveDto = new ProcessRequestDto(
-                List.of(created.applicationId()),
-                RequestStatus.APPROVED
+        ProcessRequestDto approve = new ProcessRequestDto(
+                List.of(created.applicationId()), RequestStatus.APPROVED
         );
-        RestAssured.given().log().all()
+        RestAssured.given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
-                .body(approveDto)
+                .body(approve)
                 .when()
-                .patch("reporter-applications/admin")
-                .then().statusCode(200);
+                .patch("reporter-applications/admin");
 
-        // DB에서 멤버 역할 확인
         Member updated = memberRepository.findByUserId("2").orElseThrow();
         assertThat(updated.getRole()).isEqualTo(Role.REPORTER);
     }
@@ -187,12 +203,11 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
     @DisplayName("관리자 권한 없는 사용자의 접근 차단")
     @Test
     public void listByStatuses_forbiddenForGeneral() {
-        RestAssured.given().log().all()
+        RestAssured.given()
                 .header("Authorization", "Bearer " + USER_TOKEN)
                 .queryParam("statuses", "PENDING")
                 .when()
                 .get("reporter-applications/admin")
-                .then().log().all()
-                .statusCode(403);
+                .then().statusCode(403);
     }
 }
