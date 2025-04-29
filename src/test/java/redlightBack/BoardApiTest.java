@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Board.Dto.CreateBoardRequest;
+import redlightBack.Comment.Dto.CommentResponse;
 import redlightBack.Comment.Dto.CreateCommentRequest;
 import redlightBack.Post.Dto.*;
 import redlightBack.Post.Enum.Direction;
@@ -25,7 +26,6 @@ public class BoardApiTest extends AcceptanceTest {
 
     @Autowired
     DatabaseCleanup databaseCleanup;
-
 
     @BeforeEach
     void setUp() {
@@ -316,27 +316,6 @@ public class BoardApiTest extends AcceptanceTest {
 
     }
 
-//    @Test
-//    public void 댓글_생성_테스트(){
-//        BoardResponse board = createBoard("게시판이름");
-//        Long boardId = board.id();
-//        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
-//        Long postId = post.id();
-//
-//        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMiIsImlhdCI6MTUxNjIzOTAyMn0.d4-EAJSW6QZLPsrJBMf2plzsYMpqSa0xkn5u-1rhYrs"; // 실제 JWT 토큰
-//
-//        CreateCommentRequest commentRequest = new CreateCommentRequest(post.id(), null, "This is a test comment.");
-//
-//        RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .header("Authorization", "Bearer " + validJwtToken)
-//                .body(commentRequest)
-//                .when()
-//                .post("/comments")
-//                .then().log().all()
-//                .statusCode(200);
-//    }
-
     @Test
     public void 댓글_생성_테스트() {
         // 1. 게시판 생성
@@ -365,11 +344,93 @@ public class BoardApiTest extends AcceptanceTest {
                 .when()
                 .post("/comments")
                 .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(CommentResponse.class);
+    }
+
+    @Test
+    public void 대댓글_생성_테스트() {
+        // 1. 게시판 생성
+        BoardResponse board = createBoard("게시판이름");
+        Long boardId = board.id();
+
+        // 2. 게시글 생성
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
+
+        // 3. JWT 토큰 준비
+        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMiIsImlhdCI6MTUxNjIzOTAyMn0.d4-EAJSW6QZLPsrJBMf2plzsYMpqSa0xkn5u-1rhYrs";
+
+        // 4. 일반 댓글 작성
+        CreateCommentRequest commentRequest = new CreateCommentRequest(
+                postId,
+                null,
+                "This is a test comment."
+        );
+
+        CommentResponse parentComment = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .body(commentRequest)
+                .when()
+                .post("/comments")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(CommentResponse.class);
+
+        CreateCommentRequest childCommentRequest = new CreateCommentRequest(
+                postId,
+                parentComment.commentId(),
+                "이것은 대댓글입니다."
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .body(childCommentRequest)
+                .when()
+                .post("/comments")
+                .then().log().all()
                 .statusCode(200);
     }
 
+    @Test
+    public void 조회테스트(){
+        // 1. 게시판 생성
+        BoardResponse board = createBoard("게시판이름");
+        Long boardId = board.id();
 
+        // 2. 게시글 생성
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
 
+        // 3. JWT 토큰 준비
+        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMiIsImlhdCI6MTUxNjIzOTAyMn0.d4-EAJSW6QZLPsrJBMf2plzsYMpqSa0xkn5u-1rhYrs";
+
+        // 4. 일반 댓글 작성
+        CreateCommentRequest commentRequest = new CreateCommentRequest(
+                postId,
+                null,
+                "This is a test comment."
+        );
+
+        CommentResponse parentComment = createComment(commentRequest);
+
+        CreateCommentRequest childCommentRequest = new CreateCommentRequest(
+                postId,
+                parentComment.commentId(),
+                "이것은 대댓글입니다."
+        );
+
+        createComment(childCommentRequest);
+
+//        RestAssured.given().log().all()
+//                .contentType(ContentType.JSON)
+//                .
+
+    }
 
     public BoardResponse createBoard(String boardName){
 
@@ -429,5 +490,22 @@ public class BoardApiTest extends AcceptanceTest {
 
     public String generateTestToken(){
         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+    }
+
+    public CommentResponse createComment (CreateCommentRequest commentRequest){
+
+        String token = generateTestToken();
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(commentRequest)
+                .when()
+                .post("/comments")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(CommentResponse.class);
+
     }
 }

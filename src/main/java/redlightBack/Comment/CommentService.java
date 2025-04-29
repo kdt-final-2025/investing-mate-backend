@@ -32,7 +32,11 @@ public class CommentService {
         Post post = postRepository.findById(request.postId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
-        Comment parent = request.parent() != null ? request.parent().parent() : null;
+        Comment parent = null;
+        if (request.parentId() != null) {
+            parent = commentRepository.findById(request.parentId())
+                    .orElseThrow(() -> new IllegalArgumentException("부모 댓글이 존재하지 않습니다."));
+        }
 
         Comment comment = new Comment(
                 userId,

@@ -27,7 +27,7 @@ public class CommentController {
     }
 
     //댓글+대댓글 조회
-    @GetMapping("")
+    @GetMapping("/comments")
     public CommentResponseAndPaging getCommentTree(@RequestParam Long postId,
                                                    @RequestParam(defaultValue = "1") int size,
                                                    @RequestParam(defaultValue = "150") int pageNumber ){

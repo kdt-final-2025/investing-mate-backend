@@ -47,6 +47,10 @@ public class Comment extends BaseEntity {
 
     }
 
+    public Comment(Long id) {
+        this.id = id;
+    }
+
     public Comment(Long id, String userId, String content, int likeCount, boolean likedByMe) {
         this.id = id;
         this.userId = userId;

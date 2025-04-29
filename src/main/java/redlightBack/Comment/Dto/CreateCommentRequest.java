@@ -2,7 +2,7 @@ package redlightBack.Comment.Dto;
 
 public record CreateCommentRequest(
         Long postId,
-        CreateReplyRequest parent,
+        Long parentId, // parent 댓글의 ID만 받음
         String content
-) {
-}
+) {}
+
