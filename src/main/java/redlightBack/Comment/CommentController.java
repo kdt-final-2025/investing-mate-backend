@@ -1,13 +1,13 @@
-package redlightBack.common.Comment;
+package redlightBack.Comment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import redlightBack.common.Comment.Dto.CommentLikeResponse;
-import redlightBack.common.Comment.Dto.CommentResponse;
-import redlightBack.common.Comment.Dto.CommentResponseAndPaging;
-import redlightBack.common.Comment.Dto.CreateCommentRequest;
+import redlightBack.Comment.Dto.CommentLikeResponse;
+import redlightBack.Comment.Dto.CommentResponse;
+import redlightBack.Comment.Dto.CommentResponseAndPaging;
+import redlightBack.Comment.Dto.CreateCommentRequest;
 import redlightBack.loginUtils.LoginMemberId;
 
 import java.nio.file.AccessDeniedException;
@@ -21,21 +21,19 @@ public class CommentController {
 
 
     @PostMapping("")
-    public CommentResponse.CommentItem createComment(@LoginMemberId String userId,
+    public CommentResponse createComment(@LoginMemberId String userId,
                                          @RequestBody CreateCommentRequest request){
      return commentService.save(userId,request);
     }
 
     //댓글+대댓글 조회
     @GetMapping("")
-    public CommentResponseAndPaging getCommentTree(@RequestParam Long postId,
-                                                   @RequestParam String userId,
-                                                   @PathVariable Long parentId
+    public CommentResponseAndPaging getCommentTree(@RequestParam Long postId
     , @RequestParam(defaultValue = "1") int size , @RequestParam(defaultValue = "150") int pageNumber ){
 
         Pageable pageable = PageRequest.of(pageNumber -1, size);
 
-        return commentService.getCommentTree(postId,userId,parentId, pageable);
+        return commentService.getCommentTree(postId, pageable);
     }
 
 

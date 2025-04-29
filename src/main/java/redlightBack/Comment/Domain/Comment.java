@@ -1,7 +1,8 @@
-package redlightBack.common.Comment.Domain;
+package redlightBack.Comment.Domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import redlightBack.Post.Post;
 import redlightBack.common.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -38,6 +39,18 @@ public class Comment extends BaseEntity {
 
     @Column(nullable = false)
     private boolean deleted = false;//소프트 삭제
+
+    public Comment(String userId, String content, Post post, Long aLong) {
+
+    }
+
+    public Comment(Long id, String userId, String content, int likeCount, boolean likedByMe) {
+        this.id = id;
+        this.userId = userId;
+        this.content = content;
+        this.likeCount = likeCount;
+        this.likedByMe = likedByMe;
+    }
 
     public void deletedAt(){
         this.content = "삭제된 댓글입니다.";  // 삭제된 댓글 내용으로 수정

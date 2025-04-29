@@ -1,4 +1,4 @@
-package redlightBack.common.Comment.Dto;
+package redlightBack.Comment.Dto;
 
 public record PageMeta(
         int totalPage,
