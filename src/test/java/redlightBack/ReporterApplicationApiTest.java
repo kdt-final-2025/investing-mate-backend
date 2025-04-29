@@ -1,0 +1,196 @@
+package redlightBack;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import redlightBack.member.memberEntity.Member;
+import redlightBack.member.memberEntity.Role;
+import redlightBack.member.MemberRepository;
+import redlightBack.reporterapplication.domain.RequestStatus;
+import redlightBack.reporterapplication.web.dto.ApplicationResponseDto;
+import redlightBack.reporterapplication.web.dto.ProcessRequestDto;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class ReporterApplicationApiTest extends AcceptanceTest {
+
+    @LocalServerPort
+    int port;
+
+    @Autowired
+    private DatabaseCleanup databaseCleanup;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    private static final String ADMIN_TOKEN =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyfQ.wgymko0W49YTPR0JoQ-AnrAoLbeF9DHn-naNDyNDfjQ";
+
+    private static final String USER_TOKEN =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiaWF0IjoxNTE2MjM5MDIyfQ.TPOV2eduDGVzivHON0GAcWSDkSRUB32bsGNlJ9giUG4";
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+        databaseCleanup.execute();
+
+        // 세팅: ADMINISTRATOR (id=1) 및 GENERAL (id=2) 멤버 생성
+        Member admin = Member.builder()
+                .userId("1")
+                .email("admin@example.com")
+                .fullname("Admin User")
+                .role(Role.ADMINISTRATOR)
+                .build();
+        Member general = Member.builder()
+                .userId("2")
+                .email("user@example.com")
+                .fullname("General User")
+                .role(Role.GENERAL)
+                .build();
+        memberRepository.save(admin);
+        memberRepository.save(general);
+    }
+
+    @DisplayName("Reporter 신청 - 성공 테스트")
+    @Test
+    public void applyReporter_success() {
+        ApplicationResponseDto response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(ApplicationResponseDto.class);
+
+        assertThat(response.userId()).isEqualTo("2");
+        assertThat(response.status()).isEqualTo(RequestStatus.PENDING);
+        assertThat(response.applicationId()).isNotNull();
+        assertThat(response.appliedAt()).isNotNull();
+    }
+
+    @DisplayName("Reporter 신청 - 중복 신청 시 Conflict")
+    @Test
+    public void applyReporter_conflict() {
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().log().all()
+                .statusCode(409);
+    }
+
+    @DisplayName("Reporter 신청 조회 - 본인")
+    @Test
+    public void getMyApplication_success() {
+        ApplicationResponseDto created = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+
+        ApplicationResponseDto response = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .get("reporter-applications/me")
+                .then().log().all()
+                .statusCode(200)
+                .extract().as(ApplicationResponseDto.class);
+
+        assertThat(response.applicationId()).isEqualTo(created.applicationId());
+        assertThat(response.userId()).isEqualTo("2");
+    }
+
+    @DisplayName("반려된 신청 재신청 테스트")
+    @Test
+    public void resubmit_afterRejection_success() {
+        // 사용자 신청
+        ApplicationResponseDto created = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+
+        // 관리자 반려 처리
+        ProcessRequestDto rejectDto = new ProcessRequestDto(
+                List.of(created.applicationId()),
+                RequestStatus.REJECTED
+        );
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .body(rejectDto)
+                .when()
+                .patch("reporter-applications/admin");
+
+        // 재신청
+        ApplicationResponseDto resubmitted = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .contentType(ContentType.JSON)
+                .when()
+                .put("reporter-applications/me")
+                .then().log().all()
+                .statusCode(200)
+                .extract().as(ApplicationResponseDto.class);
+
+        assertThat(resubmitted.status()).isEqualTo(RequestStatus.PENDING);
+        assertThat(resubmitted.appliedAt()).isAfter(created.appliedAt());
+    }
+
+    @DisplayName("관리자 - 기자 승인 시 역할 변경 검증")
+    @Test
+    public void approveReporter_changesUserRole() {
+        // 사용자 신청
+        ApplicationResponseDto created = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when()
+                .post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+
+        // 관리자 승인 처리
+        ProcessRequestDto approveDto = new ProcessRequestDto(
+                List.of(created.applicationId()),
+                RequestStatus.APPROVED
+        );
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .body(approveDto)
+                .when()
+                .patch("reporter-applications/admin")
+                .then().statusCode(200);
+
+        // DB에서 멤버 역할 확인
+        Member updated = memberRepository.findByUserId("2").orElseThrow();
+        assertThat(updated.getRole()).isEqualTo(Role.REPORTER);
+    }
+
+    @DisplayName("관리자 권한 없는 사용자의 접근 차단")
+    @Test
+    public void listByStatuses_forbiddenForGeneral() {
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .queryParam("statuses", "PENDING")
+                .when()
+                .get("reporter-applications/admin")
+                .then().log().all()
+                .statusCode(403);
+    }
+}
