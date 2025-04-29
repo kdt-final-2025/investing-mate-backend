@@ -15,6 +15,7 @@ import redlightBack.indicator.dto.FavoriteIndicatorsListResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -32,14 +33,33 @@ public class IndicatorService {
         ResponseEntity<String[]> resp = restTemplate.getForEntity(url, String[].class);
 
         if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
-            List<Indicator> indicators = Arrays.stream(resp.getBody())
-                    // name: 코드 그대로, nextReleaseDate: null (추후에 업데이트)
-                    .map(Indicator::new)
+            // 1) API에서 받은 이름 리스트
+            List<String> apiNames = Arrays.asList(resp.getBody());
+
+            if (apiNames.isEmpty()) {
+                return;
+            }
+
+            // 2) DB에서 이미 저장된 지표 이름만 한 번에 조회
+            Set<String> existingNames = indicatorRepository
+                    .findAllByNameIn(apiNames)
+                    .stream()
+                    .map(Indicator::getName)
+                    .collect(Collectors.toSet());
+
+            // 3) 기존에 없던(신규) 이름만 Indicator 객체로 매핑
+            List<Indicator> newIndicators = apiNames.stream()
+                    .filter(name -> !existingNames.contains(name))
+                    .map(Indicator::new)              // nextReleaseDate는 null로 생성
                     .collect(Collectors.toList());
 
-            indicatorRepository.saveAll(indicators);
+            // 4) 신규 지표가 있으면 한 번에 저장
+            if (!newIndicators.isEmpty()) {
+                indicatorRepository.saveAll(newIndicators);
+            }
         }
     }
+
 
     @Transactional
     public void createFavoriteIndicator(String userId, FavoriteIndicatorRequest request) {
