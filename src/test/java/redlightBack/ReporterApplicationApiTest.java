@@ -31,12 +31,15 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
     private MemberRepository memberRepository;
 
 
-    // 아래의 토큰 2개는 만료기한이 없습니다.
+    // 아래의 토큰 3개는 만료기한이 없습니다.
     private static final String ADMIN_TOKEN =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSJ9.LPHUzJyH03G6HsWFkWl6XIfiITDJ7UoL8GJCKuH1Sck";
 
     private static final String USER_TOKEN =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.ukq8HAkCNiMuABuZAnmiXX-Z2Lw8AR13aC93GJ6p_yo";
+
+    private static final String USER2_TOKEN =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.CfzDClpRqjgbwAyQJ43mG4UoZB-ZtpzXSTWqeNjwKkE";
 
     @BeforeEach
     void setUp() {
@@ -63,37 +66,51 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
     @DisplayName("관리자 - 모든 대기 및 반려 상태 조회")
     @Test
     public void listAllPendingAndRejected_asAdmin() {
-        // 1) 일반 유저 신청 (PENDING)
-        ApplicationResponseDto pending = RestAssured.given()
+        // --- (1) 두 번째 일반 사용자 추가 ---
+        Member another = Member.builder()
+                .userId("3")
+                .email("user2@example.com")
+                .fullname("General User 2")
+                .role(Role.GENERAL)
+                .build();
+        memberRepository.save(another);
+
+        // --- (2) 첫 번째 유저 신청 → 반려 (REJECTED) ---
+        ApplicationResponseDto app1 = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + USER_TOKEN)
-                .when()
-                .post("reporter-applications")
+                .header("Authorization", "Bearer " + USER_TOKEN)  // sub=“2”
+                .when().post("reporter-applications")
                 .then().extract().as(ApplicationResponseDto.class);
 
-        // 2) 반려 처리
         ProcessRequestDto rejectDto = new ProcessRequestDto(
-                List.of(pending.applicationId()), RequestStatus.REJECTED
+                List.of(app1.applicationId()), RequestStatus.REJECTED
         );
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .body(rejectDto)
-                .when()
-                .patch("reporter-applications/admin");
+                .when().patch("reporter-applications/admin");
 
-        // 3) 관리자 조회 (기본 statuses=PENDING,REJECTED)
+        // --- (3) 두 번째 유저 신청 (PENDING) ---
+        ApplicationResponseDto app2 = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER2_TOKEN)
+                .when().post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+
+        // --- (4) 전체 조회 (PENDING,REJECTED) 검증 ---
         ApplicationResponseDto[] all = RestAssured.given()
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
-                .when()
-                .get("reporter-applications/admin")
+                .when().get("reporter-applications/admin")
                 .then().statusCode(200)
                 .extract().as(ApplicationResponseDto[].class);
 
-        assertThat(all).hasSize(2);
         List<RequestStatus> statuses = Arrays.stream(all)
                 .map(ApplicationResponseDto::status)
                 .toList();
+
+        // 두 건이 리턴되고, 각각 한 건씩 PENDING·REJECTED 상태여야 함
+        assertThat(all).hasSize(2);
         assertThat(statuses).containsExactlyInAnyOrder(
                 RequestStatus.PENDING, RequestStatus.REJECTED
         );
