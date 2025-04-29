@@ -1,5 +1,6 @@
 package redlightBack.news;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -12,16 +13,12 @@ import redlightBack.news.dto.PageResponse;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@AllArgsConstructor
 @Service
 public class NewsService {
 
     private final NewsRepository newsRepository;
     private final NewsQueryRepository newsQueryRepository;
-
-    public NewsService(NewsRepository newsRepository, NewsQueryRepository newsQueryRepository) {
-        this.newsRepository = newsRepository;
-        this.newsQueryRepository = newsQueryRepository;
-    }
 
     public NewsResponse create(String userId, NewsRequest request) {
         News news = newsRepository.save(new News(

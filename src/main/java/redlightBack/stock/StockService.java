@@ -1,6 +1,7 @@
 package redlightBack.stock;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import redlightBack.stock.dto.FavoriteStockListResponse;
 import redlightBack.stock.dto.FavoriteStockRequest;
@@ -9,18 +10,13 @@ import redlightBack.stock.dto.FavoriteStockResponse;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@AllArgsConstructor
 @Service
 public class StockService {
 
     private final StockRepository stockRepository;
     private final FavoriteStockRepository favoriteStockRepository;
     private final StockQueryRepository stockQueryRepository;
-
-    public StockService(StockRepository stockRepository, FavoriteStockRepository favoriteStockRepository, StockQueryRepository stockQueryRepository) {
-        this.stockRepository = stockRepository;
-        this.favoriteStockRepository = favoriteStockRepository;
-        this.stockQueryRepository = stockQueryRepository;
-    }
 
     @Transactional
     public void createFavoriteStock(String userId, FavoriteStockRequest request) {

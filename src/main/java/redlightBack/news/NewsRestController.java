@@ -1,22 +1,17 @@
 package redlightBack.news;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.news.dto.NewsRequest;
 import redlightBack.news.dto.NewsResponse;
 import redlightBack.news.dto.PageResponse;
 
+@AllArgsConstructor
 @RestController
 public class NewsRestController {
 
     private final NewsService newsService;
-
-    public NewsRestController(NewsService newsService) {
-        this.newsService = newsService;
-    }
 
     @PostMapping("/news")
     public NewsResponse create(@LoginMemberId String userId, @RequestBody NewsRequest request) {

@@ -2,6 +2,7 @@ package redlightBack.indicator;
 
 import com.querydsl.core.types.OrderSpecifier;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -9,14 +10,12 @@ import redlightBack.indicator.dto.FavoriteIndicatorRequest;
 import redlightBack.indicator.dto.FavoriteIndicatorResponse;
 import redlightBack.indicator.dto.FavoriteIndicatorsListResponse;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-import static redlightBack.indicator.QIndicator.indicator;
-
+@AllArgsConstructor
 @Service
 public class IndicatorService {
 
@@ -24,13 +23,6 @@ public class IndicatorService {
     private final IndicatorRepository indicatorRepository;
     private final FavoriteIndicatorRepository favoriteIndicatorRepository;
     private final IndicatorQueryRepository indicatorQueryRepository;
-
-    public IndicatorService(RestTemplate restTemplate, IndicatorRepository indicatorRepository, FavoriteIndicatorRepository favoriteIndicatorRepository, IndicatorQueryRepository indicatorQueryRepository) {
-        this.restTemplate = restTemplate;
-        this.indicatorRepository = indicatorRepository;
-        this.favoriteIndicatorRepository = favoriteIndicatorRepository;
-        this.indicatorQueryRepository = indicatorQueryRepository;
-    }
 
     public void fetchAndSaveAll() {
         String url = "https://data360api.worldbank.org/data360/indicators?datasetId=WB_WDI";

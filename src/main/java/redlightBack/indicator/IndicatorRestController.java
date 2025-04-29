@@ -1,18 +1,16 @@
 package redlightBack.indicator;
 
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.indicator.dto.FavoriteIndicatorRequest;
 import redlightBack.indicator.dto.FavoriteIndicatorsListResponse;
 import redlightBack.loginUtils.LoginMemberId;
 
+@AllArgsConstructor
 @RestController
 public class IndicatorRestController {
 
     private final IndicatorService indicatorService;
-
-    public IndicatorRestController(IndicatorService indicatorService) {
-        this.indicatorService = indicatorService;
-    }
 
     @PostMapping("/indicators/favorites")
     public void createFavoriteIndicator(@LoginMemberId String userId, @RequestBody FavoriteIndicatorRequest request) {

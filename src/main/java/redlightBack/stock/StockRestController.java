@@ -1,18 +1,16 @@
 package redlightBack.stock;
 
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.stock.dto.FavoriteStockListResponse;
 import redlightBack.stock.dto.FavoriteStockRequest;
 
+@AllArgsConstructor
 @RestController
 public class StockRestController {
 
     private final StockService stockService;
-
-    public StockRestController(StockService stockService) {
-        this.stockService = stockService;
-    }
 
     @PostMapping("/stocks/favorites")
     public void createFavoriteStock(@LoginMemberId String userId, @RequestBody FavoriteStockRequest request) {

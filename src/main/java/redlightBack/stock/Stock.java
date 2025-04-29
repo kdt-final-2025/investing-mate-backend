@@ -5,7 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @Getter
 @Entity
 public class Stock {
@@ -19,9 +21,6 @@ public class Stock {
     private String code;
 
     private Long marketCap;
-
-    protected Stock() {
-    }
 
     public Stock(String name, String code) {
         this.name = name;

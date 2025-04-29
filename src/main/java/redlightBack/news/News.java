@@ -2,12 +2,14 @@ package redlightBack.news;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import redlightBack.common.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
 @Getter
 @Entity
 public class News extends BaseEntity {
@@ -32,9 +34,6 @@ public class News extends BaseEntity {
     private int viewCount = 0;
 
     private LocalDateTime deletedAt;
-
-    protected News() {
-    }
 
     public News(String title, String description, List<String> imageUrls, LocalDateTime publishedAt, String userId) {
         this.title = title;

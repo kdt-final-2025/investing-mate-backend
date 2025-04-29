@@ -2,7 +2,9 @@ package redlightBack.stock;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @Getter
 @Entity
 public class FavoriteStock {
@@ -15,9 +17,6 @@ public class FavoriteStock {
     private Stock stock;
 
     private String userId;
-
-    protected FavoriteStock() {
-    }
 
     public FavoriteStock(Stock stock, String userId) {
         this.stock = stock;

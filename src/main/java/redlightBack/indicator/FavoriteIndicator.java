@@ -2,8 +2,10 @@ package redlightBack.indicator;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import redlightBack.common.BaseEntity;
 
+@NoArgsConstructor
 @Getter
 @Entity
 public class FavoriteIndicator extends BaseEntity {
@@ -16,9 +18,6 @@ public class FavoriteIndicator extends BaseEntity {
     private Indicator indicator;
 
     private String userId;
-
-    protected FavoriteIndicator() {
-    }
 
     public FavoriteIndicator(Indicator indicator, String userId) {
         this.indicator = indicator;
