@@ -66,4 +66,14 @@ public class Post extends BaseEntity {
         }
     }
 
+    public void decreaseLikeCount(){
+        if(likeCount > 0 ) {
+            likeCount--;
+        }
+    }
+
+    public void increaseLikeCount(){
+        likeCount ++;
+    }
+
 }
