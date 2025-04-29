@@ -39,7 +39,7 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.ukq8HAkCNiMuABuZAnmiXX-Z2Lw8AR13aC93GJ6p_yo";
 
     private static final String USER2_TOKEN =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0.CfzDClpRqjgbwAyQJ43mG4UoZB-ZtpzXSTWqeNjwKkE";
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ1c2VyMkBleGFtcGxlLmNvbSJ9.ApaAmIFDU4QOEf6WcXlQKhMxcJo8BMCK399QDGlu96o";
 
     @BeforeEach
     void setUp() {
