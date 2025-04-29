@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface ReporterApplicationRepository
         extends JpaRepository<ReporterApplication, Long> {
 
-    List<ReporterApplication> findByStatus(RequestStatus status);
+    List<ReporterApplication> findByStatusIn(List<RequestStatus> statuses);
     Optional<ReporterApplication> findByMember_UserId(String userId);
 }

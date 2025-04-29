@@ -49,28 +49,39 @@ public class ReporterApplicationService {
         return ReporterApplicationMapper.toDto(saved);
     }
 
-    // 관리자 전용: 상태별 조회
+    // 관리자 전용: 다중 상태 조회
     @Transactional(readOnly = true)
-    public List<ApplicationResponseDto> listByStatus(RequestStatus status) {
-        return reporterApplicationRepository.findByStatus(status).stream()
+    public List<ApplicationResponseDto> listByStatuses(List<RequestStatus> statuses) {
+        return reporterApplicationRepository.findByStatusIn(statuses).stream()
                 .map(ReporterApplicationMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    // 관리자 전용: 승인 또는 반려 처리
+    // 관리자 전용: 다중 승인/반려 처리
     @Transactional
-    public ApplicationResponseDto process(Long id, ProcessRequestDto dto) {
-        ReporterApplication app = reporterApplicationRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "신청 내역이 없습니다: " + id));
+    public List<ApplicationResponseDto> process(List<Long> ids, RequestStatus action) {
+        return ids.stream()
+                .map(id -> {
+                    ReporterApplication app = reporterApplicationRepository.findById(id)
+                            .orElseThrow(() -> new ResponseStatusException(
+                                    HttpStatus.NOT_FOUND,
+                                    "신청 내역이 없습니다: " + id
+                            ));
 
-        if ("APPROVE".equalsIgnoreCase(dto.action())) {
-            app.approve();
-        } else {
-            app.reject();
-        }
-        // dirty checking → 자동 저장
-        return ReporterApplicationMapper.toDto(app);
+                    if (action == RequestStatus.APPROVED) {
+                        app.approve();
+                    } else if (action == RequestStatus.REJECTED) {
+                        app.reject();
+                    } else {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "action은 APPROVED 또는 REJECTED만 가능합니다"
+                        );
+                    }
+
+                    return ReporterApplicationMapper.toDto(app);
+                })
+                .collect(Collectors.toList());
     }
 
     // 관리자 권한 확인

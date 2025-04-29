@@ -25,24 +25,23 @@ public class ReporterApplicationController {
         return service.apply(userId);
     }
 
-    // 2) 관리자 → 대기 목록 조회
+    // 2) 관리자 → 다중 대기&반려 목록 조회
     @GetMapping("/admin")
-    public List<ApplicationResponseDto> listByStatus(
+    public List<ApplicationResponseDto> listByStatuses(
             @LoginMemberId String userId,
-            @RequestParam(defaultValue = "PENDING") RequestStatus status
+            @RequestParam(defaultValue = "PENDING,REJECTED") List<RequestStatus> statuses
     ) {
         service.authorizeAdmin(userId);
-        return service.listByStatus(status);
+        return service.listByStatuses(statuses);
     }
 
-    // 3) 관리자 → 승인/반려 처리
-    @PatchMapping("/admin/{id}")
-    public ApplicationResponseDto process(
+    // 3) 관리자 → 다중 승인/반려 처리
+    @PatchMapping("/admin")
+    public List<ApplicationResponseDto> process(
             @LoginMemberId String userId,
-            @PathVariable Long id,
-            @RequestBody ProcessRequestDto dto
+            @RequestBody ProcessRequestDto processRequestDto
     ) {
         service.authorizeAdmin(userId);
-        return service.process(id, dto);
+        return service.process(processRequestDto.ids(), processRequestDto.action());
     }
 }
