@@ -1,4 +1,11 @@
 package redlightBack.reporterapplication.web.dto;
 
-// action: "APPROVE" 또는 "REJECT"
-public record ProcessRequestDto(String action) { }
+import redlightBack.reporterapplication.domain.RequestStatus;
+
+import java.util.List;
+
+public record ProcessRequestDto(
+        List<Long> ids,
+        RequestStatus action // APPROVED 또는 REJECTED
+) {
+}

@@ -10,4 +10,5 @@ public record ApplicationResponseDto(
         RequestStatus status,
         LocalDateTime appliedAt,
         LocalDateTime processedAt
-) { }
+) {
+}
