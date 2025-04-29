@@ -1,7 +1,7 @@
-package redlightBack.common.Comment;
+package redlightBack.Comment;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import redlightBack.common.Comment.Domain.CommentLike;
+import redlightBack.Comment.Domain.CommentLike;
 
 import java.util.Optional;
 
