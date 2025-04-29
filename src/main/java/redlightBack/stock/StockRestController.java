@@ -19,6 +19,11 @@ public class StockRestController {
         stockService.createFavoriteStock(userId, request);
     }
 
+    @DeleteMapping("/stocks/favorites")
+    public void deleteFavoriteStock(@LoginMemberId String userId, @Valid @RequestBody FavoriteStockRequest request) {
+        stockService.deleteFavoriteStock(userId, request);
+    }
+
     @GetMapping("/stocks/favorites")
     public FavoriteStockListResponse getAll(@LoginMemberId String userId,
                                             @RequestParam(required = false, defaultValue = "0") int page,
