@@ -131,7 +131,7 @@ public class PostService {
     }
 
     //사용자가 좋아요 누른 게시글 목록 보기
-    public LikedPostListAndPagingResponse likedPostList (String userId, Pageable pageable){
+    public PostsLikedAndPagingResponse likedPostList (String userId, Pageable pageable){
 
         Member member = memberRepository.findByUserId(userId).orElseThrow(
                 () -> new NoSuchElementException("유효하지 않은 사용자입니다.")
