@@ -47,7 +47,7 @@ public class Comment extends BaseEntity {
 
     }
 
-    public Comment(Long id) {
+    public Comment(Long id, String userA, String 부모, int i, boolean b, LocalDateTime now, Object o) {
         this.id = id;
     }
 

@@ -27,6 +27,8 @@ public class BoardApiTest extends AcceptanceTest {
     @Autowired
     DatabaseCleanup databaseCleanup;
 
+
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
@@ -394,10 +396,25 @@ public class BoardApiTest extends AcceptanceTest {
                 .post("/comments")
                 .then().log().all()
                 .statusCode(200);
+
+        CreateCommentRequest childCommentRequest2 = new CreateCommentRequest(
+                postId,
+                parentComment.commentId(),
+                "이것은 대댓글입니다2."
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .body(childCommentRequest2)
+                .when()
+                .post("/comments")
+                .then().log().all()
+                .statusCode(200);
     }
 
     @Test
-    public void 조회테스트(){
+    public void 조회테스트() {
         // 1. 게시판 생성
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
@@ -413,7 +430,7 @@ public class BoardApiTest extends AcceptanceTest {
         CreateCommentRequest commentRequest = new CreateCommentRequest(
                 postId,
                 null,
-                "This is a test comment."
+                "테스트 댓글"
         );
 
         CommentResponse parentComment = createComment(commentRequest);
@@ -426,11 +443,37 @@ public class BoardApiTest extends AcceptanceTest {
 
         createComment(childCommentRequest);
 
-//        RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .
+        CreateCommentRequest childCommentRequest2 = new CreateCommentRequest(
+                postId,
+                parentComment.commentId(),
+                "이것은 대댓글입니다2."
+        );
 
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .body(childCommentRequest2)
+                .when()
+                .post("/comments")
+                .then().log().all()
+                .statusCode(200);
+
+        // 5. 댓글 조회 API 호출 및 검증
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .queryParam("postId", 1L)
+                .queryParam("size", 150)        // 생략 가능 (기본값)
+                .queryParam("pageNumber", 1)
+                .when()
+                .get("/comments")
+                .then().log().all()  // 실제 응답 출력
+                .statusCode(200);
     }
+
+    @Test
+    public void 댓글_수정_테스트(){}
+
+
 
     public BoardResponse createBoard(String boardName){
 

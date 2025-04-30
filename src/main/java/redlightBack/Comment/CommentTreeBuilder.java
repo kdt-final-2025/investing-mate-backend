@@ -32,15 +32,18 @@ public class CommentTreeBuilder {
 
         // 2차로 부모-자식 연결
         for (Comment comment : flatComments) {
-            Long parentId = comment.getParent().getId();
-            CommentResponse child = commentMap.get(comment.getId());
+            Long commentId = comment.getId();
+            CommentResponse child = commentMap.get(commentId);
 
-            if (parentId == null) {
+            if (comment.getParent() == null) {
                 roots.add(child); // 최상위 댓글
             } else {
-                CommentResponse parent = commentMap.get(parentId);
-                if (parent != null) {
-                    parent.children().add(child);  // 자식 추가
+                Long parentId = comment.getParent().getId();
+                if (!commentId.equals(parentId)) {
+                   CommentResponse parent = commentMap.get(parentId);
+                   if(parent != null){
+                       parent.children().add(child);// 자식 추가
+                   }
                 }
             }
         }
@@ -48,3 +51,4 @@ public class CommentTreeBuilder {
         return roots;
     }
 }
+
