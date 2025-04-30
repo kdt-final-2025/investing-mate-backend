@@ -65,13 +65,14 @@ public class CommentController {
     //댓글+대댓글 조회(좋아요순)
     @GetMapping("/comments/likes")
     public CommentResponseAndPaging getCommentTreeByLikeCount(@RequestParam Long postId,
-                                                              @RequestParam(defaultValue = "time") String sort,
+                                                              @RequestParam(defaultValue = "time") SortType sortType,
                                                    @RequestParam(defaultValue = "1") int size,
                                                    @RequestParam(defaultValue = "150") int pageNumber ){
 
         Pageable pageable = PageRequest.of(pageNumber -1, size);
 
-        return commentService.getCommentTreeByLikeCount(postId, pageable,sort);
+
+        return commentService.getCommentTreeByLikeCount(postId, pageable,sortType);
     }
 
 

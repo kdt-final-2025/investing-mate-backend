@@ -145,28 +145,29 @@ public class CommentService {
     }
     //좋아요 순 조회
     @Transactional
-    public CommentResponseAndPaging getCommentTreeByLikeCount(Long postId, Pageable pageable, String sortType) {
+    public CommentResponseAndPaging getCommentTreeByLikeCount(Long postId, Pageable pageable, SortType sortType) {
         List<CommentResponse> comments;
 
-        if ("like".equals(sortType)) {
-            comments = likeCountRepository.findCommentsSortedByLikes(postId, pageable);  // 아래 참고
-        } else {
-            Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
-            comments = commentTreeBuilder.build(commentPage.getContent());
+        if (sortType == SortType.LIKE) {
+            comments = likeCountRepository.findCommentsSortedByLikes(postId, pageable);
 
             PageMeta pageMeta = new PageMeta(
-                    commentPage.getTotalPages(),
-                    commentPage.getTotalElements(),
+                    1,
+                    (long) comments.size(),
                     pageable.getPageNumber(),
                     pageable.getPageSize()
             );
+
             return new CommentResponseAndPaging(comments, pageMeta);
         }
 
-        // 좋아요 순일 때는 페이징 수동 처리
+        // 기본 시간순 정렬
+        Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
+        comments = commentTreeBuilder.build(commentPage.getContent());
+
         PageMeta pageMeta = new PageMeta(
-                /* totalPages = */ 1,
-                /* totalElements = */ (long) comments.size(),
+                commentPage.getTotalPages(),
+                commentPage.getTotalElements(),
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
