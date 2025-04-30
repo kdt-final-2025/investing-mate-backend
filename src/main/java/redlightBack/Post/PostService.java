@@ -109,16 +109,16 @@ public class PostService {
         long totalElements = postQueryRepository.countPosts(boardId, postTitle, userId);
         int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
 
-        List<Post> posts = postQueryRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, offset, size);
+        List<PostDto> posts = postQueryRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, offset, size);
 
         List<PostListResponse> responseList = posts.stream()
-                .map(list -> new PostListResponse(list.getId(),
-                        list.getPostTitle(),
-                        list.getUserId(),
-                        list.getViewCount(),
-                        list.getCommentCount(),
-                        list.getLikeCount(),
-                        list.getCreatedAt())
+                .map(list -> new PostListResponse(list.id(),
+                        list.postTitle(),
+                        list.userId(),
+                        list.viewCount(),
+                        list.commentCount(),
+                        list.likeCount(),
+                        list.createdAt())
                 ).toList();
 
         PageInfo pageInfo = new PageInfo(pageable.getPageNumber() + 1,
