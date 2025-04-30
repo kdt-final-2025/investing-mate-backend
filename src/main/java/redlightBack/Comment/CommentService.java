@@ -23,6 +23,7 @@ public class CommentService {
     public final CommentLikeRepository commentLikeRepository;
     public final  PostRepository postRepository;
     public final CommentTreeBuilder commentTreeBuilder;
+    public final LikeCountRepository likeCountRepository;
 
 
 
@@ -56,31 +57,6 @@ public class CommentService {
                 List.of());
     }
 
-
-//    //댓글 조회 및 페이징
-//    public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable) {
-//        Page<Comment> commentPage = commentRepository.findByAllPostId(postId, pageable);  // 댓글 + 대댓글 다 조회
-//
-//        List<CommentResponse> comments = commentPage.getContent().stream()
-//                .map(comment -> new CommentResponse(
-//                        comment.getId(),
-//                        comment.getUserId(),
-//                        comment.getContent(),
-//                        comment.getLikeCount(),
-//                        comment.isLikedByMe(),
-//                        comment.getCreatedAt(),
-//                        List.of()
-//                ))
-//                .collect(Collectors.toList());
-//
-//        PageMeta pageMeta = new PageMeta(
-//                commentPage.getTotalPages(),
-//                commentPage.getTotalElements(),
-//                pageable.getPageNumber(),
-//                pageable.getPageNumber());
-//
-//        return new CommentResponseAndPaging(comments, pageMeta);
-//    }
 
 
     //댓글 조회 및 페이징 및 트리구조
@@ -166,6 +142,36 @@ public class CommentService {
                 comment.getLikeCount(),
                 nowLiked
         );
+    }
+    //좋아요 순 조회
+    @Transactional
+    public CommentResponseAndPaging getCommentTreeByLikeCount(Long postId, Pageable pageable, String sortType) {
+        List<CommentResponse> comments;
+
+        if ("like".equals(sortType)) {
+            comments = likeCountRepository.findCommentsSortedByLikes(postId, pageable);  // 아래 참고
+        } else {
+            Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
+            comments = commentTreeBuilder.build(commentPage.getContent());
+
+            PageMeta pageMeta = new PageMeta(
+                    commentPage.getTotalPages(),
+                    commentPage.getTotalElements(),
+                    pageable.getPageNumber(),
+                    pageable.getPageSize()
+            );
+            return new CommentResponseAndPaging(comments, pageMeta);
+        }
+
+        // 좋아요 순일 때는 페이징 수동 처리
+        PageMeta pageMeta = new PageMeta(
+                /* totalPages = */ 1,
+                /* totalElements = */ (long) comments.size(),
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
+
+        return new CommentResponseAndPaging(comments, pageMeta);
     }
 }
 

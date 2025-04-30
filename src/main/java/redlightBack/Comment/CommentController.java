@@ -61,4 +61,18 @@ public class CommentController {
         return  commentService.toggleLikeComment(userId,commentId);
 
     }
+
+    //댓글+대댓글 조회(좋아요순)
+    @GetMapping("/comments/likes")
+    public CommentResponseAndPaging getCommentTreeByLikeCount(@RequestParam Long postId,
+                                                              @RequestParam(defaultValue = "time") String sort,
+                                                   @RequestParam(defaultValue = "1") int size,
+                                                   @RequestParam(defaultValue = "150") int pageNumber ){
+
+        Pageable pageable = PageRequest.of(pageNumber -1, size);
+
+        return commentService.getCommentTreeByLikeCount(postId, pageable,sort);
+    }
+
+
 }
