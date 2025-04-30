@@ -12,6 +12,7 @@ import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Post.Dto.*;
 import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
+import redlightBack.member.memberEntity.Member;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class BoardApiTest extends AcceptanceTest {
 
         //테스트용 토큰
         String token = generateTestTokens("user1");
+        createMember("user1");
 
         BoardResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -58,7 +60,11 @@ public class BoardApiTest extends AcceptanceTest {
     @Test
     public void 게시판_목록_조회_테스트(){
 
-        BoardResponse board1 = createBoard("자유게시판");
+        createMember("user1");
+        createMember("user3");
+
+        BoardResponse board = createBoard("자유게시판");
+        Long boardId = board.id();
         BoardResponse board2 = createBoard("공지게시판");
         BoardResponse board3 = createBoard("주식게시판");
 
@@ -86,6 +92,8 @@ public class BoardApiTest extends AcceptanceTest {
     @Test
     public void 게시글_생성_테스트(){
 
+        createMember("user1");
+
         String token = generateTestTokens("user1");
         BoardResponse testBoard = createBoard("자유게시판");
         Long boardId = testBoard.id();
@@ -112,6 +120,8 @@ public class BoardApiTest extends AcceptanceTest {
     @Test
     public void 게시물_조회_테스트 (){
 
+        createMember("user1");
+
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -136,6 +146,9 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("게시물 수정 테스트")
     @Test
     public void 게시물_수정_테스트 (){
+
+        createMember("user1");
+
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -164,6 +177,9 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("게시물 삭제 테스트")
     @Test
     public void 게시물_삭제_테스트 (){
+
+        createMember("user1");
+
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -189,6 +205,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("게시물 목록 조회 테스트")
     @Test
     public void 게시물_목록_조회_테스트 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -221,6 +239,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("게시물 검색 테스트")
     @Test
     public void 게시물_검색_테스트 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -253,6 +273,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("게시물 정렬 테스트")
     @Test
     public void 게시물_정렬_테스트_내림차순 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -286,6 +308,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("게시물 정렬 테스트")
     @Test
     public void 게시물_정렬_테스트_오름차순 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -319,6 +343,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("좋아요 테스트")
     @Test
     public void 좋아요_테스트 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -344,6 +370,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("좋아요 취소 테스트")
     @Test
     public void 좋아요_취소_테스트 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -361,6 +389,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("여러 사용자의 좋아요 테스트")
     @Test
     public void 여러_사용자의_좋아요_테스트 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -383,6 +413,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("여러 사용자의 좋아요 테스트2")
     @Test
     public void 여러_사용자의_좋아요_테스트2 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -411,6 +443,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("좋아요순으로 목록 조회 테스트")
     @Test
     public void 좋아요순으로_목록_조회_테스트 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -473,6 +507,8 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("좋아요순 오래된 게시물 순서로 목록 조회")
     @Test
     public void 좋아요와_오래된_게시물_순서로_목록_조회 (){
+
+        createMember("user1");
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -537,6 +573,11 @@ public class BoardApiTest extends AcceptanceTest {
     @DisplayName("사용자가 좋아요 누른 게시글 목록 보기")
     @Test
     public void 사용자가_좋아요_누른_게시글_목록_보기 (){
+
+        createMember("user1");
+
+        String token = generateTestTokens("user6");
+        createMember("user6");
 
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
@@ -651,6 +692,21 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(PostLikeResponse.class);
     }
 
+    public Member createMember (String userId){
+
+        String token = generateTestTokens(userId);
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .post("member/me")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(Member.class);
+    }
+
 
 
     public String generateTestToken(){
@@ -658,12 +714,12 @@ public class BoardApiTest extends AcceptanceTest {
     }
 
     private Map<String, String> tokens = Map.of(
-            "user1", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U",
-            "user2", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMzQ1Njc4OTAxIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNzQ1ODM5MjAwLCJleHAiOjE3NzczNzUyMDB9.w7PfX7l9nZnK4VX2vAWoWE93_PXQpoYGlURuDzWjd_M",
-            "user3", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDU2Nzg5MDEyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNzQ1ODM5MjAwLCJleHAiOjE3NzczNzUyMDB9.ciysHp4jkmva9rXmhQ_E99Uw-3dGfMhsWblTwEzmVpQ",
-            "user4", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTY3ODkwMTIzIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNzQ1ODM5MjAwLCJleHAiOjE3NzczNzUyMDB9.SQgt9bGWKm7x72RiyzbcrWVZNek5KTkQ48gXnNF7k74",
-            "user5", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1Njc4OTAxMjM0IiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNzQ1ODM5MjAwLCJleHAiOjE3NzczNzUyMDB9.HRAWZGvX_iETUKrd9FWBuP_3OE3k6Iiey4_naENWbsw",
-            "user6", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Nzg5MDEyMzQ1IiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNzQ1ODM5MjAwLCJleHAiOjE3NzczNzUyMDB9.hnn1LeD1f9pZ8KWMqlPkUmugJmcwSzjEtfP--ht9Fn0"
+            "user1", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJleGFtcGxlMUBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.47l3xzbylBcWghRGY2gR9jUsy_gUa4s1wUJLduzvo7Y",
+            "user2", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMzQ1Njc4OTAxIiwiZW1haWwiOiJleGFtcGxlMkBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.Fr2sLUf7mxbk9vcd0_LzmgCd3MLVNN21FWJamtTkI6U",
+            "user3", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDU2Nzg5MDEyIiwiZW1haWwiOiJleGFtcGxlM0BlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.TbTxngE22J8J-dBpgGRLY9wxeuK0h9fmQtY78wPqb5s",
+            "user4", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTY3ODkwMTIzIiwiZW1haWwiOiJleGFtcGxlNEBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.kuPJaoaDpyKbIRGS9auIZAYXTho05VYndZr59D2gE9I",
+            "user5", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1Njc4OTAxMjM0IiwiZW1haWwiOiJleGFtcGxlNUBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.ZJd5fvaFO_wYVr17bWmCuYZbYJZWRmDR8k_XeC9Olp0",
+            "user6", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Nzg5MDEyMzQ1IiwiZW1haWwiOiJleGFtcGxlNkBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.OGQpY8Zri7UWugvOiohjCXdHg14MLn07N1vadRo-tfQ"
     );
 
     public String generateTestTokens(String userId){
