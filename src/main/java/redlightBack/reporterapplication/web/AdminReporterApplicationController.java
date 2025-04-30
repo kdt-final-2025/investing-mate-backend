@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/reporter-applications")
+@RequestMapping("/admin/console/reporter-applications")
 public class AdminReporterApplicationController {
 
     private final ReporterApplicationService service;
