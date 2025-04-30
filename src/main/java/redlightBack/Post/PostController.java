@@ -25,11 +25,13 @@ public class PostController {
         return postService.create(userId, request);
     }
 
+    //게시물 상세보기
     @GetMapping("/posts/{postId}")
     public PostResponse getPost (@PathVariable Long postId){
         return postService.getDetailPost(postId);
     }
 
+    //게시물 수정
     @PutMapping("posts/{postId}")
     public PostResponse updatePost (@LoginMemberId String userId,
                                     @PathVariable Long postId,
@@ -37,6 +39,7 @@ public class PostController {
         return postService.update(userId, postId, request);
     }
 
+    //게시물 삭제
     @DeleteMapping("posts/{postId}")
     public DeletePostResponse deletePost (@LoginMemberId String userId,
                                           @PathVariable Long postId){
@@ -44,6 +47,7 @@ public class PostController {
         return postService.delete(userId, postId);
     }
 
+    //게시물 목록보기
     @GetMapping("/posts")
     public PostListAndPagingResponse getPostList (
             @RequestParam Long boardId,
@@ -70,9 +74,9 @@ public class PostController {
 
     //좋아요 한 목록 보기
     @GetMapping("/boards/liked")
-    public LikedPostListAndPagingResponse getLikedPostList (@LoginMemberId String userId,
-                                                            @RequestParam (defaultValue = "1") int pageNumber,
-                                                            @RequestParam (defaultValue = "10") int size){
+    public PostsLikedAndPagingResponse getLikedPostList (@LoginMemberId String userId,
+                                                         @RequestParam (defaultValue = "1") int pageNumber,
+                                                         @RequestParam (defaultValue = "10") int size){
 
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
 

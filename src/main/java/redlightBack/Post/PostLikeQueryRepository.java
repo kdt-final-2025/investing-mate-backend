@@ -1,14 +1,13 @@
 package redlightBack.Post;
 
-import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import redlightBack.Board.QBoard;
-import redlightBack.Post.Dto.LikedPostListResponse;
+import redlightBack.Post.Dto.PostLikeDto;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository

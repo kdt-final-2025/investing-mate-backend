@@ -68,6 +68,16 @@ public class BoardApiTest extends AcceptanceTest {
         BoardResponse board2 = createBoard("공지게시판");
         BoardResponse board3 = createBoard("주식게시판");
 
+        PostResponse post1 = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        PostResponse post2 = createPost(new CreatePostRequest(boardId, "제목2", "내용2", List.of("img1", "img2", "img3")));
+        PostResponse post3 = createPost(new CreatePostRequest(boardId, "제목3", "내용3", List.of("img1", "img2", "img3")));
+        PostResponse post4 = createPost(new CreatePostRequest(boardId, "제목4", "내용4", List.of("img1", "img2", "img3")));
+        PostResponse post5 = createPost(new CreatePostRequest(boardId, "제목5", "내용5", List.of("img1", "img2", "img3")));
+        PostResponse post6 = createPost(new CreatePostRequest(boardId, "제목6", "내용6", List.of("img1", "img2", "img3")));
+        PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
+        PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
+
+
 
         List<BoardResponse> boards = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -599,9 +609,9 @@ public class BoardApiTest extends AcceptanceTest {
         toggleLike(postId2, generateTestTokens("user6"));
         toggleLike(postId3, generateTestTokens("user6"));
 
-        String token = generateTestTokens("user6");
 
-        LikedPostListAndPagingResponse likedPosts = RestAssured.given().log().all()
+
+        PostsLikedAndPagingResponse likedPosts = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
                 .when()
@@ -609,9 +619,9 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200)
                 .extract()
-                .as(LikedPostListAndPagingResponse.class);
+                .as(PostsLikedAndPagingResponse.class);
 
-        List<LikedPostListResponse> responses = likedPosts.likedPosts();
+        List<PostsLikedResponse> responses = likedPosts.likedPosts();
 
         assertThat(responses.size()).isEqualTo(3);
         assertThat(responses.get(0).postTitle()).isEqualTo("제목8");
