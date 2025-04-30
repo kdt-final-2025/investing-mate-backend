@@ -44,7 +44,7 @@ public class Post extends BaseEntity {
     private boolean likedByMe = false;
 
     @Column(nullable = false)
-    private int likeCount = 0;
+    private long likeCount = 0;
 
     @OneToMany(mappedBy = "post")
     private List<PostLike> postLikes;

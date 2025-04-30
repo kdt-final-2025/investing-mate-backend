@@ -12,7 +12,7 @@ public record PostResponse(Long boardId,
                            List<String> imageUrls,
                            LocalDateTime createdAt,
                            LocalDateTime updatedAt,
-                           int likeCount,
+                           long likeCount,
                            boolean likedByMe,
                            int commentCount) {
 }

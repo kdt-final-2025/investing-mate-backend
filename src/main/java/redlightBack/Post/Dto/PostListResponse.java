@@ -7,6 +7,6 @@ public record PostListResponse (Long id,
                                 String userId,
                                 int viewCount,
                                 int commentCount,
-                                int likeCount,
+                                long likeCount,
                                 LocalDateTime createdAt){
 }
