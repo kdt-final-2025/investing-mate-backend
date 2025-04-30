@@ -10,6 +10,7 @@ import redlightBack.Post.Dto.*;
 import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
 import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Member;
 
 
 import java.util.List;
@@ -57,7 +58,9 @@ public class PostService {
     @Transactional
     public PostResponse update (String userId, Long postId, CreatePostRequest request){
 
-        //TODO 작성자 검증 추가
+        memberRepository.findByUserId(userId).orElseThrow(
+                () -> new NoSuchElementException("게시물 수정은 작성자만 할 수 있습니다.")
+        );
 
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
@@ -74,7 +77,9 @@ public class PostService {
     @Transactional
     public DeletePostResponse delete (String userId, Long postId){
 
-        //TODO 작성자 확인 로직
+        memberRepository.findByUserId(userId).orElseThrow(
+                () -> new NoSuchElementException("게시물 삭제는 작성자만 할 수 있습니다.")
+        );
 
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
@@ -128,10 +133,9 @@ public class PostService {
     //사용자가 좋아요 누른 게시글 목록 보기
     public LikedPostListAndPagingResponse likedPostList (String userId, Pageable pageable){
 
-        //TODO 사용자 검증 로직 넣으니까 외부 로그인 때문에 테스트시 모킹이 필요하다고 하는데 어떻게 해야하나요???😭
-//        Member member = memberRepository.findByUserId(userId).orElseThrow(
-//                () -> new NoSuchElementException("유효하지 않은 사용자입니다.")
-//        );
+        Member member = memberRepository.findByUserId(userId).orElseThrow(
+                () -> new NoSuchElementException("유효하지 않은 사용자입니다.")
+        );
 
         int pageNumber = pageable.getPageNumber();
         int size = pageable.getPageSize();

@@ -17,9 +17,12 @@ public class BoardService {
     private final MemberRepository memberRepository;
 
     //게시판 생성
-    //TODO 관리자 권한 추가 필요
     public BoardResponse create (String userId, CreateBoardRequest request){
         Board board = new Board(request.boardName());
+
+        memberRepository.findByUserId(userId).orElseThrow(
+                () -> new AccessDeniedException("접근 권한이 없습니다.")
+        );
 
         boardRepository.save(board);
 
