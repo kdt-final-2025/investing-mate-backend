@@ -19,7 +19,7 @@ public class PostLike {
     private String userId;
 
     @Setter
-    private boolean liked = false;
+    private boolean liked;
 
     public PostLike(Post post, String userId) {
         this.post = post;

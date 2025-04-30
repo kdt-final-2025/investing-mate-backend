@@ -46,6 +46,7 @@ public class PostLikeQueryRepository {
                 .from(qPostLike)
                 .join(qPostLike.post, qPost)
                 .where(qPostLike.userId.eq(userId),
+                        qPostLike.liked.isTrue(),
                         qPost.deletedAt.isNull())
                 .fetchOne();
 
