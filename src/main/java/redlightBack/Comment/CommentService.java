@@ -126,10 +126,10 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException("댓글을 찾을 수 없습니다. commentId: " + commentId));
 
-        if (!comment.getUserId().equals(userId)) {
+        if (comment.getUserId() == null || !comment.getUserId().equals(userId)) {
             throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
-
         }
+
         comment.setContent(request.content());
     }
 
@@ -152,7 +152,7 @@ public class CommentService {
             nowLiked = false;
         } else {
             // 좋아요가 눌려있지 않으면 → 좋아요 추가
-            commentLikeRepository.save(new CommentLike(commentId, userId));
+            commentLikeRepository.save(new CommentLike(comment, userId));
             comment.incrementLikeCount(); // 좋아요 수 증가
             nowLiked = true;
         }

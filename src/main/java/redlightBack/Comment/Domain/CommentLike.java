@@ -24,7 +24,8 @@ public class CommentLike extends BaseEntity {
     @JoinColumn(nullable = false)
     private  Comment comment;
 
-    public CommentLike(Long commentId, String userId) {
-
+    public CommentLike(Comment comment, String userId) {
+        this.userId = userId;
+        this.comment = comment;
     }
 }

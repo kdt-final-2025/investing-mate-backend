@@ -471,8 +471,121 @@ public class BoardApiTest extends AcceptanceTest {
     }
 
     @Test
-    public void 댓글_수정_테스트(){}
+    public void 댓글_수정_테스트(){
+        BoardResponse board = createBoard("게시판이름");
+        Long boardId = board.id();
 
+        // 2. 게시글 생성
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
+
+        // 3. JWT 토큰 준비
+        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+        // 4. 일반 댓글 작성
+        CommentResponse parentComment = createComment(new CreateCommentRequest(postId, null, "부모 댓글"));
+
+        // 5. 대댓글 작성 및 ID 저장
+        CommentResponse createdComment = createComment(new CreateCommentRequest(postId, parentComment.commentId(), "이것은 대댓글입니다2."));
+        System.out.println("Created comment ID = " + createdComment.commentId());
+
+        // 6. 대댓글 수정 요청
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .body(new CreateCommentRequest(postId, parentComment.commentId(), "수정된 내용"))
+                .pathParam("commentId", createdComment.commentId())  // 이름 일치
+                .when()
+                .put("/comments/{commentId}")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    public void 댓글_삭제_테스트(){
+        BoardResponse board = createBoard("게시판이름");
+        Long boardId = board.id();
+
+        // 2. 게시글 생성
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
+
+        // 3. JWT 토큰 준비
+        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+        // 4. 일반 댓글 작성
+        CommentResponse parentComment = createComment(new CreateCommentRequest(postId, null, "부모 댓글"));
+
+        // 5. 대댓글 작성 및 ID 저장
+        CommentResponse createdComment = createComment(new CreateCommentRequest(postId, parentComment.commentId(), "이것은 대댓글입니다2."));
+        System.out.println("Created comment ID = " + createdComment.commentId());
+
+        // 6. 대댓글 삭제 요청
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .pathParam("commentId", parentComment.commentId())  // 이름 일치
+                .when()
+                .delete("/{commentId}")
+                .then().log().all()
+                .statusCode(200);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .pathParam("commentId", createdComment.commentId())  // 이름 일치
+                .when()
+                .delete("/{commentId}")
+                .then().log().all()
+                .statusCode(200);
+
+        // 5. 댓글 조회 API 호출 및 검증
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .queryParam("postId", 1L)
+                .queryParam("size", 150)        // 생략 가능 (기본값)
+                .queryParam("pageNumber", 1)
+                .when()
+                .get("/comments")
+                .then().log().all()  // 실제 응답 출력
+                .statusCode(200);
+    }
+
+
+
+    @Test
+    public void 좋아요_테스트() {
+        BoardResponse board = createBoard("게시판이름");
+        Long boardId = board.id();
+
+        // 2. 게시글 생성
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
+
+        // 3. JWT 토큰 준비
+        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
+
+        // 4. 일반 댓글 작성
+        CommentResponse parentComment = createComment(new CreateCommentRequest(postId, null, "부모 댓글"));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .pathParam("commentId", parentComment.commentId())  // 이름 일치
+                .when()
+                .post("/comments/{commentId}/likes")
+                .then().log().all()
+                .statusCode(200);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .pathParam("commentId", parentComment.commentId())  // 이름 일치
+                .when()
+                .post("/comments/{commentId}/likes")
+                .then().log().all()
+                .statusCode(200);
+    }
 
 
     public BoardResponse createBoard(String boardName){

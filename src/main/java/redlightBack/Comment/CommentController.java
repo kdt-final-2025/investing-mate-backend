@@ -39,7 +39,7 @@ public class CommentController {
 
 
     //댓글 수정 로그인 유저만
-    @PutMapping()
+    @PutMapping("/comments/{commentId}")
     public void updateComment(@LoginMemberId String userId,
                               @PathVariable Long commentId,
                               @RequestBody CreateCommentRequest request) throws AccessDeniedException {
@@ -56,7 +56,7 @@ public class CommentController {
 
 
     //좋아요 버튼
-    @PostMapping()
+    @PostMapping("/comments/{commentId}/likes")
     public CommentLikeResponse toggleLike(@LoginMemberId String userId,@PathVariable Long commentId){
         return  commentService.toggleLikeComment(userId,commentId);
 
