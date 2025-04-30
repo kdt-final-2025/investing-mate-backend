@@ -15,6 +15,7 @@ public class PostLike {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
     private String userId;
 

@@ -46,7 +46,7 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private long likeCount = 0;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<PostLike> postLikes;
 
     @Setter
