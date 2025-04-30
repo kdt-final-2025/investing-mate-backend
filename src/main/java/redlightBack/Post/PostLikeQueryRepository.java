@@ -19,14 +19,17 @@ public class PostLikeQueryRepository {
     private final QPost qPost = QPost.post;
     private final QBoard qBoard = QBoard.board;
 
+    public List<PostLikeDto> findPostsLikedByUser (String userId, Long offset, int size){
 
-    public PostLikeQueryRepository(JPAQueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
-    }
-
-    public List<LikedPostListResponse> postListLikedByUser (String userId, Long offset, int size){
-
-        List<Tuple> tupleList = queryFactory.select(qPost.id, qPost.postTitle, qPost.createdAt, qBoard.id, qBoard.boardName)
+        return queryFactory.select(Projections.constructor(PostLikeDto.class,
+                        qBoard.id,
+                        qBoard.boardName,
+                        qPost.postTitle,
+                        qPostLike.userId,
+                        qPost.viewCount,
+                        qPost.commentCount,
+                        qPost.likeCount,
+                        qPost.createdAt))
                 .from(qPostLike)
                 .join(qPostLike.post, qPost)
                 .join(qBoard).on(qPost.boardId.eq(qBoard.id))
@@ -36,17 +39,6 @@ public class PostLikeQueryRepository {
                 .offset(offset)
                 .limit(size)
                 .fetch();
-
-        return tupleList.stream().map(list -> new LikedPostListResponse(
-                list.get(qPost.boardId),
-                list.get(qBoard.boardName),
-                list.get(qPost.postTitle),
-                list.get(qPost.userId),
-                Optional.ofNullable(list.get(qPost.viewCount)).orElse(0),
-                Optional.ofNullable(list.get(qPost.commentCount)).orElse(0),
-                Optional.ofNullable(list.get(qPost.likeCount)).orElse(0),
-                list.get(qPost.createdAt))
-        ).toList();
     }
 
     public long countLikedPosts(String userId){

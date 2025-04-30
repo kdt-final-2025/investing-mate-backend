@@ -143,11 +143,13 @@ public class PostService {
         long totalElements = postLikeQueryRepository.countLikedPosts(userId);
         int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
 
-        List<LikedPostListResponse> posts = postLikeQueryRepository.postListLikedByUser(userId, offset, size);
+        List<PostLikeDto> postsLikedByUser = postLikeQueryRepository.findPostsLikedByUser(member.getUserId(), offset, size);
+
+        List<PostsLikedResponse> posts = postMapper.toListPostLikeResponse(postsLikedByUser);
 
         PageInfo pageInfo = new PageInfo(pageNumber, size, totalElements, totalPages);
 
-        return new LikedPostListAndPagingResponse(posts, pageInfo);
+        return new PostsLikedAndPagingResponse(posts, pageInfo);
     }
 
 }
