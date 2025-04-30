@@ -1,6 +1,7 @@
 package redlightBack.Post;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
@@ -14,6 +15,7 @@ import redlightBack.member.MemberRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@RequiredArgsConstructor
 @Service
 public class PostService {
 
@@ -23,16 +25,6 @@ public class PostService {
     private final PostMapper postMapper;
     private final MemberRepository memberRepository;
     private final PostLikeQueryRepository postLikeQueryRepository;
-
-    public PostService(PostRepository postRepository, BoardRepository boardRepository, PostQueryRepository postQueryRepository, PostMapper postMapper, MemberRepository memberRepository, PostLikeQueryRepository postLikeQueryRepository
-    ) {
-        this.postRepository = postRepository;
-        this.boardRepository = boardRepository;
-        this.postQueryRepository = postQueryRepository;
-        this.postMapper = postMapper;
-        this.memberRepository = memberRepository;
-        this.postLikeQueryRepository = postLikeQueryRepository;
-    }
 
     //게시물 생성
     public PostResponse create (String userId, CreatePostRequest request){

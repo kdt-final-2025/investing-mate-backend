@@ -1,22 +1,19 @@
 package redlightBack.Post;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import redlightBack.Post.Dto.PostLikeResponse;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class PostLikeService {
 
     private final PostLikeRepository postLikeRepository;
     private final PostRepository postRepository;
-
-    public PostLikeService(PostLikeRepository postLikeRepository, PostRepository postRepository) {
-        this.postLikeRepository = postLikeRepository;
-        this.postRepository = postRepository;
-    }
 
     @Transactional
     public PostLikeResponse toggleLike (String userId,

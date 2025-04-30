@@ -1,6 +1,7 @@
 package redlightBack.Post;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -9,15 +10,13 @@ import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
 import redlightBack.loginUtils.LoginMemberId;
 
+@RequiredArgsConstructor
 @RestController
 public class PostController {
 
     private final PostService postService;
 
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
-
+    //게시물 생성
     @PostMapping("/posts")
     public PostResponse createPost (@LoginMemberId String userId,
                                     @Valid @RequestBody CreatePostRequest request){

@@ -3,12 +3,14 @@ package redlightBack.Post;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Repository
 public class PostQueryRepository {
 

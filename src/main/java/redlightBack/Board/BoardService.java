@@ -1,19 +1,20 @@
 package redlightBack.Board;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class BoardService {
 
     private final BoardRepository boardRepository;
-
-    public BoardService(BoardRepository boardRepository) {
-        this.boardRepository = boardRepository;
-    }
+    private final PostQueryRepository postQueryRepository;
+    private final MemberRepository memberRepository;
 
     //게시판 생성
     //TODO 관리자 권한 추가 필요
