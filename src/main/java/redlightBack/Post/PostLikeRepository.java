@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
-    Optional<PostLike> findByPostIdAndUserId(Long postId, String userId);
+    PostLike findByPostIdAndUserId(Long postId, String userId);
 }

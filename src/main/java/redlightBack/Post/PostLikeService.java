@@ -20,28 +20,27 @@ public class PostLikeService {
                                         Long postId){
 
         Post post = postRepository.findById(postId).orElseThrow(
-                () -> new NoSuchElementException("해당 개시물이 존재하지 않습니다.")
+                () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
-        Optional<PostLike> existingLike = postLikeRepository.findByPostIdAndUserId(postId, userId);
+        PostLike postLike = postLikeRepository.findByPostIdAndUserId(postId, userId);
 
-        boolean liked;
-
-        if(existingLike.isPresent()){
-            postLikeRepository.delete(existingLike.get());
-            post.decreaseLikeCount();
-            liked = false;
-        }
-        else {
-            PostLike newPostLike = new PostLike(post, userId);
-            post.increaseLikeCount();
-            postLikeRepository.save(newPostLike);
-            liked = true;
-        }
-        postRepository.save(post);
+        boolean isLiked = switchIsLikeState(post, postLike, userId);
 
         return new PostLikeResponse(post.getId(),
-                liked,
+                isLiked,
                 post.getLikeCount());
+    }
+
+    private boolean switchIsLikeState(Post post, PostLike postLike, String userId){
+        if(postLike != null){
+            post.decreaseLikeCount();
+            postLikeRepository.delete(postLike);
+            return false;
+        }else {
+            post.increaseLikeCount();
+            postLikeRepository.save(new PostLike(post, userId));
+            return true;
+        }
     }
 }
