@@ -15,6 +15,7 @@ import redlightBack.loginUtils.LoginMemberId;
 public class PostController {
 
     private final PostService postService;
+    private final PostLikeService postLikeService;
 
     //게시물 생성
     @PostMapping("/posts")
@@ -58,6 +59,16 @@ public class PostController {
         return postService.getPosts(userId, boardId, postTitle, sortBy, direction, pageable);
     }
 
+    //좋아요
+    @PostMapping("/posts/{postId}/like")
+    public PostLikeResponse like (@LoginMemberId String userId,
+                                  @PathVariable Long postId){
+
+
+        return postLikeService.toggleLike(userId, postId);
+    }
+
+    //좋아요 한 목록 보기
     @GetMapping("/boards/liked")
     public LikedPostListAndPagingResponse getLikedPostList (@LoginMemberId String userId,
                                                             @RequestParam (defaultValue = "1") int pageNumber,
