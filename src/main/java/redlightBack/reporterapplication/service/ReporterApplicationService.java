@@ -1,126 +1,93 @@
 package redlightBack.reporterapplication.service;
 
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import redlightBack.member.MemberRepository;
 import redlightBack.member.memberEntity.Member;
+import redlightBack.member.MemberRepository;
 import redlightBack.member.memberEntity.Role;
 import redlightBack.reporterapplication.domain.ReporterApplication;
 import redlightBack.reporterapplication.domain.RequestStatus;
 import redlightBack.reporterapplication.repository.ReporterApplicationRepository;
 import redlightBack.reporterapplication.web.dto.ApplicationResponseDto;
-import redlightBack.reporterapplication.web.dto.ProcessRequestDto;
 import redlightBack.reporterapplication.web.mapper.ReporterApplicationMapper;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class ReporterApplicationService {
 
-    private final ReporterApplicationRepository reporterApplicationRepository;
-    private final MemberRepository memberRepository;
+    private final ReporterApplicationRepository repo;
+    private final MemberRepository memberRepo;
 
-    public ReporterApplicationService(
-            ReporterApplicationRepository reporterApplicationRepository,
-            MemberRepository memberRepository
-    ) {
-        this.reporterApplicationRepository = reporterApplicationRepository;
-        this.memberRepository = memberRepository;
-    }
-
-    // 로그인된 회원으로 “기자 신청” 생성
+    // 1) 사용자 신청 or 재신청 → 기존 반려 기록은 보존
     @Transactional
     public ApplicationResponseDto apply(String userId) {
-        Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다: " + userId));
+        Member member = memberRepo.findByUserId(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다: " + userId));
 
-        if (reporterApplicationRepository.findByMember_UserId(userId).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "이미 신청된 사용자입니다");
+        // PENDING 또는 APPROVED 중복 방지
+        if (repo.existsByMember_UserIdAndStatusIn(
+                userId,
+                List.of(RequestStatus.PENDING, RequestStatus.APPROVED))
+        ) {
+            throw new IllegalStateException("이미 대기 중이거나 승인된 신청이 존재합니다");
         }
 
         ReporterApplication app = ReporterApplication.applyFor(member);
-        ReporterApplication saved = reporterApplicationRepository.save(app);
-        return ReporterApplicationMapper.toDto(saved);
+        return ReporterApplicationMapper.toDto(repo.save(app));
     }
 
-    // 로그인된 사용자의 Application 조회
+    // 2) 사용자 → 본인 최신 신청 조회
     @Transactional(readOnly = true)
     public ApplicationResponseDto getMyApplication(String userId) {
-        return reporterApplicationRepository
-                .findByMember_UserId(userId)
-                .map(e -> ReporterApplicationMapper.toDto(e))
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "신청 내역이 없습니다."
-                ));
-    }
-
-    // 로그인된 사용자 재신청
-    @Transactional
-    public ApplicationResponseDto resubmit(String userId) {
-        ReporterApplication app = reporterApplicationRepository.findByMember_UserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "신청 내역이 없습니다"
-                ));
-
-        try {
-            app.resubmit();
-        } catch (IllegalStateException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, e.getMessage()
-            );
-        }
-        // dirty checking → 자동 저장
+        ReporterApplication app = repo.findTopByMember_UserIdOrderByAppliedAtDesc(userId)
+                .orElseThrow(() -> new NoSuchElementException("신청 내역이 없습니다."));
         return ReporterApplicationMapper.toDto(app);
     }
 
-    // 관리자 전용: 다중 상태 조회
+    // 3) 관리자 전용: 상태별 조회 + 권한 검증
     @Transactional(readOnly = true)
-    public List<ApplicationResponseDto> listByStatuses(List<RequestStatus> statuses) {
-        return reporterApplicationRepository.findByStatusIn(statuses).stream()
-                .map(e -> ReporterApplicationMapper.toDto(e))
+    public List<ApplicationResponseDto> listByStatuses(String userId, List<RequestStatus> statuses) {
+        authorizeAdmin(userId);
+        return repo.findByStatusIn(statuses).stream()
+                .map(ReporterApplicationMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    // 관리자 전용: 다중 승인/반려 처리
+    // 4) 관리자 전용: 다중 승인/반려 처리 + 권한 검증
     @Transactional
-    public List<ApplicationResponseDto> process(List<Long> ids, RequestStatus action) {
+    public List<ApplicationResponseDto> process(
+            String userId,
+            List<Long> ids,
+            RequestStatus action
+    ) {
+        authorizeAdmin(userId);
         return ids.stream()
                 .map(id -> {
-                    ReporterApplication app = reporterApplicationRepository.findById(id)
-                            .orElseThrow(() -> new ResponseStatusException(
-                                    HttpStatus.NOT_FOUND,
-                                    "신청 내역이 없습니다: " + id
-                            ));
-
+                    ReporterApplication app = repo.findById(id)
+                            .orElseThrow(() -> new NoSuchElementException("신청 내역이 없습니다: " + id));
                     if (action == RequestStatus.APPROVED) {
                         app.approve();
                     } else if (action == RequestStatus.REJECTED) {
                         app.reject();
-                    } else {
-                        throw new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "action은 APPROVED 또는 REJECTED만 가능합니다"
-                        );
                     }
-
                     return ReporterApplicationMapper.toDto(app);
                 })
                 .collect(Collectors.toList());
     }
 
     // 관리자 권한 확인
-    public void authorizeAdmin(String userId) {
-        Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다: " + userId));
-        if (member.getRole() != Role.ADMINISTRATOR) {
+    private void authorizeAdmin(String userId) {
+        Member m = memberRepo.findByUserId(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다: " + userId));
+        if (m.getRole() != Role.ADMINISTRATOR) {
             throw new AccessDeniedException("관리자 권한이 필요합니다.");
         }
     }

@@ -11,5 +11,10 @@ public interface ReporterApplicationRepository
         extends JpaRepository<ReporterApplication, Long> {
 
     List<ReporterApplication> findByStatusIn(List<RequestStatus> statuses);
-    Optional<ReporterApplication> findByMember_UserId(String userId);
+
+    // 중복 신청 방지를 위한 메서드
+    boolean existsByMember_UserIdAndStatusIn(String userId, List<RequestStatus> statuses);
+
+    // 본인 최신 신청 조회
+    Optional<ReporterApplication> findTopByMember_UserIdOrderByAppliedAtDesc(String userId);
 }

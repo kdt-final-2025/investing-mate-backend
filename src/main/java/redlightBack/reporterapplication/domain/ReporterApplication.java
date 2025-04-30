@@ -9,28 +9,27 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@AllArgsConstructor @Builder
 public class ReporterApplication {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    // 1:N 관계로 변경하여, 반려 기록을 남기고 새 신청 가능
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RequestStatus status;   // PENDING, APPROVED, REJECTED
+    private RequestStatus status;
 
     @Column(nullable = false)
     private LocalDateTime appliedAt;
 
     private LocalDateTime processedAt;
 
-    // 팩토리 메서드: 도메인 안에서 생성 로직 캡슐화
+    // 팩토리 메서드
     public static ReporterApplication applyFor(Member member) {
         return ReporterApplication.builder()
                 .member(member)
@@ -39,24 +38,12 @@ public class ReporterApplication {
                 .build();
     }
 
-    //반려 상태에서만 재신청
-    public void resubmit() {
-        if (this.status != RequestStatus.REJECTED) {
-            throw new IllegalStateException("REJECTED 상태에서만 재신청이 가능합니다");
-        }
-        this.status = RequestStatus.PENDING;
-        this.appliedAt = LocalDateTime.now();
-        this.processedAt = null;
-    }
-
-    // 승인(관리자)
     public void approve() {
         this.status = RequestStatus.APPROVED;
         this.processedAt = LocalDateTime.now();
         member.upgradeToReporter();
     }
 
-    // 반려(관리자)
     public void reject() {
         this.status = RequestStatus.REJECTED;
         this.processedAt = LocalDateTime.now();
