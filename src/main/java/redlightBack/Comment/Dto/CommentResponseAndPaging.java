@@ -2,33 +2,20 @@ package redlightBack.Comment.Dto;
 
 import java.util.List;
 
-public record CommentResponseAndPaging(
-                                       List<CommentResponse> items,
-                                       PageMeta pageMeta
-) {
-//    public record CommentItem(
-//            Long commentId,
-//            String userId,
-//            String content,
-//            int likeCount,
-//            boolean likedByMe,
-//            LocalDateTime createdAt,
-//            List<CommentResponse.CommentItem.ReplyItem> replies // 대댓글
-//    ) {
-//        public record ReplyItem(
-//                Long commentId,
-//                String userId,
-//                String content,
-//                int likeCount,
-//                boolean likedByMe,
-//                LocalDateTime createdAt
-//        ) {}
-//    }
-//
-//    public record PageMeta(
-//            int totalPage,
-//            int totalCount,
-//            int pageNumber,
-//            int pageSize
-//    ) {}
+public class CommentResponseAndPaging {
+    private List<CommentResponse> items;
+    private PageMeta pageMeta;
+
+    public CommentResponseAndPaging(List<CommentResponse> items, PageMeta pageMeta) {
+        this.items = items;
+        this.pageMeta = pageMeta;
+    }
+
+    public List<CommentResponse> getItems() {
+        return items;
+    }
+
+    public PageMeta getPageMeta() {
+        return pageMeta;
+    }
 }

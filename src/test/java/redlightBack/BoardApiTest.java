@@ -586,8 +586,45 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200);
     }
+    @Test
+    public void 좋아요순_댓글트리_조회테스트() {
+        // 1. 게시판 생성
+        BoardResponse board = createBoard("게시판이름");
+        Long boardId = board.id();
 
+        // 2. 게시글 생성
+        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        Long postId = post.id();
 
+        // 3. JWT 토큰 준비
+        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMiIsImlhdCI6MTUxNjIzOTAyMn0.d4-EAJSW6QZLPsrJBMf2plzsYMpqSa0xkn5u-1rhYrs";
+
+        // 4. 부모 댓글 작성
+        CreateCommentRequest parentRequest = new CreateCommentRequest(postId, null, "부모 댓글");
+        CommentResponse parentComment = createComment(parentRequest);
+
+        // 5. 대댓글 1 작성
+        CreateCommentRequest childRequest1 = new CreateCommentRequest(postId, parentComment.commentId(), "대댓글 1");
+        createComment(childRequest1);
+
+        // 6. 대댓글 2 작성
+        CreateCommentRequest childRequest2 = new CreateCommentRequest(postId, parentComment.commentId(), "대댓글 2");
+        createComment(childRequest2);
+
+        // (선택) 좋아요 몇 개 추가해주면 더 테스트가 풍부해짐 (테스트용 좋아요 API가 있다면 넣어주세요)
+
+        // 7. 좋아요순 댓글 + 대댓글 조회 API 호출 및 검증
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .queryParam("postId", postId)
+                .queryParam("sortType", "LIKE")
+                .queryParam("size", 150)
+                .queryParam("pageNumber", 1)// 추가: 좋아요 순 정렬
+                .when()
+                .get("/comments/likes")
+                .then().log().all()
+                .statusCode(200);
+    }
     public BoardResponse createBoard(String boardName){
 
         String token = generateTestToken();
@@ -638,7 +675,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
                 .pathParam("postId", postId)
-                .delete("/posts/{postId}")
+                .delete("/comments/likes")
                 .then().log().all()
                 .extract()
                 .as(DeletePostResponse.class);

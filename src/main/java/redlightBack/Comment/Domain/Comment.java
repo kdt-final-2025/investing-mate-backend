@@ -43,6 +43,7 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private boolean deleted = false;//소프트 삭제
 
+
     public Comment(String userId, String content, Long post, Long aLong) {
 
     }

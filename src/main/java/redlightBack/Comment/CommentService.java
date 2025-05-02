@@ -24,7 +24,23 @@ public class CommentService {
     public final  PostRepository postRepository;
     public final CommentTreeBuilder commentTreeBuilder;
     public final LikeCountRepository likeCountRepository;
+    public final LikeSortedCommentTreeBuilder likeSortedCommentTreeBuilder;
+    private CommentResponse convertToCommentResponse(CommentSortedByLikesResponse response) {
+        List<CommentResponse> children = response.children() == null ? List.of() :
+                response.children().stream()
+                        .map(this::convertToCommentResponse)
+                        .toList();
 
+        return new CommentResponse(
+                response.commentId(),
+                response.userId(),
+                response.content(),
+                response.likeCount(),
+                response.likedByMe(),
+                response.createdAt(),
+                children
+        );
+    }
 
 
     //생성
@@ -60,6 +76,7 @@ public class CommentService {
 
 
     //댓글 조회 및 페이징 및 트리구조
+    @Transactional
     public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable) {
         Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);  // 댓글 + 대댓글 다 조회
 
@@ -145,15 +162,42 @@ public class CommentService {
     }
     //좋아요 순 조회
     @Transactional
-    public CommentResponseAndPaging getCommentTreeByLikeCount(Long postId, Pageable pageable, SortType sortType) {
-        List<CommentResponse> comments;
+    public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable, SortType sortType) {
+        PageMeta pageMeta;
+
+
 
         if (sortType == SortType.LIKE) {
-            comments = likeCountRepository.findCommentsSortedByLikes(postId, pageable);
+            // 좋아요순 댓글 조회
+            List<CommentSortedByLikesResponse> likeComments = likeCountRepository.findCommentsSortedByLikes(postId, pageable);
 
-            PageMeta pageMeta = new PageMeta(
-                    1,
-                    (long) comments.size(),
+            long totalElements = likeCountRepository.countCommentsByPostId(postId);
+
+            // 좋아요순 트리 빌드
+            List<CommentSortedByLikesResponse> likeCommentTree = likeSortedCommentTreeBuilder.buildFromResponses(likeComments);
+
+            // CommentResponse로 변환 (children도 재귀적으로 변환)
+            List<CommentResponse> commentResponses = likeCommentTree.stream()
+                    .map(this::convertToCommentResponse)
+                    .toList();
+
+            pageMeta = new PageMeta(
+                    (int) Math.ceil((double) totalElements / pageable.getPageSize()),
+                    totalElements,
+                    pageable.getPageNumber(),
+                    pageable.getPageSize()
+            );
+
+            return new CommentResponseAndPaging(commentResponses, pageMeta);
+        } else {
+            // 시간순 조회 (기존 로직)
+            Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
+
+            List<CommentResponse> comments = commentTreeBuilder.build(commentPage.getContent());
+
+            pageMeta = new PageMeta(
+                    commentPage.getTotalPages(),
+                    commentPage.getTotalElements(),
                     pageable.getPageNumber(),
                     pageable.getPageSize()
             );
@@ -161,18 +205,5 @@ public class CommentService {
             return new CommentResponseAndPaging(comments, pageMeta);
         }
 
-        // 기본 시간순 정렬
-        Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
-        comments = commentTreeBuilder.build(commentPage.getContent());
 
-        PageMeta pageMeta = new PageMeta(
-                commentPage.getTotalPages(),
-                commentPage.getTotalElements(),
-                pageable.getPageNumber(),
-                pageable.getPageSize()
-        );
-
-        return new CommentResponseAndPaging(comments, pageMeta);
-    }
-}
-
+    }}

@@ -27,15 +27,15 @@ public class CommentController {
     }
 
     //댓글+대댓글 조회
-    @GetMapping("/comments")
-    public CommentResponseAndPaging getCommentTree(@RequestParam Long postId,
-                                                   @RequestParam(defaultValue = "1") int size,
-                                                   @RequestParam(defaultValue = "150") int pageNumber ){
-
-        Pageable pageable = PageRequest.of(pageNumber -1, size);
-
-        return commentService.getCommentTree(postId, pageable);
-    }
+//    @GetMapping("/comments")
+//    public CommentResponseAndPaging getCommentTree(@RequestParam Long postId,
+//                                                   @RequestParam(defaultValue = "1") int size,
+//                                                   @RequestParam(defaultValue = "150") int pageNumber ){
+//
+//        Pageable pageable = PageRequest.of(pageNumber -1, size);
+//
+//        return commentService.getCommentTree(postId, pageable);
+//    }
 
 
     //댓글 수정 로그인 유저만
@@ -65,14 +65,14 @@ public class CommentController {
     //댓글+대댓글 조회(좋아요순)
     @GetMapping("/comments/likes")
     public CommentResponseAndPaging getCommentTreeByLikeCount(@RequestParam Long postId,
-                                                              @RequestParam(defaultValue = "time") SortType sortType,
+                                                              @RequestParam(defaultValue = "Time") SortType sortType,
                                                    @RequestParam(defaultValue = "1") int size,
                                                    @RequestParam(defaultValue = "150") int pageNumber ){
 
         Pageable pageable = PageRequest.of(pageNumber -1, size);
 
 
-        return commentService.getCommentTreeByLikeCount(postId, pageable,sortType);
+        return commentService.getCommentTree(postId, pageable,sortType);
     }
 
 

@@ -1,43 +1,66 @@
 package redlightBack.Comment;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import redlightBack.Comment.Domain.QComment;
 import redlightBack.Comment.Domain.QCommentLike;
-import redlightBack.Comment.Dto.CommentResponse;
-import redlightBack.common.JpaConfig;
+import redlightBack.Comment.Dto.CommentSortedByLikesResponse;
 
 import java.util.List;
 
 @Repository
-public class LikeCountRepository extends JpaConfig {
+public class LikeCountRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     public LikeCountRepository(JPAQueryFactory jpaQueryFactory) {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
+
     QCommentLike qCommentLike = QCommentLike.commentLike;
     QComment qComment = QComment.comment;
-    public List<CommentResponse> findCommentsSortedByLikes(Long postId, Pageable pageable) {
+
+    public List<CommentSortedByLikesResponse> findCommentsSortedByLikes(Long postId, Pageable pageable) {
+
+        QComment qChild = new QComment("qChild");
+
         return jpaQueryFactory
-                .select(Projections.constructor(CommentResponse.class,
+                .select(Projections.constructor(CommentSortedByLikesResponse.class,
                         qComment.id,
-                        qComment.content,
+                        qComment.parent,
                         qComment.userId,
+                        qComment.content,
+                        qCommentLike.count().intValue().as("likeCount"),
+                        qComment.likedByMe,
                         qComment.createdAt,
-                        qCommentLike.count().as("likeCount")
+                        JPAExpressions.select(qChild.count().intValue())
+                                .from(qChild)
+                                .where(qChild.parent.id.eq(qComment.id))
                 ))
                 .from(qComment)
                 .leftJoin(qCommentLike).on(qComment.id.eq(qCommentLike.comment.id))
                 .where(qComment.postId.eq(postId))
-                .groupBy(qComment.id)
+                .groupBy(qComment.id, qComment.content, qComment.userId, qComment.createdAt)
                 .orderBy(qCommentLike.count().desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+
     }
 
-}
+    public long countCommentsByPostId(Long postId) {
+        QComment qComment = QComment.comment;
+
+        Long result = jpaQueryFactory
+                .select(qComment.count())
+                .from(qComment)
+                .where(qComment.postId.eq(postId))
+                .fetchOne();
+
+        return result != null ? result : 0L;
+
+
+}}
