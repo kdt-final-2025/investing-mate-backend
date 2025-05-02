@@ -58,13 +58,13 @@ public class PostService {
     @Transactional
     public PostResponse update (String userId, Long postId, CreatePostRequest request){
 
-        memberRepository.findByUserId(userId).orElseThrow(
-                () -> new NoSuchElementException("게시물 수정은 작성자만 할 수 있습니다.")
-        );
-
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
+
+        if(!post.getUserId().equals(userId)){
+            throw new NoSuchElementException("게시물 수정은 작성자만 할 수 있습니다.");
+        }
 
         post.updatePost(request.postTitle(),
                 request.content(),
@@ -77,13 +77,13 @@ public class PostService {
     @Transactional
     public DeletePostResponse delete (String userId, Long postId){
 
-        memberRepository.findByUserId(userId).orElseThrow(
-                () -> new NoSuchElementException("게시물 삭제는 작성자만 할 수 있습니다.")
-        );
-
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
+
+        if(!post.getUserId().equals(userId)){
+            throw new NoSuchElementException("게시물 삭제는 작성자만 할 수 있습니다.");
+        }
 
         post.softDelete();
 
