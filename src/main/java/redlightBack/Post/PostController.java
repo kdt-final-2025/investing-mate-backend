@@ -73,7 +73,7 @@ public class PostController {
     }
 
     //좋아요 한 목록 보기
-    @GetMapping("/boards/liked")
+    @GetMapping("/posts/liked")
     public PostsLikedAndPagingResponse getLikedPostList (@LoginMemberId String userId,
                                                          @RequestParam (defaultValue = "1") int pageNumber,
                                                          @RequestParam (defaultValue = "10") int size){
