@@ -21,7 +21,6 @@ public class PostMapper {
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
                 post.getLikeCount(),
-                post.isLikedByMe(),
                 post.getCommentCount());
     }
 

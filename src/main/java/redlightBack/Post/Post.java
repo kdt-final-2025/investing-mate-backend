@@ -41,8 +41,6 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private int commentCount = 0;
 
-    private boolean likedByMe = false;
-
     @Column(nullable = false)
     private long likeCount = 0;
 

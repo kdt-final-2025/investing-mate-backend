@@ -13,6 +13,5 @@ public record PostResponse(Long boardId,
                            LocalDateTime createdAt,
                            LocalDateTime updatedAt,
                            long likeCount,
-                           boolean likedByMe,
                            int commentCount) {
 }

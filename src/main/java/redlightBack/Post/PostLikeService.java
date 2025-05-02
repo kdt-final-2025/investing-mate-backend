@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import redlightBack.Post.Dto.PostLikeResponse;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
