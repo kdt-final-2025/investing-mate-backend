@@ -1,13 +1,11 @@
 package redlightBack.reporterapplication.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-import redlightBack.member.memberEntity.Member;
 import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Member;
 import redlightBack.member.memberEntity.Role;
 import redlightBack.reporterapplication.domain.ReporterApplication;
 import redlightBack.reporterapplication.domain.RequestStatus;
