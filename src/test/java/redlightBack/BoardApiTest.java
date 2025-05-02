@@ -615,13 +615,13 @@ public class BoardApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/boards/liked")
+                .get("/posts/liked")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
                 .as(PostsLikedAndPagingResponse.class);
 
-        List<PostsLikedResponse> responses = likedPosts.likedPosts();
+        List<PostsLikedResponse> responses = likedPosts.likedPostsResponse();
 
         assertThat(responses.size()).isEqualTo(3);
         assertThat(responses.get(0).postTitle()).isEqualTo("제목8");
