@@ -124,7 +124,7 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .body(rejectDto)
-                .when().patch("/admin/console/reporter-applications");
+                .when().patch("reporter-applications");
 
         // 재신청
         ApplicationResponseDto second = RestAssured.given()
@@ -157,7 +157,7 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .body(rejectDto)
-                .when().patch("/admin/console/reporter-applications");
+                .when().patch("reporter-applications");
 
         // 두 번째 신청
         ApplicationResponseDto second = RestAssured.given()
@@ -198,12 +198,12 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .body(rejectDto2)
-                .when().patch("/admin/console/reporter-applications");
+                .when().patch("reporter-applications");
 
         // 전체 조회
         ApplicationResponseDto[] all = RestAssured.given()
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
-                .when().get("/admin/console/reporter-applications")
+                .when().get("reporter-applications")
                 .then().statusCode(200)
                 .extract().as(ApplicationResponseDto[].class);
 
@@ -231,13 +231,13 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .body(rejectDto)
-                .when().patch("/admin/console/reporter-applications");
+                .when().patch("reporter-applications");
 
         // PENDING only
         RestAssured.given()
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .queryParam("statuses", "PENDING")
-                .when().get("/admin/console/reporter-applications")
+                .when().get("reporter-applications")
                 .then().statusCode(200)
                 .body("size()", org.hamcrest.Matchers.is(0));
 
@@ -245,7 +245,7 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
         RestAssured.given()
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .queryParam("statuses", "REJECTED")
-                .when().get("/admin/console/reporter-applications")
+                .when().get("reporter-applications")
                 .then().statusCode(200)
                 .body("[0].status", org.hamcrest.Matchers.equalTo("REJECTED"));
     }
@@ -265,7 +265,7 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + ADMIN_TOKEN)
                 .body(approveDto)
-                .when().patch("/admin/console/reporter-applications")
+                .when().patch("reporter-applications")
                 .then().statusCode(200);
 
         Member updated = memberRepository.findByUserId("2").orElseThrow();
@@ -278,7 +278,7 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
         // GET
         RestAssured.given()
                 .header("Authorization", "Bearer " + USER_TOKEN)
-                .when().get("/admin/console/reporter-applications")
+                .when().get("reporter-applications")
                 .then().statusCode(403);
         // PATCH
         ProcessRequestDto dto = new ProcessRequestDto(List.of(1L), RequestStatus.APPROVED);
@@ -286,7 +286,7 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + USER_TOKEN)
                 .body(dto)
-                .when().patch("/admin/console/reporter-applications")
+                .when().patch("reporter-applications")
                 .then().statusCode(403);
     }
 }
