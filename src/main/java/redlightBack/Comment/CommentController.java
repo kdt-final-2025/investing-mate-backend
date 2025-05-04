@@ -22,8 +22,8 @@ public class CommentController {
 
     @PostMapping("/comments")
     public CommentResponse createComment(@LoginMemberId String userId,
-                                         @RequestBody CreateCommentRequest request){
-     return commentService.save(userId,request);
+                                         @RequestBody CreateCommentRequest request) {
+        return commentService.save(userId, request);
     }
 
     //댓글+대댓글 조회
@@ -43,7 +43,7 @@ public class CommentController {
     public void updateComment(@LoginMemberId String userId,
                               @PathVariable Long commentId,
                               @RequestBody CreateCommentRequest request) throws AccessDeniedException {
-        commentService.updateComment(request,userId,commentId);
+        commentService.updateComment(request, userId, commentId);
     }
 
 
@@ -57,22 +57,23 @@ public class CommentController {
 
     //좋아요 버튼
     @PostMapping("/comments/{commentId}/likes")
-    public CommentLikeResponse toggleLike(@LoginMemberId String userId,@PathVariable Long commentId){
-        return  commentService.toggleLikeComment(userId,commentId);
+    public CommentLikeResponse toggleLike(@LoginMemberId String userId, @PathVariable Long commentId) {
+        return commentService.toggleLikeComment(userId, commentId);
 
     }
 
     //댓글+대댓글 조회(좋아요순)
     @GetMapping("/comments/likes")
-    public CommentResponseAndPaging getCommentTreeByLikeCount(@RequestParam Long postId,
-                                                              @RequestParam(defaultValue = "Time") SortType sortType,
-                                                   @RequestParam(defaultValue = "1") int size,
-                                                   @RequestParam(defaultValue = "150") int pageNumber ){
+    public CommentResponseAndPaging getCommentTreeByLikeCount(
+            @RequestParam Long postId,
+            @RequestParam(defaultValue = "Time") String sortType,
+            @RequestParam(defaultValue = "1") int size,
+            @RequestParam(defaultValue = "150") int pageNumber) {
 
-        Pageable pageable = PageRequest.of(pageNumber -1, size);
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
 
 
-        return commentService.getCommentTree(postId, pageable,sortType);
+        return commentService.getCommentTree(postId, pageable, sortType);
     }
 
 

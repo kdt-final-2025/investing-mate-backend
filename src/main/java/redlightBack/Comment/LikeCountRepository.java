@@ -1,6 +1,7 @@
 package redlightBack.Comment;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import redlightBack.Comment.Domain.QComment;
 import redlightBack.Comment.Domain.QCommentLike;
 import redlightBack.Comment.Dto.CommentSortedByLikesResponse;
+import redlightBack.Comment.Dto.QCommentSortedByLikesResponse;
 
 import java.util.List;
 
@@ -24,31 +26,29 @@ public class LikeCountRepository {
     QComment qComment = QComment.comment;
 
     public List<CommentSortedByLikesResponse> findCommentsSortedByLikes(Long postId, Pageable pageable) {
-
+        QCommentLike qCommentLike = QCommentLike.commentLike;
+        QComment qComment = QComment.comment;
         QComment qChild = new QComment("qChild");
 
         return jpaQueryFactory
-                .select(Projections.constructor(CommentSortedByLikesResponse.class,
+                .select(new QCommentSortedByLikesResponse(
                         qComment.id,
-                        qComment.parent,
+                        qComment.parent.id, // parentId
                         qComment.userId,
                         qComment.content,
-                        qCommentLike.count().intValue().as("likeCount"),
-                        qComment.likedByMe,
-                        qComment.createdAt,
-                        JPAExpressions.select(qChild.count().intValue())
-                                .from(qChild)
-                                .where(qChild.parent.id.eq(qComment.id))
+                        qCommentLike.count().intValue(), // likeCount
+                        Expressions.constant(false), // likedByMe: 사용자 로그인 정보 필요시 동적 처리
+                        qComment.createdAt
+                        // children은 트리 구성에서 추가로 처리
                 ))
                 .from(qComment)
                 .leftJoin(qCommentLike).on(qComment.id.eq(qCommentLike.comment.id))
                 .where(qComment.postId.eq(postId))
-                .groupBy(qComment.id, qComment.content, qComment.userId, qComment.createdAt)
+                .groupBy(qComment.id, qComment.parent.id, qComment.userId, qComment.content, qComment.createdAt)
                 .orderBy(qCommentLike.count().desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
     }
 
     public long countCommentsByPostId(Long postId) {

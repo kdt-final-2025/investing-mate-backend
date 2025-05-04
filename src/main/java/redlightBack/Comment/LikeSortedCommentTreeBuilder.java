@@ -15,17 +15,17 @@ public class LikeSortedCommentTreeBuilder {
     // CommentSortedByLikesResponse를 사용하여 트리 구조로 변환
     public List<CommentSortedByLikesResponse> buildFromResponses(List<CommentSortedByLikesResponse> flatResponses) {
         Map<Long, CommentSortedByLikesResponse> commentMap = flatResponses.stream()
-                .collect(Collectors.toMap(CommentSortedByLikesResponse::commentId, Function.identity()));
+                .collect(Collectors.toMap(CommentSortedByLikesResponse::getCommentId, Function.identity()));
 
         List<CommentSortedByLikesResponse> roots = new ArrayList<>();
 
         for (CommentSortedByLikesResponse response : flatResponses) {
-            if (response.parentId() == null) {
+            if (response.getParentId() == null) {
                 roots.add(response); // 최상위 댓글은 roots에 추가
             } else {
-                CommentSortedByLikesResponse parent = commentMap.get(response.parentId());
+                CommentSortedByLikesResponse parent = commentMap.get(response.getParentId());
                 if (parent != null) {
-                    parent.children().add(response); // 자식 댓글을 부모 댓글에 추가
+                    parent.getChildren().add(response); // 자식 댓글을 부모 댓글에 추가
                 }
             }
         }

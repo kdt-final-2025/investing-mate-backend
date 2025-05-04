@@ -25,23 +25,6 @@ public class CommentService {
     public final CommentTreeBuilder commentTreeBuilder;
     public final LikeCountRepository likeCountRepository;
     public final LikeSortedCommentTreeBuilder likeSortedCommentTreeBuilder;
-    private CommentResponse convertToCommentResponse(CommentSortedByLikesResponse response) {
-        List<CommentResponse> children = response.children() == null ? List.of() :
-                response.children().stream()
-                        .map(this::convertToCommentResponse)
-                        .toList();
-
-        return new CommentResponse(
-                response.commentId(),
-                response.userId(),
-                response.content(),
-                response.likeCount(),
-                response.likedByMe(),
-                response.createdAt(),
-                children
-        );
-    }
-
 
     //생성
     public CommentResponse save(String userId, CreateCommentRequest request) {
@@ -72,8 +55,6 @@ public class CommentService {
                 comment.getCreatedAt(),
                 List.of());
     }
-
-
 
     //댓글 조회 및 페이징 및 트리구조
     @Transactional
@@ -162,12 +143,10 @@ public class CommentService {
     }
     //좋아요 순 조회
     @Transactional
-    public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable, SortType sortType) {
+    public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable, String sortType) {
         PageMeta pageMeta;
 
-
-
-        if (sortType == SortType.LIKE) {
+        if (sortType.equals("LIKE")) {
             // 좋아요순 댓글 조회
             List<CommentSortedByLikesResponse> likeComments = likeCountRepository.findCommentsSortedByLikes(postId, pageable);
 
@@ -190,6 +169,7 @@ public class CommentService {
 
             return new CommentResponseAndPaging(commentResponses, pageMeta);
         } else {
+
             // 시간순 조회 (기존 로직)
             Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
 
@@ -206,4 +186,21 @@ public class CommentService {
         }
 
 
-    }}
+    }
+    private CommentResponse convertToCommentResponse(CommentSortedByLikesResponse response) {
+        List<CommentResponse> children = response.getChildren() == null ? List.of() :
+                response.getChildren().stream()
+                        .map(this::convertToCommentResponse)
+                        .toList();
+
+        return new CommentResponse(
+                response.getCommentId(),
+                response.getUserId(),
+                response.getContent(),
+                response.getLikeCount(),
+                response.isLikedByMe(),
+                response.getCreatedAt(),
+                children
+        );
+    }
+}

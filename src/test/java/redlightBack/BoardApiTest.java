@@ -28,7 +28,6 @@ public class BoardApiTest extends AcceptanceTest {
     DatabaseCleanup databaseCleanup;
 
 
-
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
@@ -37,7 +36,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시판 생성 테스트")
     @Test
-    public void Board_Create_test(){
+    public void Board_Create_test() {
 
         //테스트용 토큰
         String token = generateTestToken();
@@ -58,7 +57,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시판 목록 조회 테스트")
     @Test
-    public void 게시판_목록_조회_테스트(){
+    public void 게시판_목록_조회_테스트() {
 
         BoardResponse board1 = createBoard("자유게시판");
         BoardResponse board2 = createBoard("공지게시판");
@@ -86,7 +85,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시글 생성 테스트")
     @Test
-    public void 게시글_생성_테스트(){
+    public void 게시글_생성_테스트() {
 
         String token = generateTestToken();
         BoardResponse testBoard = createBoard("자유게시판");
@@ -112,7 +111,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시물 조회 테스트")
     @Test
-    public void 게시물_조회_테스트 (){
+    public void 게시물_조회_테스트() {
 
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
@@ -137,7 +136,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시물 수정 테스트")
     @Test
-    public void 게시물_수정_테스트 (){
+    public void 게시물_수정_테스트() {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -165,7 +164,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시물 삭제 테스트")
     @Test
-    public void 게시물_삭제_테스트 (){
+    public void 게시물_삭제_테스트() {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -190,7 +189,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시물 목록 조회 테스트")
     @Test
-    public void 게시물_목록_조회_테스트 (){
+    public void 게시물_목록_조회_테스트() {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -222,7 +221,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시물 검색 테스트")
     @Test
-    public void 게시물_검색_테스트 (){
+    public void 게시물_검색_테스트() {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -254,7 +253,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시물 정렬 테스트")
     @Test
-    public void 게시물_정렬_테스트_내림차순 (){
+    public void 게시물_정렬_테스트_내림차순() {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -287,7 +286,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("게시물 정렬 테스트")
     @Test
-    public void 게시물_정렬_테스트_오름차순 (){
+    public void 게시물_정렬_테스트_오름차순() {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
@@ -465,13 +464,13 @@ public class BoardApiTest extends AcceptanceTest {
                 .queryParam("size", 150)        // 생략 가능 (기본값)
                 .queryParam("pageNumber", 1)
                 .when()
-                .get("/comments")
+                .get("/comments/likes")
                 .then().log().all()  // 실제 응답 출력
                 .statusCode(200);
     }
 
     @Test
-    public void 댓글_수정_테스트(){
+    public void 댓글_수정_테스트() {
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -502,7 +501,7 @@ public class BoardApiTest extends AcceptanceTest {
     }
 
     @Test
-    public void 댓글_삭제_테스트(){
+    public void 댓글_삭제_테스트() {
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -552,7 +551,6 @@ public class BoardApiTest extends AcceptanceTest {
     }
 
 
-
     @Test
     public void 좋아요_테스트() {
         BoardResponse board = createBoard("게시판이름");
@@ -586,6 +584,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
     @Test
     public void 좋아요순_댓글트리_조회테스트() {
         // 1. 게시판 생성
@@ -602,16 +601,50 @@ public class BoardApiTest extends AcceptanceTest {
         // 4. 부모 댓글 작성
         CreateCommentRequest parentRequest = new CreateCommentRequest(postId, null, "부모 댓글");
         CommentResponse parentComment = createComment(parentRequest);
+        //4.1 부모 댓그 2 작성
+        CreateCommentRequest parentRequest2 = new CreateCommentRequest(postId, null, "부모 댓글2");
+        CommentResponse parentComment2 = createComment(parentRequest2);
+        //4.2 부모댓글 3 작성
+        CreateCommentRequest parentRequest3 = new CreateCommentRequest(postId, null, "부모 댓글2");
+        CommentResponse parentComment3 = createComment(parentRequest3);
 
         // 5. 대댓글 1 작성
         CreateCommentRequest childRequest1 = new CreateCommentRequest(postId, parentComment.commentId(), "대댓글 1");
-        createComment(childRequest1);
+        CommentResponse childComment1 = createComment(childRequest1);
 
         // 6. 대댓글 2 작성
         CreateCommentRequest childRequest2 = new CreateCommentRequest(postId, parentComment.commentId(), "대댓글 2");
-        createComment(childRequest2);
+        CommentResponse childComment2 = createComment(childRequest2);
 
-        // (선택) 좋아요 몇 개 추가해주면 더 테스트가 풍부해짐 (테스트용 좋아요 API가 있다면 넣어주세요)
+        //부모 댓글 2 좋아요
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .pathParam("commentId", parentComment2.commentId())  // 이름 일치
+                .when()
+                .post("/comments/{commentId}/likes")
+                .then().log().all()
+                .statusCode(200);
+        //부모 댓글 3 좋아요
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .pathParam("commentId", parentComment3.commentId())  // 이름 일치
+                .when()
+                .post("/comments/{commentId}/likes")
+                .then().log().all()
+                .statusCode(200);
+
+        //대댓글 2 좋아요
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + validJwtToken)
+                .pathParam("commentId", childComment2.commentId())  // 이름 일치
+                .when()
+                .post("/comments/{commentId}/likes")
+                .then().log().all()
+                .statusCode(200);
+
 
         // 7. 좋아요순 댓글 + 대댓글 조회 API 호출 및 검증
         RestAssured.given().log().all()
@@ -624,8 +657,11 @@ public class BoardApiTest extends AcceptanceTest {
                 .get("/comments/likes")
                 .then().log().all()
                 .statusCode(200);
+
+
     }
-    public BoardResponse createBoard(String boardName){
+
+    public BoardResponse createBoard(String boardName) {
 
         String token = generateTestToken();
 
@@ -641,7 +677,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(BoardResponse.class);
     }
 
-    public PostResponse createPost(CreatePostRequest request){
+    public PostResponse createPost(CreatePostRequest request) {
 
         String token = generateTestToken();
 
@@ -656,7 +692,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(PostResponse.class);
     }
 
-    public PostResponse getDetail(Long postId){
+    public PostResponse getDetail(Long postId) {
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -667,7 +703,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(PostResponse.class);
     }
 
-    public DeletePostResponse deletePost (Long postId){
+    public DeletePostResponse deletePost(Long postId) {
 
         String token = generateTestToken();
 
@@ -681,11 +717,11 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(DeletePostResponse.class);
     }
 
-    public String generateTestToken(){
+    public String generateTestToken() {
         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
     }
 
-    public CommentResponse createComment (CreateCommentRequest commentRequest){
+    public CommentResponse createComment(CreateCommentRequest commentRequest) {
 
         String token = generateTestToken();
 
