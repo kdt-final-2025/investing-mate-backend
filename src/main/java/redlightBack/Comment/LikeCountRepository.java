@@ -1,8 +1,6 @@
 package redlightBack.Comment;
 
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -21,14 +19,9 @@ public class LikeCountRepository {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-
-    QCommentLike qCommentLike = QCommentLike.commentLike;
-    QComment qComment = QComment.comment;
-
     public List<CommentSortedByLikesResponse> findCommentsSortedByLikes(Long postId, Pageable pageable) {
         QCommentLike qCommentLike = QCommentLike.commentLike;
         QComment qComment = QComment.comment;
-        QComment qChild = new QComment("qChild");
 
         return jpaQueryFactory
                 .select(new QCommentSortedByLikesResponse(

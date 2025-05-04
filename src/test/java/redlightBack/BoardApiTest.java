@@ -601,7 +601,7 @@ public class BoardApiTest extends AcceptanceTest {
         // 4. 부모 댓글 작성
         CreateCommentRequest parentRequest = new CreateCommentRequest(postId, null, "부모 댓글");
         CommentResponse parentComment = createComment(parentRequest);
-        //4.1 부모 댓그 2 작성
+        //4.1 부모 댓글 2 작성
         CreateCommentRequest parentRequest2 = new CreateCommentRequest(postId, null, "부모 댓글2");
         CommentResponse parentComment2 = createComment(parentRequest2);
         //4.2 부모댓글 3 작성
