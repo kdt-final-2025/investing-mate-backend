@@ -66,4 +66,12 @@ public class MemberService {
         Member saved = memberRepository.save(member);
         return MemberMapper.toResponseDto(saved);
     }
+
+    // 주어진 userId가 관리자 권한인지 조회
+    @Transactional(readOnly = true)
+    public boolean isAdministrator(String userId) {
+        return memberRepository.findByUserId(userId)
+                .map(member -> member.isAdministrator())
+                .orElse(false);
+    }
 }

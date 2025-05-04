@@ -2,8 +2,12 @@ package redlightBack.member;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import redlightBack.loginUtils.LoginMemberId;
+import redlightBack.member.memberDto.AdminResponseDto;
 import redlightBack.member.memberDto.MemberResponseDto;
 
 @RestController
@@ -22,5 +26,11 @@ public class MemberController {
     @PostMapping("/me")
     public MemberResponseDto provisionUser(@AuthenticationPrincipal Jwt jwt) {
         return memberService.provisionUserFromJwt(jwt);
+    }
+
+    @GetMapping("/role")
+    public AdminResponseDto isAdmin(@LoginMemberId String userId) {
+        boolean isAdmin = memberService.isAdministrator(userId);
+        return new AdminResponseDto(isAdmin);
     }
 }
