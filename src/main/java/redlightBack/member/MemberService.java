@@ -1,11 +1,14 @@
 package redlightBack.member;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import redlightBack.member.memberDto.MemberMapper;
 import redlightBack.member.memberDto.MemberRequestDto;
 import redlightBack.member.memberDto.MemberResponseDto;
+import redlightBack.member.memberDto.RoleResponseDto;
 import redlightBack.member.memberEntity.Member;
 
 import java.util.Map;
@@ -67,11 +70,14 @@ public class MemberService {
         return MemberMapper.toResponseDto(saved);
     }
 
-    // 주어진 userId가 관리자 권한인지 조회
+    // 로그인된 사용자의 role 조회
     @Transactional(readOnly = true)
-    public boolean isAdministrator(String userId) {
-        return memberRepository.findByUserId(userId)
-                .map(member -> member.isAdministrator())
-                .orElse(false);
+    public RoleResponseDto getMyRole(String userId) {
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "사용자를 찾을 수 없습니다: " + userId
+                ));
+        return new RoleResponseDto(member.getRole());
     }
 }
