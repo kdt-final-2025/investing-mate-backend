@@ -12,7 +12,7 @@ import redlightBack.loginUtils.LoginMemberId;
 
 import java.nio.file.AccessDeniedException;
 
-
+@RequestMapping("comments")
 @RequiredArgsConstructor
 @RestController
 public class CommentController {
@@ -20,26 +20,15 @@ public class CommentController {
     public final CommentService commentService;
 
 
-    @PostMapping("/comments")
+    @PostMapping("/create")
     public CommentResponse createComment(@LoginMemberId String userId,
                                          @RequestBody CreateCommentRequest request) {
         return commentService.save(userId, request);
     }
 
-    //댓글+대댓글 조회
-//    @GetMapping("/comments")
-//    public CommentResponseAndPaging getCommentTree(@RequestParam Long postId,
-//                                                   @RequestParam(defaultValue = "1") int size,
-//                                                   @RequestParam(defaultValue = "150") int pageNumber ){
-//
-//        Pageable pageable = PageRequest.of(pageNumber -1, size);
-//
-//        return commentService.getCommentTree(postId, pageable);
-//    }
-
 
     //댓글 수정 로그인 유저만
-    @PutMapping("/comments/{commentId}")
+    @PutMapping("/{commentId}")
     public void updateComment(@LoginMemberId String userId,
                               @PathVariable Long commentId,
                               @RequestBody CreateCommentRequest request) throws AccessDeniedException {
@@ -56,15 +45,17 @@ public class CommentController {
 
 
     //좋아요 버튼
-    @PostMapping("/comments/{commentId}/likes")
-    public CommentLikeResponse toggleLike(@LoginMemberId String userId, @PathVariable Long commentId) {
+    @PostMapping("/{commentId}/likes")
+    public CommentLikeResponse toggleLike(
+            @LoginMemberId String userId,
+            @PathVariable Long commentId) {
         return commentService.toggleLikeComment(userId, commentId);
 
     }
 
     //댓글+대댓글 조회(좋아요순)
-    @GetMapping("/comments/likes")
-    public CommentResponseAndPaging getCommentTreeByLikeCount(
+    @GetMapping("/likes")
+    public CommentResponseAndPaging CommentTreeBySortType(
             @RequestParam Long postId,
             @RequestParam(defaultValue = "Time") String sortType,
             @RequestParam(defaultValue = "1") int size,

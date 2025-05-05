@@ -6,7 +6,6 @@ import redlightBack.common.BaseEntity;
 
 import java.time.LocalDateTime;
 
-
 @NoArgsConstructor
 @Getter
 @ToString
@@ -24,12 +23,8 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private String userId;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
     private Comment parent;
-
-//    private Long parentId; // null이면 일반 댓글, 있으면 대댓글
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
@@ -40,17 +35,9 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private boolean likedByMe = false;
 
-    @Column(nullable = false)
-    private boolean deleted = false;//소프트 삭제
+    @Column(nullable = true)
+    private LocalDateTime deletedAt;
 
-
-    public Comment(String userId, String content, Long post, Long aLong) {
-
-    }
-
-    public Comment(Long id, String userA, String 부모, int i, boolean b, LocalDateTime now, Object o) {
-        this.id = id;
-    }
 
     public Comment(Long id, String userId, String content, int likeCount, boolean likedByMe) {
         this.id = id;
@@ -67,12 +54,9 @@ public class Comment extends BaseEntity {
         this.parent = parent;
     }
 
-    public void deletedAt(){
-        this.content = "삭제된 댓글입니다.";  // 삭제된 댓글 내용으로 수정
-        this.deleted = true;
-        LocalDateTime deletedAt = LocalDateTime.now();
+    public void deletedAt() {
+        this.deletedAt = LocalDateTime.now();
     }
-
 
     // 좋아요 증가
     public void incrementLikeCount() {
@@ -84,8 +68,8 @@ public class Comment extends BaseEntity {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
-
     }
+
     public void setContent(String content) {
         this.content = content;
     }

@@ -2,7 +2,6 @@ package redlightBack.Comment.Dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
-import redlightBack.Comment.Domain.Comment;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,6 +29,4 @@ public class CommentSortedByLikesResponse {
         this.createdAt = createdAt;
         this.children = new ArrayList<>();
     }
-
-    // getter + setter or Lombok 사용
 }
