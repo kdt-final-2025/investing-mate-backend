@@ -67,10 +67,20 @@ public class ReporterApplicationService {
             RequestStatus action
     ) {
         authorizeAdmin(userId);
+
         return ids.stream()
                 .map(id -> {
                     ReporterApplication app = repo.findById(id)
                             .orElseThrow(() -> new NoSuchElementException("신청 내역이 없습니다: " + id));
+
+                    // REJECTED 상태인 건은 승인 불가
+                    if (action == RequestStatus.APPROVED &&
+                            app.getStatus() == RequestStatus.REJECTED) {
+                        throw new IllegalStateException(
+                                "반려된 신청(id=" + id + ")은 승인할 수 없습니다"
+                        );
+                    }
+
                     if (action == RequestStatus.APPROVED) {
                         app.approve();
                     } else if (action == RequestStatus.REJECTED) {
