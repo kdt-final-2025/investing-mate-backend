@@ -38,9 +38,4 @@ public class Member extends BaseEntity {
     public void upgradeToReporter() {
         this.role = Role.REPORTER;
     }
-
-    // 관리자 권한인지 판단
-    public boolean isAdministrator() {
-        return Role.ADMINISTRATOR.equals(this.role);
-    }
 }
