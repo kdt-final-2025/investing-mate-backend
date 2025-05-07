@@ -23,9 +23,9 @@ public class CommentTreeBuilder {
                     comment.getUserId(),
                     comment.getContent(),
                     comment.getLikeCount(),
-                    comment.isLikedByMe(),
+                    false,
                     comment.getCreatedAt(),
-                    new ArrayList<>()  // 자식 리스트 초기화
+                    new ArrayList<>() // 자식 리스트 초기화
             );
             commentMap.put(comment.getId(), response);
         }

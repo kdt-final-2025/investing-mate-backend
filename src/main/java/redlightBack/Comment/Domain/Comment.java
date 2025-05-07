@@ -32,19 +32,18 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private int likeCount = 0;//좋아요
 
-    @Column(nullable = false)
-    private boolean likedByMe = false;
+
 
     @Column(nullable = true)
-    private LocalDateTime deletedAt;
+    private LocalDateTime delete;
 
 
-    public Comment(Long id, String userId, String content, int likeCount, boolean likedByMe) {
+    public Comment(Long id, String userId, String content, int likeCount) {
         this.id = id;
         this.userId = userId;
         this.content = content;
         this.likeCount = likeCount;
-        this.likedByMe = likedByMe;
+
     }
 
     public Comment(String userId, String content, Long postId, Comment parent) {
@@ -54,8 +53,8 @@ public class Comment extends BaseEntity {
         this.parent = parent;
     }
 
-    public void deletedAt() {
-        this.deletedAt = LocalDateTime.now();
+    public void delete() {
+        this.delete = LocalDateTime.now();
     }
 
     // 좋아요 증가

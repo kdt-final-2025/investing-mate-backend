@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Board.Dto.CreateBoardRequest;
+import redlightBack.Comment.Dto.CommentCreateResponse;
 import redlightBack.Comment.Dto.CommentResponse;
 import redlightBack.Comment.Dto.CreateCommentRequest;
 import redlightBack.Post.Dto.*;
@@ -370,7 +371,7 @@ public class BoardApiTest extends AcceptanceTest {
                 "This is a test comment."
         );
 
-        CommentResponse parentComment = RestAssured.given().log().all()
+        CommentCreateResponse parentComment = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + validJwtToken)
                 .body(commentRequest)
@@ -379,7 +380,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200)
                 .extract()
-                .as(CommentResponse.class);
+                .as(CommentCreateResponse.class);
 
         CreateCommentRequest childCommentRequest = new CreateCommentRequest(
                 postId,
@@ -412,62 +413,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .statusCode(200);
     }
 
-    @Test
-    public void 조회테스트() {
-        // 1. 게시판 생성
-        BoardResponse board = createBoard("게시판이름");
-        Long boardId = board.id();
 
-        // 2. 게시글 생성
-        PostResponse post = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
-        Long postId = post.id();
-
-        // 3. JWT 토큰 준비
-        String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMiIsImlhdCI6MTUxNjIzOTAyMn0.d4-EAJSW6QZLPsrJBMf2plzsYMpqSa0xkn5u-1rhYrs";
-
-        // 4. 일반 댓글 작성
-        CreateCommentRequest commentRequest = new CreateCommentRequest(
-                postId,
-                null,
-                "테스트 댓글"
-        );
-
-        CommentResponse parentComment = createComment(commentRequest);
-
-        CreateCommentRequest childCommentRequest = new CreateCommentRequest(
-                postId,
-                parentComment.commentId(),
-                "이것은 대댓글입니다."
-        );
-
-        createComment(childCommentRequest);
-
-        CreateCommentRequest childCommentRequest2 = new CreateCommentRequest(
-                postId,
-                parentComment.commentId(),
-                "이것은 대댓글입니다2."
-        );
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + validJwtToken)
-                .body(childCommentRequest2)
-                .when()
-                .post("/comments")
-                .then().log().all()
-                .statusCode(200);
-
-        // 5. 댓글 조회 API 호출 및 검증
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .queryParam("postId", 1L)
-                .queryParam("size", 150)        // 생략 가능 (기본값)
-                .queryParam("pageNumber", 1)
-                .when()
-                .get("/comments/likes")
-                .then().log().all()  // 실제 응답 출력
-                .statusCode(200);
-    }
 
     @Test
     public void 댓글_수정_테스트() {

@@ -4,15 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import redlightBack.Comment.Dto.CommentCreateResponse;
 import redlightBack.Comment.Dto.CommentLikeResponse;
-import redlightBack.Comment.Dto.CommentResponse;
 import redlightBack.Comment.Dto.CommentResponseAndPaging;
 import redlightBack.Comment.Dto.CreateCommentRequest;
 import redlightBack.loginUtils.LoginMemberId;
 
 import java.nio.file.AccessDeniedException;
 
-@RequestMapping("comments")
+@RequestMapping("/comments")
 @RequiredArgsConstructor
 @RestController
 public class CommentController {
@@ -20,9 +20,9 @@ public class CommentController {
     public final CommentService commentService;
 
 
-    @PostMapping("/create")
-    public CommentResponse createComment(@LoginMemberId String userId,
-                                         @RequestBody CreateCommentRequest request) {
+    @PostMapping("")
+    public CommentCreateResponse createComment(@LoginMemberId String userId,
+                                               @RequestBody CreateCommentRequest request) {
         return commentService.save(userId, request);
     }
 
@@ -55,7 +55,7 @@ public class CommentController {
 
     //댓글+대댓글 조회(좋아요순)
     @GetMapping("/likes")
-    public CommentResponseAndPaging CommentTreeBySortType(
+    public CommentResponseAndPaging getCommentsSortedByLikes(
             @RequestParam Long postId,
             @RequestParam(defaultValue = "Time") String sortType,
             @RequestParam(defaultValue = "1") int size,
