@@ -7,15 +7,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import redlightBack.member.MemberRepository;
 import redlightBack.member.memberEntity.Member;
 import redlightBack.member.memberEntity.Role;
-import redlightBack.member.MemberRepository;
 import redlightBack.reporterapplication.domain.RequestStatus;
 import redlightBack.reporterapplication.web.dto.ApplicationResponseDto;
 import redlightBack.reporterapplication.web.dto.ProcessRequestDto;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -288,5 +288,37 @@ public class ReporterApplicationApiTest extends AcceptanceTest {
                 .body(dto)
                 .when().patch("reporter-applications")
                 .then().statusCode(403);
+    }
+
+    @DisplayName("관리자 - 반려된 신청 재승인 불가(400)")
+    @Test
+    public void process_reapprovalAfterRejection_failure() {
+        // 1) 사용자 신청
+        ApplicationResponseDto app = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + USER_TOKEN)
+                .when().post("reporter-applications")
+                .then().extract().as(ApplicationResponseDto.class);
+
+        // 2) 반려 처리
+        ProcessRequestDto rejectDto = new ProcessRequestDto(
+                List.of(app.applicationId()), RequestStatus.REJECTED
+        );
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .body(rejectDto)
+                .when().patch("reporter-applications");
+
+        // 3) 반려된 신청 재승인 시도
+        ProcessRequestDto approveDto = new ProcessRequestDto(
+                List.of(app.applicationId()), RequestStatus.APPROVED
+        );
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + ADMIN_TOKEN)
+                .body(approveDto)
+                .when().patch("reporter-applications")
+                .then().statusCode(400);
     }
 }
