@@ -19,12 +19,12 @@ public class Stock {
 
     private String name;
 
-    private String code;
+    private String symbol;
 
     private Long marketCap;
 
-    public Stock(String name, String code) {
+    public Stock(String name, String symbol) {
         this.name = name;
-        this.code = code;
+        this.symbol = symbol;
     }
 }

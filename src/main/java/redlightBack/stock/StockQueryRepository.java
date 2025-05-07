@@ -1,7 +1,6 @@
 package redlightBack.stock;
 
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -43,8 +42,8 @@ public class StockQueryRepository {
 
                     case "code":
                         orderSpecifiers.add(asc
-                                ? stock.code.asc()
-                                : stock.code.desc());
+                                ? stock.symbol.asc()
+                                : stock.symbol.desc());
                         break;
 
                     default:
