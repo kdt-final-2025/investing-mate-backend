@@ -11,6 +11,7 @@ public class ReporterApplicationMapper {
         return new ApplicationResponseDto(
                 e.getId(),
                 e.getMember().getUserId(),
+                e.getMember().getFullname(),
                 e.getStatus(),
                 e.getAppliedAt(),
                 e.getProcessedAt()
