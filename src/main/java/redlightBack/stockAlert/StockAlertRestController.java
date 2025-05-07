@@ -1,14 +1,10 @@
 package redlightBack.stockAlert;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
-import redlightBack.stockAlert.dto.DeleteStockAlertRequest;
-import redlightBack.stockAlert.dto.StockAlertRequest;
-import redlightBack.stockAlert.dto.StockAlertResponse;
+import redlightBack.stockAlert.dto.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,5 +20,15 @@ public class StockAlertRestController {
     @DeleteMapping("/alerts")
     public void delete(@LoginMemberId String userId, @RequestBody DeleteStockAlertRequest request) {
         stockAlertService.delete(userId, request);
+    }
+
+    @GetMapping("/alerts/{alertId}")
+    public StockAlertDetailResponse findByAlertId(@LoginMemberId String userId, Long alertId) {
+        return stockAlertService.findByAlertId(userId, alertId);
+    }
+
+    @GetMapping("/alerts")
+    public StockAlertListResponse findAll(@LoginMemberId String userId) {
+        return stockAlertService.findAll(userId);
     }
 }
