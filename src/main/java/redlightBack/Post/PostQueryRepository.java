@@ -1,29 +1,41 @@
 package redlightBack.Post;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import redlightBack.Post.Dto.PostDto;
 import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Repository
 public class PostQueryRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QPost qPost = QPost.post;
+    private final QPostLike qPostLike = QPostLike.postLike;
 
-    public PostQueryRepository(JPAQueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
-    }
+    public List<PostDto> searchAndOrderingPosts(Long boardId, String postTitle, String userId, SortBy sortBy, Direction direction, Long offset, int size) {
 
-    public List<Post> searchAndOrderingPosts (Long boardId, String postTitle, String userId, SortBy sortBy, Direction direction, Long offset, int size){
-
-        return queryFactory.select(qPost)
+        return queryFactory.select(Projections.constructor(PostDto.class, qPost.id,
+                        qPost.postTitle,
+                        qPost.userId,
+                        qPost.viewCount,
+                        qPost.commentCount,
+                        qPostLike.id.count(),
+                        qPost.createdAt))
                 .from(qPost)
-                .where(qPost.boardId.eq(boardId), qPost.deletedAt.isNull(), searchByTitle(postTitle), searchByUserId(userId))
+                .where(qPost.boardId.eq(boardId),
+                        qPost.deletedAt.isNull(),
+                        searchByTitle(postTitle),
+                        searchByUserId(userId))
+                .leftJoin(qPostLike).on(qPostLike.post.id.eq(qPost.id))
+                .groupBy(qPost.id)
                 .orderBy(orderSpecifiers(sortBy, direction))
                 .offset(offset)
                 .limit(size)
