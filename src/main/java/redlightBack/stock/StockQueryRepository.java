@@ -44,6 +44,7 @@ public class StockQueryRepository {
                         orderSpecifiers.add(asc
                                 ? stock.symbol.asc()
                                 : stock.symbol.desc());
+
                         break;
 
                     default:

@@ -58,6 +58,7 @@ public class StockService {
                 .map(stock -> new FavoriteStockResponse(
                         stock.getName(),
                         stock.getSymbol(),
+
                         stock.getMarketCap()))
                 .toList();
         return new FavoriteStockListResponse(
