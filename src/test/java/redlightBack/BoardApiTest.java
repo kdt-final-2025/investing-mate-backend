@@ -364,8 +364,8 @@ public class BoardApiTest extends AcceptanceTest {
         assertThat(postListResponses.get(0).postTitle()).isEqualTo("제목1");
 
     }
-  
-  
+
+
     @DisplayName("좋아요 테스트")
     @Test
     public void 좋아요_테스트 (){
@@ -650,6 +650,7 @@ public class BoardApiTest extends AcceptanceTest {
     @Test
     public void 댓글_생성_테스트() {
         // 1. 게시판 생성
+        createMember("user1");
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -684,6 +685,7 @@ public class BoardApiTest extends AcceptanceTest {
     @Test
     public void 대댓글_생성_테스트() {
         // 1. 게시판 생성
+        createMember("user1");
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -747,6 +749,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @Test
     public void 댓글_수정_테스트() {
+        createMember("user1");
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -778,6 +781,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @Test
     public void 댓글_삭제_테스트() {
+        createMember("user1");
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -831,7 +835,8 @@ public class BoardApiTest extends AcceptanceTest {
 
 
     @Test
-    public void 좋아요_테스트() {
+    public void 댓글_좋아요_테스트() {
+        createMember("user1");
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -867,6 +872,7 @@ public class BoardApiTest extends AcceptanceTest {
     @Test
     public void 좋아요순_댓글트리_조회테스트() {
         // 1. 게시판 생성
+        createMember("user1");
         BoardResponse board = createBoard("게시판이름");
         Long boardId = board.id();
 
@@ -990,7 +996,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + token)
                 .pathParam("postId", postId)
-                .delete("/comments/likes")
+                .delete("/posts/{postId}")
                 .then().log().all()
                 .extract()
                 .as(DeletePostResponse.class);
@@ -1000,22 +1006,22 @@ public class BoardApiTest extends AcceptanceTest {
     public String generateTestToken() {
         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
     }
-  
+
       public CommentResponse createComment(CreateCommentRequest commentRequest) {
 
-        String token = generateTestToken();
+          String token = generateTestToken();
 
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token)
-                .body(commentRequest)
-                .when()
-                .post("/comments")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .as(CommentResponse.class);
-
+          return RestAssured.given().log().all()
+                  .contentType(ContentType.JSON)
+                  .header("Authorization", "Bearer " + token)
+                  .body(commentRequest)
+                  .when()
+                  .post("/comments")
+                  .then().log().all()
+                  .statusCode(200)
+                  .extract()
+                  .as(CommentResponse.class);
+      }
 
 
 
@@ -1047,7 +1053,6 @@ public class BoardApiTest extends AcceptanceTest {
                 .extract()
                 .as(Member.class);
     }
-
 
     private Map<String, String> tokens = Map.of(
             "user1", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJleGFtcGxlMUBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.47l3xzbylBcWghRGY2gR9jUsy_gUa4s1wUJLduzvo7Y",
