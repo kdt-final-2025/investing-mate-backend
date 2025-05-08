@@ -7,7 +7,6 @@ import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Post.PostQueryRepository;
 import redlightBack.member.MemberRepository;
-import redlightBack.member.memberEntity.Member;
 import redlightBack.member.memberEntity.Role;
 
 import java.util.List;
@@ -20,25 +19,21 @@ public class BoardService {
     private final PostQueryRepository postQueryRepository;
     private final MemberRepository memberRepository;
 
-    // 게시판 생성 (관리자만 가능)
+    // 게시판 생성 (관리자만)
     public BoardResponse create(String userId, CreateBoardRequest request) {
-        // 1) 사용자 조회
-        Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new AccessDeniedException("접근 권한이 없습니다."));  // 로그인 여부 확인 :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}:contentReference[oaicite:2]{index=2}:contentReference[oaicite:3]{index=3}
 
-        // 2) 관리자 권한 체크
-        if (member.getRole() != Role.ADMINISTRATOR) {
-            throw new AccessDeniedException("관리자만 접근할 수 있습니다.");  // 권한 없으면 예외
+        // ADMINISTRATOR 권한이 아니면 예외
+        if (!memberRepository.existsByUserIdAndRole(userId, Role.ADMINISTRATOR)) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
         }
 
-        // 3) 권한 통과 시 게시판 생성
         Board board = new Board(request.boardName());
         boardRepository.save(board);
 
         return new BoardResponse(
                 board.getId(),
                 board.getBoardName(),
-                board.postCount
+                board.getPostCount()
         );
     }
 
