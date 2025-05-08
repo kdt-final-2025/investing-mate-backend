@@ -35,12 +35,19 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Add a specific step to verify Lombok is correctly installed
+      - name: Verify Lombok configuration
+        run: |
+          echo "Checking Lombok version and configuration..."
+          ./gradlew -q dependencies | grep -i lombok || echo "Lombok not found in dependencies!"
+
+      # Use --info flag to get more detailed build information
       - name: Run tests
-        run: ./gradlew test --no-daemon
+        run: ./gradlew test --no-daemon --info
 
   build:
     name: Build Application
-    needs: test  # test job 완료 후 실행
+    needs: test
     runs-on: ubuntu-latest
     environment: dev
 
