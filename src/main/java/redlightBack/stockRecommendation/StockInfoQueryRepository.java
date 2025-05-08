@@ -1,0 +1,38 @@
+package redlightBack.stockRecommendation;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+
+@Repository
+@RequiredArgsConstructor
+public class StockInfoQueryRepository {
+
+    private final JPAQueryFactory queryFactory;
+    private final QStockRecommendation qStockRecommendation = QStockRecommendation.stockRecommendation;
+
+
+    public List<StockRecommendation> recommend(Double minDividend, Double maxPriceRatio, int limit){
+        return queryFactory.selectFrom(qStockRecommendation)
+                .where(byDividend(minDividend), byPriceRatio(maxPriceRatio))
+                .orderBy(qStockRecommendation.dividendYield.desc())
+                .limit(limit)
+                .fetch();
+    }
+
+    // 	배당률이 최소 기준 이상인 종목
+    private BooleanExpression byDividend(Double min){
+        return (min != null) ? qStockRecommendation.dividendYield.gt(min) : null;
+    }
+
+    // 기간 고점 대비 저평가된 종목
+    // 예: maxRatio = 0.8 이면, 현재가가 1년 고가의 80% 이하인 종목만 반환
+    private BooleanExpression byPriceRatio(Double maxRatio){
+        return (maxRatio != null) ? qStockRecommendation.currentPrice.divide(qStockRecommendation.highPrice1y).lt(maxRatio) : null;
+    }
+
+}
