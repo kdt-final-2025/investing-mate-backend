@@ -1,6 +1,7 @@
 package redlightBack.Post;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import redlightBack.Board.Board;
@@ -8,10 +9,14 @@ import redlightBack.Board.BoardRepository;
 import redlightBack.Post.Dto.*;
 import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
+import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Member;
+
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@RequiredArgsConstructor
 @Service
 public class PostService {
 
@@ -19,13 +24,8 @@ public class PostService {
     private final BoardRepository boardRepository;
     private final PostQueryRepository postQueryRepository;
     private final PostMapper postMapper;
-
-    public PostService(PostRepository postRepository, BoardRepository boardRepository, PostQueryRepository postQueryRepository, PostMapper postMapper) {
-        this.postRepository = postRepository;
-        this.boardRepository = boardRepository;
-        this.postQueryRepository = postQueryRepository;
-        this.postMapper = postMapper;
-    }
+    private final MemberRepository memberRepository;
+    private final PostLikeQueryRepository postLikeQueryRepository;
 
     //게시물 생성
     public PostResponse create (String userId, CreatePostRequest request){
@@ -58,11 +58,13 @@ public class PostService {
     @Transactional
     public PostResponse update (String userId, Long postId, CreatePostRequest request){
 
-        //TODO 작성자 검증 추가
-
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
+
+        if(!post.getUserId().equals(userId)){
+            throw new NoSuchElementException("게시물 수정은 작성자만 할 수 있습니다.");
+        }
 
         post.updatePost(request.postTitle(),
                 request.content(),
@@ -75,11 +77,13 @@ public class PostService {
     @Transactional
     public DeletePostResponse delete (String userId, Long postId){
 
-        //TODO 작성자 확인 로직
-
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
+
+        if(!post.getUserId().equals(userId)){
+            throw new NoSuchElementException("게시물 삭제는 작성자만 할 수 있습니다.");
+        }
 
         post.softDelete();
 
@@ -105,15 +109,16 @@ public class PostService {
         long totalElements = postQueryRepository.countPosts(boardId, postTitle, userId);
         int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
 
-        List<Post> posts = postQueryRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, offset, size);
+        List<PostDto> posts = postQueryRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, offset, size);
 
         List<PostListResponse> responseList = posts.stream()
-                .map(list -> new PostListResponse(list.getId(),
-                        list.getPostTitle(),
-                        list.getUserId(),
-                        list.getViewCount(),
-                        list.getCommentCount(),
-                        list.getLikeCount())
+                .map(list -> new PostListResponse(list.id(),
+                        list.postTitle(),
+                        list.userId(),
+                        list.viewCount(),
+                        list.commentCount(),
+                        list.likeCount(),
+                        list.createdAt())
                 ).toList();
 
         PageInfo pageInfo = new PageInfo(pageable.getPageNumber() + 1,
@@ -123,6 +128,28 @@ public class PostService {
                 );
 
         return new PostListAndPagingResponse(board.getBoardName(), responseList, pageInfo);
+    }
+
+    //사용자가 좋아요 누른 게시글 목록 보기
+    public PostsLikedAndPagingResponse likedPostList (String userId, Pageable pageable){
+
+        Member member = memberRepository.findByUserId(userId).orElseThrow(
+                () -> new NoSuchElementException("유효하지 않은 사용자입니다.")
+        );
+
+        int pageNumber = pageable.getPageNumber();
+        int size = pageable.getPageSize();
+        long offset = pageable.getOffset();
+        long totalElements = postLikeQueryRepository.countLikedPosts(userId);
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+
+        List<PostLikeDto> postsLikedByUser = postLikeQueryRepository.findPostsLikedByUser(member.getUserId(), offset, size);
+
+        List<PostsLikedResponse> posts = postMapper.toListPostLikeResponse(postsLikedByUser);
+
+        PageInfo pageInfo = new PageInfo(pageNumber, size, totalElements, totalPages);
+
+        return new PostsLikedAndPagingResponse(posts, pageInfo);
     }
 
 }

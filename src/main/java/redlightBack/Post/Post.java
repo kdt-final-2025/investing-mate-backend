@@ -35,13 +35,17 @@ public class Post extends BaseEntity {
     @CollectionTable(name = "post_image_urls", joinColumns = @JoinColumn(name = "post_id"))
     private List<String> imageUrls;
 
-    private int viewCount;
+    @Column(nullable = false)
+    private int viewCount = 0;
 
-    private int commentCount;
+    @Column(nullable = false)
+    private int commentCount = 0;
 
-    private boolean likedByMe = false;
+    @Column(nullable = false)
+    private long likeCount = 0;
 
-    private int likeCount;
+    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<PostLike> postLikes;
 
     @Setter
     private LocalDateTime deletedAt = null;
@@ -64,6 +68,16 @@ public class Post extends BaseEntity {
         if(deletedAt == null) {
             setDeletedAt(LocalDateTime.now());
         }
+    }
+
+    public void decreaseLikeCount(){
+        if(likeCount > 0 ) {
+            likeCount--;
+        }
+    }
+
+    public void increaseLikeCount(){
+        likeCount ++;
     }
 
 }
