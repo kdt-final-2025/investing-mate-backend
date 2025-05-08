@@ -57,7 +57,8 @@ public class StockService {
         List<FavoriteStockResponse> responses = stocks.stream()
                 .map(stock -> new FavoriteStockResponse(
                         stock.getName(),
-                        stock.getCode(),
+                        stock.getSymbol(),
+
                         stock.getMarketCap()))
                 .toList();
         return new FavoriteStockListResponse(
