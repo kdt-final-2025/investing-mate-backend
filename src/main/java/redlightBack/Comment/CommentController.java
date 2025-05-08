@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import redlightBack.Comment.Dto.CommentCreateResponse;
 import redlightBack.Comment.Dto.CommentLikeResponse;
+import redlightBack.Comment.Dto.CommentResponse;
 import redlightBack.Comment.Dto.CommentResponseAndPaging;
 import redlightBack.Comment.Dto.CreateCommentRequest;
 import redlightBack.loginUtils.LoginMemberId;
@@ -21,8 +21,8 @@ public class CommentController {
 
 
     @PostMapping("")
-    public CommentCreateResponse createComment(@LoginMemberId String userId,
-                                               @RequestBody CreateCommentRequest request) {
+    public CommentResponse createComment(@LoginMemberId String userId,
+                                         @RequestBody CreateCommentRequest request) {
         return commentService.save(userId, request);
     }
 

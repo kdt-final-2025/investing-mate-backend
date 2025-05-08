@@ -31,7 +31,8 @@ public class LikeCountRepository {
                         qComment.content,
                         qCommentLike.count().intValue(), // likeCount
                         Expressions.constant(false), // likedByMe: 사용자 로그인 정보 필요시 동적 처리
-                        qComment.createdAt
+                        qComment.createdAt,
+                        qComment.delete
                         // children은 트리 구성에서 추가로 처리
                 ))
                 .from(qComment)

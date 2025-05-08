@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Board.Dto.CreateBoardRequest;
-import redlightBack.Comment.Dto.CommentCreateResponse;
 import redlightBack.Comment.Dto.CommentResponse;
 import redlightBack.Comment.Dto.CreateCommentRequest;
 import redlightBack.Post.Dto.*;
@@ -371,7 +370,7 @@ public class BoardApiTest extends AcceptanceTest {
                 "This is a test comment."
         );
 
-        CommentCreateResponse parentComment = RestAssured.given().log().all()
+        CommentResponse parentComment = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + validJwtToken)
                 .body(commentRequest)
@@ -380,7 +379,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200)
                 .extract()
-                .as(CommentCreateResponse.class);
+                .as(CommentResponse.class);
 
         CreateCommentRequest childCommentRequest = new CreateCommentRequest(
                 postId,
@@ -465,34 +464,37 @@ public class BoardApiTest extends AcceptanceTest {
         CommentResponse createdComment = createComment(new CreateCommentRequest(postId, parentComment.commentId(), "이것은 대댓글입니다2."));
         System.out.println("Created comment ID = " + createdComment.commentId());
 
-        // 6. 대댓글 삭제 요청
+        // 6. 대댓글 삭제 요청 (첫 번째)
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + validJwtToken)
-                .pathParam("commentId", parentComment.commentId())  // 이름 일치
+                .pathParam("commentId",1L)
                 .when()
-                .delete("/{commentId}")
+                .delete("/comments/{commentId}" )
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200);  // 정상 삭제
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + validJwtToken)
-                .pathParam("commentId", createdComment.commentId())  // 이름 일치
+                .pathParam("commentId",2L)
                 .when()
-                .delete("/{commentId}")
+                .delete("/comments/{commentId}" )
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200);  // 정상 삭제
 
-        // 5. 댓글 조회 API 호출 및 검증
+
+
+        // 7. 좋아요순 댓글 + 대댓글 조회 API 호출 및 검증
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .queryParam("postId", 1L)
-                .queryParam("size", 150)        // 생략 가능 (기본값)
-                .queryParam("pageNumber", 1)
+                .queryParam("postId", postId)
+                .queryParam("sortType", "LIKE")
+                .queryParam("size", 150)
+                .queryParam("pageNumber", 1)// 추가: 좋아요 순 정렬
                 .when()
-                .get("/comments")
-                .then().log().all()  // 실제 응답 출력
+                .get("/comments/likes")
+                .then().log().all()
                 .statusCode(200);
     }
 

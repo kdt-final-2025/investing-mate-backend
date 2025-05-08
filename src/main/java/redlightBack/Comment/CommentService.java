@@ -27,7 +27,7 @@ public class CommentService {
     public final LikeSortedCommentTreeBuilder likeSortedCommentTreeBuilder;
 
     //생성
-    public CommentCreateResponse save(String userId, CreateCommentRequest request) {
+    public CommentResponse save(String userId, CreateCommentRequest request) {
 
         Post post = postRepository.findById(request.postId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
@@ -47,11 +47,13 @@ public class CommentService {
 
         commentRepository.save(comment);
 
-        return new CommentCreateResponse(comment.getId(),
+        return new CommentResponse(comment.getId(),
                 comment.getUserId(),
                 comment.getContent(),
                 comment.getLikeCount(),
+                false,
                 comment.getCreatedAt(),
+                comment.getDelete(),
                 List.of());
     }
 
@@ -199,6 +201,7 @@ public class CommentService {
                 response.getLikeCount(),
                 response.isLikedByMe(),
                 response.getCreatedAt(),
+                response.getDeletedAt(),
                 children
         );
     }

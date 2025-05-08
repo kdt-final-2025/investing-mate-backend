@@ -10,6 +10,7 @@ public record CommentResponse(
         int likeCount,
         boolean likeByMe,
         LocalDateTime createdAt,
+        LocalDateTime deletedAt,
         List<CommentResponse> children
 
 ) {
