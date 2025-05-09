@@ -34,8 +34,8 @@ public class Comment extends BaseEntity {
 
 
 
-    @Column(nullable = true)
-    private LocalDateTime delete;
+
+    private LocalDateTime delete = null;
 
 
     public Comment(Long id, String userId, String content, int likeCount) {

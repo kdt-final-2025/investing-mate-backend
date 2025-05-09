@@ -37,7 +37,7 @@ public class LikeCountRepository {
                 ))
                 .from(qComment)
                 .leftJoin(qCommentLike).on(qComment.id.eq(qCommentLike.comment.id))
-                .where(qComment.postId.eq(postId))
+                .where(qComment.postId.eq(postId).and(qComment.delete.isNull()))
                 .groupBy(qComment.id, qComment.parent.id, qComment.userId, qComment.content, qComment.createdAt)
                 .orderBy(qCommentLike.count().desc())
                 .offset(pageable.getOffset())
@@ -51,7 +51,7 @@ public class LikeCountRepository {
         Long result = jpaQueryFactory
                 .select(qComment.count())
                 .from(qComment)
-                .where(qComment.postId.eq(postId))
+                .where(qComment.postId.eq(postId).and(qComment.delete.isNull()))
                 .fetchOne();
 
         return result != null ? result : 0L;

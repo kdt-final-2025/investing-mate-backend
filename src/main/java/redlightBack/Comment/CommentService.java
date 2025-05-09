@@ -53,33 +53,16 @@ public class CommentService {
                 comment.getLikeCount(),
                 false,
                 comment.getCreatedAt(),
-                comment.getDelete(),
                 List.of());
     }
 
-    //댓글 조회 및 페이징 및 트리구조
-    @Transactional
-    public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable) {
-        Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);  // 댓글 + 대댓글 다 조회
 
-        // 평면 → 트리로 변환
-        List<CommentResponse> comments = commentTreeBuilder.build(commentPage.getContent());
-
-        PageMeta pageMeta = new PageMeta(
-                commentPage.getTotalPages(),
-                commentPage.getTotalElements(),
-                pageable.getPageNumber(),
-                pageable.getPageSize()
-        );
-
-        return new CommentResponseAndPaging(comments, pageMeta);
-    }
 
     //댓글 삭제(대댓글 남기고)
     @Transactional
     public void deleteComment(Long commentId, String userId) throws AccessDeniedException {
         // 댓글 조회
-        Comment comment = commentRepository.findById(commentId)
+        Comment comment = commentRepository.findByIdAndDeleteIsNull(commentId)
                 .orElseThrow(() -> new NoSuchElementException("댓글을 찾을 수 없습니다. commentId: " + commentId));
 
         // 작성자 확인
@@ -201,7 +184,6 @@ public class CommentService {
                 response.getLikeCount(),
                 response.isLikedByMe(),
                 response.getCreatedAt(),
-                response.getDeletedAt(),
                 children
         );
     }
