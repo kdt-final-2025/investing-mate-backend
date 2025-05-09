@@ -1,9 +1,9 @@
 package redlightBack.Post;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import redlightBack.Board.Board;
 import redlightBack.Board.BoardRepository;
 import redlightBack.Post.Dto.*;
@@ -11,7 +11,6 @@ import redlightBack.Post.Enum.Direction;
 import redlightBack.Post.Enum.SortBy;
 import redlightBack.member.MemberRepository;
 import redlightBack.member.memberEntity.Member;
-
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -45,6 +44,7 @@ public class PostService {
     }
 
     //게시물 상세조회
+    @Transactional(readOnly = true)
     public PostResponse getDetailPost (Long postId){
 
         Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
