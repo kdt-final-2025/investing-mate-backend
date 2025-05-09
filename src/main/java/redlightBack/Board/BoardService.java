@@ -7,6 +7,7 @@ import redlightBack.Board.Dto.CreateBoardRequest;
 import redlightBack.Board.Dto.BoardResponse;
 import redlightBack.Post.PostQueryRepository;
 import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Role;
 
 import java.util.List;
 
@@ -18,19 +19,22 @@ public class BoardService {
     private final PostQueryRepository postQueryRepository;
     private final MemberRepository memberRepository;
 
-    //게시판 생성
-    public BoardResponse create (String userId, CreateBoardRequest request){
+    // 게시판 생성 (관리자만)
+    public BoardResponse create(String userId, CreateBoardRequest request) {
+
+        // ADMINISTRATOR 권한이 아니면 예외
+        if (!memberRepository.existsByUserIdAndRole(userId, Role.ADMINISTRATOR)) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
+        }
+
         Board board = new Board(request.boardName());
-
-        memberRepository.findByUserId(userId).orElseThrow(
-                () -> new AccessDeniedException("접근 권한이 없습니다.")
-        );
-
         boardRepository.save(board);
 
-        return new BoardResponse(board.getId(),
+        return new BoardResponse(
+                board.getId(),
                 board.getBoardName(),
-                board.postCount);
+                board.getPostCount()
+        );
     }
 
     //게시판 목록조회
