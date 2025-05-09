@@ -828,7 +828,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .queryParam("size", 150)
                 .queryParam("pageNumber", 1)// 추가: 좋아요 순 정렬
                 .when()
-                .get("/comments/likes")
+                .get("/comments")
                 .then().log().all()
                 .statusCode(200);
     }
@@ -939,7 +939,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .queryParam("size", 150)
                 .queryParam("pageNumber", 1)// 추가: 좋아요 순 정렬
                 .when()
-                .get("/comments/likes")
+                .get("/comments")
                 .then().log().all()
                 .statusCode(200);
 

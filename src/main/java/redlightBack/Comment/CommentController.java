@@ -20,7 +20,7 @@ public class CommentController {
     public final CommentService commentService;
 
 
-    @PostMapping("")
+    @PostMapping
     public CommentResponse createComment(@LoginMemberId String userId,
                                          @RequestBody CreateCommentRequest request) {
         return commentService.save(userId, request);
@@ -54,7 +54,7 @@ public class CommentController {
     }
 
     //댓글+대댓글 조회(좋아요순)
-    @GetMapping("/likes")
+    @GetMapping
     public CommentResponseAndPaging getCommentsSortedByLikes(
             @RequestParam Long postId,
             @RequestParam(defaultValue = "Time") String sortType,
