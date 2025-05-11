@@ -95,8 +95,12 @@ public class PostQueryRepository {
         return totalElements != null ? totalElements : 0L;
     }
 
+    //조회수 1 증가 (QueryDSL update)
+    public void incrementViewCount(Long postId) {
+        queryFactory
+                .update(qPost)
+                .set(qPost.viewCount, qPost.viewCount.add(1))
+                .where(qPost.id.eq(postId))
+                .execute();
+    }
 }
-
-
-
-
