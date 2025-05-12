@@ -1,11 +1,14 @@
 package redlightBack.member;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import redlightBack.member.memberDto.MemberMapper;
 import redlightBack.member.memberDto.MemberRequestDto;
 import redlightBack.member.memberDto.MemberResponseDto;
+import redlightBack.member.memberDto.RoleResponseDto;
 import redlightBack.member.memberEntity.Member;
 
 import java.util.Map;
@@ -67,12 +70,14 @@ public class MemberService {
         return MemberMapper.toResponseDto(saved);
     }
 
-    //일반유저를 기자로 바꿔주는 로직
-    @Transactional
-    public MemberResponseDto promoteToReporter(String userId) {
+    // 로그인된 사용자의 role 조회
+    @Transactional(readOnly = true)
+    public RoleResponseDto getMyRole(String userId) {
         Member member = memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
-        member.upgradeToReporter();
-        return MemberMapper.toResponseDto(member);
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "사용자를 찾을 수 없습니다: " + userId
+                ));
+        return new RoleResponseDto(member.getRole());
     }
 }
