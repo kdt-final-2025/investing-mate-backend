@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
+
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.NoSuchElementException;
@@ -13,22 +15,32 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 롬복 사용 시 @Slf4j를 클래스에 사용하면 생략 가능
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // @ResponseStatus 사용
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(NoSuchElementException.class)
-    public ApiResponse<Void> handleNoSuchElementException(NoSuchElementException ex) {
-        logger.error("message", ex);
-        return ApiResponse.error(ex.getMessage());
+    // 중복 신청 등 IllegalStateException → 400 Bad Request
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalState(IllegalStateException ex) {
+        logger.warn("Bad Request: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
     }
 
-    // ResponseEntity 사용, Exception 두 개
-    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(RuntimeException ex) {
-        logger.error("message", ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ex.getMessage()));
+    // 찾아볼 수 없는 자원 → 404 Not Found
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<String> handleNotFound(NoSuchElementException ex) {
+        logger.info("Not Found: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
+    // 권한 없음 → 403 Forbidden
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleDenied(AccessDeniedException ex) {
+        logger.warn("Forbidden: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ex.getMessage());
     }
 }
