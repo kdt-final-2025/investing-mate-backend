@@ -11,10 +11,12 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
 
+import java.time.Instant;
 import java.util.Map;
 
 
@@ -31,6 +33,7 @@ public class FinnhubWebSocketService {
 
     private final StockAlertRepository alertRepository;
     private final AlertEmitterService emitterService;
+    private final TaskScheduler scheduler;
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -38,8 +41,17 @@ public class FinnhubWebSocketService {
 
     @PostConstruct
     public void init() {
+        connect();
+    }
+
+    public synchronized void connect() {
+
+        if (webSocket != null) {
+            webSocket.close(1000, "reconnect");
+        }
+
         String url = baseUrl + "?token=" + token;
-        // ② replace 불필요, WS_URL 그대로 사용
+
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -64,7 +76,27 @@ public class FinnhubWebSocketService {
 
             @Override
             public void onFailure(WebSocket ws, Throwable t, Response resp) {
-                t.printStackTrace();
+                // 1) 로깅 전략
+                log.error("❌ WebSocket failure (code={}), will retry in {}s",
+                        resp != null ? resp.code() : -1,
+                        5,
+                        t);
+                // 2) 재연결 스케줄
+                scheduler.schedule(this::retryConnect,
+                        Instant.now().plusSeconds(5));
+            }
+
+            @Override
+            public void onClosed(WebSocket ws, int code, String reason) {
+                log.warn("⚠️ WebSocket closed (code={}, reason={}), retrying in {}s",
+                        code, reason, 5);
+                scheduler.schedule(this::retryConnect,
+                        Instant.now().plusSeconds(5));
+            }
+
+            private void retryConnect() {
+                log.info("▶ Reconnecting WebSocket…");
+                connect();
             }
         });
     }
