@@ -10,6 +10,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
@@ -22,22 +23,25 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class FinnhubWebSocketService {
 
-    // ① 토큰을 직접 박아넣기
-    private static final String WS_URL = "wss://ws.finnhub.io?token=d0a2df9r01qus8rg7d8gd0a2df9r01qus8rg7d90";
+    @Value("${finnhub.ws.base-url}")
+    private String baseUrl;
+
+    @Value("${finnhub.api.token}")
+    private String token;
 
     private final StockAlertRepository alertRepository;
     private final AlertEmitterService emitterService;
+    private final OkHttpClient client = new OkHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    private OkHttpClient client;
     private WebSocket webSocket;
-    private ObjectMapper mapper = new ObjectMapper();
 
     @PostConstruct
     public void init() {
-        client = new OkHttpClient();
+        String url = baseUrl + "?token=" + token;
         // ② replace 불필요, WS_URL 그대로 사용
         Request request = new Request.Builder()
-                .url(WS_URL)
+                .url(url)
                 .build();
 
         webSocket = client.newWebSocket(request, new WebSocketListener() {

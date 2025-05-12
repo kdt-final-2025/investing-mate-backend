@@ -3,6 +3,7 @@ package redlightBack.stockAlert;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.stockAlert.dto.*;
 
@@ -17,13 +18,18 @@ public class StockAlertRestController {
         return stockAlertService.create(userId, request);
     }
 
+    @GetMapping("/alerts/subscribe")
+    public SseEmitter subscribe(@LoginMemberId String userId) {
+        return stockAlertService.subscribe(userId);
+    }
+
     @DeleteMapping("/alerts")
     public void delete(@LoginMemberId String userId, @RequestBody DeleteStockAlertRequest request) {
         stockAlertService.delete(userId, request);
     }
 
     @GetMapping("/alerts/{alertId}")
-    public StockAlertDetailResponse findByAlertId(@LoginMemberId String userId, Long alertId) {
+    public StockAlertDetailResponse findByAlertId(@LoginMemberId String userId, @PathVariable Long alertId) {
         return stockAlertService.findByAlertId(userId, alertId);
     }
 
