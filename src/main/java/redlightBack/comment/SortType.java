@@ -1,4 +1,4 @@
-package redlightBack.Comment;
+package redlightBack.comment;
 
 public enum SortType {
     LIKE,

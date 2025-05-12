@@ -1,13 +1,13 @@
-package redlightBack.Comment;
+package redlightBack.comment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import redlightBack.Comment.Domain.Comment;
-import redlightBack.Comment.Domain.CommentLike;
-import redlightBack.Comment.Dto.*;
+import redlightBack.comment.domain.Comment;
+import redlightBack.comment.domain.CommentLike;
+import redlightBack.comment.dto.*;
 import redlightBack.Post.Post;
 import redlightBack.Post.PostRepository;
 

@@ -1,13 +1,13 @@
-package redlightBack.Comment;
+package redlightBack.comment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import redlightBack.Comment.Dto.CommentLikeResponse;
-import redlightBack.Comment.Dto.CommentResponse;
-import redlightBack.Comment.Dto.CommentResponseAndPaging;
-import redlightBack.Comment.Dto.CreateCommentRequest;
+import redlightBack.comment.dto.CommentLikeResponse;
+import redlightBack.comment.dto.CommentResponse;
+import redlightBack.comment.dto.CommentResponseAndPaging;
+import redlightBack.comment.dto.CreateCommentRequest;
 import redlightBack.loginUtils.LoginMemberId;
 
 import java.nio.file.AccessDeniedException;

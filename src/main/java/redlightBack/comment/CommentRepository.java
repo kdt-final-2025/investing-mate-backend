@@ -1,9 +1,9 @@
-package redlightBack.Comment;
+package redlightBack.comment;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import redlightBack.Comment.Domain.Comment;
+import redlightBack.comment.domain.Comment;
 
 import java.util.Optional;
 

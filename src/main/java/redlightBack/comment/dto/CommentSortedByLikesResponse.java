@@ -1,4 +1,4 @@
-package redlightBack.Comment.Dto;
+package redlightBack.comment.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
