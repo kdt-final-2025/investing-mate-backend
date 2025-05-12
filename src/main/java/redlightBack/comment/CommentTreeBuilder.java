@@ -1,8 +1,8 @@
-package redlightBack.Comment;
+package redlightBack.comment;
 
 import org.springframework.stereotype.Component;
-import redlightBack.Comment.Domain.Comment;
-import redlightBack.Comment.Dto.CommentResponse;
+import redlightBack.comment.domain.Comment;
+import redlightBack.comment.dto.CommentResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;

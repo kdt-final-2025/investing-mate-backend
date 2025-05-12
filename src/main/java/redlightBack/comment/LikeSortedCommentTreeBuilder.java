@@ -1,7 +1,7 @@
-package redlightBack.Comment;
+package redlightBack.comment;
 
 import org.springframework.stereotype.Component;
-import redlightBack.Comment.Dto.CommentSortedByLikesResponse;
+import redlightBack.comment.dto.CommentSortedByLikesResponse;
 
 import java.util.ArrayList;
 import java.util.List;

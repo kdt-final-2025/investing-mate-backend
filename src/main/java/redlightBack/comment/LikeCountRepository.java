@@ -1,13 +1,13 @@
-package redlightBack.Comment;
+package redlightBack.comment;
 
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import redlightBack.Comment.Domain.QComment;
-import redlightBack.Comment.Domain.QCommentLike;
-import redlightBack.Comment.Dto.CommentSortedByLikesResponse;
-import redlightBack.Comment.Dto.QCommentSortedByLikesResponse;
+import redlightBack.comment.domain.QComment;
+import redlightBack.comment.domain.QCommentLike;
+import redlightBack.comment.dto.CommentSortedByLikesResponse;
+import redlightBack.comment.dto.QCommentSortedByLikesResponse;
 
 import java.util.List;
 

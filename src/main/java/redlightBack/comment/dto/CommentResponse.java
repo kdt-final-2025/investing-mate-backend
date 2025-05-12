@@ -1,14 +1,16 @@
-package redlightBack.Comment.Dto;
+package redlightBack.comment.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record CommentCreateResponse(
+public record CommentResponse(
         Long commentId,
         String userId,
         String content,
         int likeCount,
+        boolean likeByMe,
         LocalDateTime createdAt,
-        List<CommentCreateResponse> children
+        List<CommentResponse> children
+
 ) {
 }

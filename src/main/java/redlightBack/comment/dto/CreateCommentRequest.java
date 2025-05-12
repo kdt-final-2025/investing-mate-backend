@@ -1,4 +1,4 @@
-package redlightBack.Comment.Dto;
+package redlightBack.comment.dto;
 
 public record CreateCommentRequest(
         Long postId,
