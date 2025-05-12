@@ -21,6 +21,7 @@ public class PostLikeQueryRepository {
     public List<PostLikeDto> findPostsLikedByUser (String userId, Long offset, int size){
 
         return queryFactory.select(Projections.constructor(PostLikeDto.class,
+                        qPost.id,          // ② 추가: post.id
                         qBoard.id,
                         qBoard.boardName,
                         qPost.postTitle,
