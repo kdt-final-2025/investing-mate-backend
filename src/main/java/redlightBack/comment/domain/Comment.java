@@ -1,4 +1,4 @@
-package redlightBack.Comment.Domain;
+package redlightBack.comment.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
