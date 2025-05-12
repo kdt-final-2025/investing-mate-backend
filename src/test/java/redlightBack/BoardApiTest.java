@@ -7,13 +7,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import redlightBack.Board.Dto.BoardResponse;
-import redlightBack.Board.Dto.CreateBoardRequest;
+import redlightBack.board.dto.BoardResponse;
+import redlightBack.board.dto.CreateBoardRequest;
 import redlightBack.comment.dto.CommentResponse;
 import redlightBack.comment.dto.CreateCommentRequest;
-import redlightBack.Post.Dto.*;
-import redlightBack.Post.Enum.Direction;
-import redlightBack.Post.Enum.SortBy;
+import redlightBack.post.dto.*;
+import redlightBack.post.enums.Direction;
+import redlightBack.post.enums.SortBy;
 import redlightBack.member.memberEntity.Member;
 
 import java.util.List;
