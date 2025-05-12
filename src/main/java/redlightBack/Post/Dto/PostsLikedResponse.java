@@ -3,7 +3,7 @@ package redlightBack.Post.Dto;
 import java.time.LocalDateTime;
 
 public record PostsLikedResponse(
-        Long id,
+        Long postId,
         Long boardId,
         String boardName,
         String postTitle,
