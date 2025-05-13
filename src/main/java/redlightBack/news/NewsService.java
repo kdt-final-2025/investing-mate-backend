@@ -66,7 +66,8 @@ public class NewsService {
     }
 
     public NewsPageResponse getAll(String title, int page, int size, String sortBy, String order) {
-        Sort sort = Sort.by(sortBy, order);
+        Sort.Direction direction = Sort.Direction.fromString(order);
+        Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         List<News> news = newsQueryRepository.findAll(title, pageable);
         long totalCount = newsQueryRepository.totalCount(title);

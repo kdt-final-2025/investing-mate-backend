@@ -8,6 +8,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -19,12 +22,22 @@ public class Stock {
 
     private String name;
 
-    private String code;
+    private String symbol;
 
-    private Long marketCap;
+    private BigDecimal marketCap;
 
-    public Stock(String name, String code) {
+    private LocalDateTime updatedAt;
+
+    public Stock(String symbol, String name, BigDecimal marketCap) {
+        this.symbol = symbol;
         this.name = name;
-        this.code = code;
+        this.marketCap = marketCap;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void update(String name, BigDecimal cap) {
+        this.name = name;
+        this.marketCap = cap;
+        this.updatedAt = LocalDateTime.now();
     }
 }
