@@ -1,6 +1,7 @@
 package redlightBack.stock;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -74,7 +75,53 @@ public class StockQueryRepository {
         return count != null ? count : 0L;
     }
 
-//    public List<Stock> getAll(String symbol, Pageable pageable) {
-//
-//    }
+    public List<Stock> getAll(String symbol, Pageable pageable) {
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+        Sort sort = pageable.getSort();
+
+        if (sort.isUnsorted()) {
+            // 정렬 조건이 없으면 기본으로 ID 오름차순
+            orderSpecifiers.add(stock.id.asc());
+        } else {
+            for (Sort.Order o : sort) {
+                String prop = o.getProperty();
+                boolean asc = o.isAscending();
+
+                switch (prop) {
+                    case "marketCap":
+                        orderSpecifiers.add(asc
+                                ? stock.marketCap.asc()
+                                : stock.marketCap.desc());
+                        break;
+
+                    case "code":
+                        orderSpecifiers.add(asc
+                                ? stock.symbol.asc()
+                                : stock.symbol.desc());
+
+                        break;
+
+                    default:
+                        // 그 외 컬럼은 ID 정렬로 대체
+                        orderSpecifiers.add(asc
+                                ? stock.id.asc()
+                                : stock.id.desc());
+                }
+            }
+        }
+        return queryFactory
+                .selectFrom(stock)
+                .where(findBySymbol(symbol))
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier<?>[0]))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
+
+    public BooleanExpression findBySymbol(String symbol) {
+        if (symbol == null) {
+            return null;
+        }
+        return stock.symbol.contains(symbol);
+    }
 }

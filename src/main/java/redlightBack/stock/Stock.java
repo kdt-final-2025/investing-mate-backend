@@ -28,9 +28,9 @@ public class Stock {
 
     private LocalDateTime updatedAt;
 
-    public Stock(String name, String symbol, BigDecimal marketCap) {
-        this.name = name;
+    public Stock(String symbol, String name, BigDecimal marketCap) {
         this.symbol = symbol;
+        this.name = name;
         this.marketCap = marketCap;
         this.updatedAt = LocalDateTime.now();
     }

@@ -6,10 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import redlightBack.stock.dto.FavoriteStockListResponse;
-import redlightBack.stock.dto.FavoriteStockRequest;
-import redlightBack.stock.dto.FavoriteStockResponse;
-import redlightBack.stock.dto.StockListResponse;
+import redlightBack.stock.dto.*;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -70,13 +67,21 @@ public class StockService {
         );
     }
 
-//    public StockListResponse getAll(String symbol,
-//                                    int page,
-//                                    int size,
-//                                    String sortBy,
-//                                    String order) {
-//        Sort sort = Sort.by(sortBy, order);
-//        Pageable pageable = PageRequest.of(page - 1, size, sort);
-//
-//    }
+    public StockListResponse getAll(String symbol,
+                                    int page,
+                                    int size,
+                                    String sortBy,
+                                    String order) {
+        Sort sort = Sort.by(sortBy, order);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        List<Stock> stocks = stockQueryRepository.getAll(symbol, pageable);
+        List<StockResponse> list = stocks.stream()
+                .map(stock -> new StockResponse(
+                        stock.getName(),
+                        stock.getSymbol(),
+                        stock.getMarketCap()
+                ))
+                .toList();
+        return new StockListResponse(list);
+    }
 }

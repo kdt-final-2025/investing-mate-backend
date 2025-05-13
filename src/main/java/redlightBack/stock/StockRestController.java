@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.stock.dto.FavoriteStockListResponse;
 import redlightBack.stock.dto.FavoriteStockRequest;
+import redlightBack.stock.dto.StockListResponse;
 import redlightBack.stock.external.TickerSyncService;
 
 @RequiredArgsConstructor
@@ -33,15 +34,15 @@ public class StockRestController {
                                                     @RequestParam(required = false, defaultValue = "asc") String order) {
         return stockService.getFavoriteAll(userId, page, size, sortBy, order);
     }
-//
-//    @GetMapping("/stocks")
-//    public StockListResponse getAll(@RequestParam(required = false) String symbol,
-//                                    @RequestParam(required = false, defaultValue = "0") int page,
-//                                    @RequestParam(required = false, defaultValue = "20") int size,
-//                                    @RequestParam(required = false, defaultValue = "id") String sortBy,
-//                                    @RequestParam(required = false, defaultValue = "asc") String order) {
-//        return stockService.getAll(symbol, page, size, sortBy, order);
-//    }
+
+    @GetMapping("/stocks")
+    public StockListResponse getAll(@RequestParam(required = false) String symbol,
+                                    @RequestParam(required = false, defaultValue = "0") int page,
+                                    @RequestParam(required = false, defaultValue = "20") int size,
+                                    @RequestParam(required = false, defaultValue = "id") String sortBy,
+                                    @RequestParam(required = false, defaultValue = "asc") String order) {
+        return stockService.getAll(symbol, page, size, sortBy, order);
+    }
 
     @GetMapping("stocks/symbol")
     public void getAllFromFmp() {

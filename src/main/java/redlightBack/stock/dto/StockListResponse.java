@@ -1,4 +1,8 @@
 package redlightBack.stock.dto;
 
-public record StockListResponse() {
+import java.util.List;
+
+public record StockListResponse(
+        List<StockResponse> stockResponses
+) {
 }
