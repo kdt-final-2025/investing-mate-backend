@@ -45,12 +45,13 @@ public class StockService {
                                                     int size,
                                                     String sortBy,
                                                     String order) {
-        Sort sort = Sort.by(sortBy, order);
+        Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
+        Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         List<Stock> stocks = stockQueryRepository.getFavoriteAll(
                 userId,
                 pageable);
-        long totalCount = stockQueryRepository.totalCount(userId);
+        long totalCount = stockQueryRepository.favoriteTotalCount(userId);
         long totalPages = (totalCount + size - 1) / size;
         List<FavoriteStockResponse> responses = stocks.stream()
                 .map(stock -> new FavoriteStockResponse(
@@ -72,7 +73,8 @@ public class StockService {
                                     int size,
                                     String sortBy,
                                     String order) {
-        Sort sort = Sort.by(sortBy, order);
+        Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
+        Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         List<Stock> stocks = stockQueryRepository.getAll(symbol, pageable);
         List<StockResponse> list = stocks.stream()
@@ -82,6 +84,7 @@ public class StockService {
                         stock.getMarketCap()
                 ))
                 .toList();
-        return new StockListResponse(list);
+        Long totalCount = stockQueryRepository.totalCount(symbol);
+        return new StockListResponse(list, totalCount);
     }
 }

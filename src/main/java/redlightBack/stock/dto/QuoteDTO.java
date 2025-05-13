@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 public record QuoteDTO(
         String symbol,
         String name,
-        @JsonProperty("marketCap") BigDecimal marketCap
+        @JsonProperty("marketCap") BigDecimal marketCap,
+        String type
 ) {
 
 }

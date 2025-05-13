@@ -22,52 +22,18 @@ public class StockQueryRepository {
     }
 
     public List<Stock> getFavoriteAll(String userId, Pageable pageable) {
-        // --- Pageable 에서 Sort 꺼내서 QueryDSL OrderSpecifier 로 변환 ---
-        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
-        Sort sort = pageable.getSort();
-
-        if (sort.isUnsorted()) {
-            // 정렬 조건이 없으면 기본으로 ID 오름차순
-            orderSpecifiers.add(stock.id.asc());
-        } else {
-            for (Sort.Order o : sort) {
-                String prop = o.getProperty();
-                boolean asc = o.isAscending();
-
-                switch (prop) {
-                    case "marketCap":
-                        orderSpecifiers.add(asc
-                                ? stock.marketCap.asc()
-                                : stock.marketCap.desc());
-                        break;
-
-                    case "code":
-                        orderSpecifiers.add(asc
-                                ? stock.symbol.asc()
-                                : stock.symbol.desc());
-
-                        break;
-
-                    default:
-                        // 그 외 컬럼은 ID 정렬로 대체
-                        orderSpecifiers.add(asc
-                                ? stock.id.asc()
-                                : stock.id.desc());
-                }
-            }
-        }
-
+        OrderSpecifier<?>[] orders = toOrderSpecifiers(pageable.getSort());
         return queryFactory
                 .selectFrom(stock)
                 .join(favoriteStock).on(favoriteStock.stock.eq(stock))
                 .where(favoriteStock.userId.eq(userId))
-                .orderBy(orderSpecifiers.toArray(new OrderSpecifier<?>[0]))
+                .orderBy(orders)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
     }
 
-    public Long totalCount(String userId) {
+    public Long favoriteTotalCount(String userId) {
         Long count = queryFactory.select(favoriteStock.count())
                 .from(favoriteStock)
                 .where(favoriteStock.userId.eq(userId))
@@ -75,44 +41,20 @@ public class StockQueryRepository {
         return count != null ? count : 0L;
     }
 
+    public Long totalCount(String symbol) {
+        Long count = queryFactory.select(stock.count())
+                .from(stock)
+                .where(findBySymbol(symbol))
+                .fetchOne();
+        return count != null ? count : 0L;
+    }
+
     public List<Stock> getAll(String symbol, Pageable pageable) {
-        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
-        Sort sort = pageable.getSort();
-
-        if (sort.isUnsorted()) {
-            // 정렬 조건이 없으면 기본으로 ID 오름차순
-            orderSpecifiers.add(stock.id.asc());
-        } else {
-            for (Sort.Order o : sort) {
-                String prop = o.getProperty();
-                boolean asc = o.isAscending();
-
-                switch (prop) {
-                    case "marketCap":
-                        orderSpecifiers.add(asc
-                                ? stock.marketCap.asc()
-                                : stock.marketCap.desc());
-                        break;
-
-                    case "code":
-                        orderSpecifiers.add(asc
-                                ? stock.symbol.asc()
-                                : stock.symbol.desc());
-
-                        break;
-
-                    default:
-                        // 그 외 컬럼은 ID 정렬로 대체
-                        orderSpecifiers.add(asc
-                                ? stock.id.asc()
-                                : stock.id.desc());
-                }
-            }
-        }
+        OrderSpecifier<?>[] orders = toOrderSpecifiers(pageable.getSort());
         return queryFactory
                 .selectFrom(stock)
                 .where(findBySymbol(symbol))
-                .orderBy(orderSpecifiers.toArray(new OrderSpecifier<?>[0]))
+                .orderBy(orders)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -123,5 +65,27 @@ public class StockQueryRepository {
             return null;
         }
         return stock.symbol.contains(symbol);
+    }
+
+    private OrderSpecifier<?>[] toOrderSpecifiers(Sort sort) {
+        if (sort == null || sort.isUnsorted()) {
+            return new OrderSpecifier<?>[]{stock.marketCap.asc()};
+        }
+
+        return sort.stream()
+                .map(order -> {
+                    boolean asc = order.isAscending();
+                    switch (order.getProperty()) {
+                        case "marketCap":
+                            return asc ? stock.marketCap.asc() : stock.marketCap.desc();
+                        case "code":
+                            // 프론트에서 property="code"로 내려준다고 가정
+                            return asc ? stock.symbol.asc() : stock.symbol.desc();
+                        default:
+                            // 그 외에는 ID로 대체
+                            return asc ? stock.id.asc() : stock.id.desc();
+                    }
+                })
+                .toArray(OrderSpecifier[]::new);
     }
 }

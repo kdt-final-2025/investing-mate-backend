@@ -7,6 +7,8 @@ import redlightBack.stock.dto.QuoteDTO;
 import redlightBack.stock.dto.SymbolDTO;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -15,12 +17,32 @@ public class FmpClient {
     private final WebClient webClient;
     private final FmpProperties fmpProperties;
 
-    public List<SymbolDTO> fetchAllSymbols() {
+    public List<SymbolDTO> fetchTopByMarketCap(String exchange) {
         return webClient.get()
-                .uri("https://financialmodelingprep.com/api/v3/stock/list?apikey={key}", fmpProperties.getKey())
-                .retrieve().bodyToFlux(SymbolDTO.class)
-                .collectList().block();
+                .uri(uri -> uri
+                        .scheme("https")
+                        .host("financialmodelingprep.com")
+                        .path("/api/v3/stock-screener")
+                        .queryParam("exchange", exchange)
+                        .queryParam("limit", "1000")
+                        .queryParam("sort", "marketCap")
+                        .queryParam("order", "desc")
+                        .queryParam("apikey", fmpProperties.getKey())
+                        .build())
+                .retrieve()
+                .bodyToFlux(SymbolDTO.class)
+                .collectList()
+                .block();
     }
+
+    public List<SymbolDTO> fetchAllTopLargeCaps() {
+        List<SymbolDTO> nasdaq = fetchTopByMarketCap("NASDAQ");
+        List<SymbolDTO> nyse = fetchTopByMarketCap("NYSE");
+        return Stream.concat(nasdaq.stream(), nyse.stream())
+                .distinct()
+                .toList();
+    }
+
 
     public List<QuoteDTO> fetchQuotes(List<String> symbols) {
         String joined = String.join(",", symbols);
