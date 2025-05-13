@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import redlightBack.stock.dto.FavoriteStockListResponse;
 import redlightBack.stock.dto.FavoriteStockRequest;
 import redlightBack.stock.dto.FavoriteStockResponse;
+import redlightBack.stock.dto.StockListResponse;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -42,14 +43,14 @@ public class StockService {
         favoriteStockRepository.deleteByStock_IdAndUserId(stock.getId(), userId);
     }
 
-    public FavoriteStockListResponse getAll(String userId,
-                                            int page,
-                                            int size,
-                                            String sortBy,
-                                            String order) {
+    public FavoriteStockListResponse getFavoriteAll(String userId,
+                                                    int page,
+                                                    int size,
+                                                    String sortBy,
+                                                    String order) {
         Sort sort = Sort.by(sortBy, order);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
-        List<Stock> stocks = stockQueryRepository.getAll(
+        List<Stock> stocks = stockQueryRepository.getFavoriteAll(
                 userId,
                 pageable);
         long totalCount = stockQueryRepository.totalCount(userId);
@@ -58,7 +59,6 @@ public class StockService {
                 .map(stock -> new FavoriteStockResponse(
                         stock.getName(),
                         stock.getSymbol(),
-
                         stock.getMarketCap()))
                 .toList();
         return new FavoriteStockListResponse(
@@ -69,4 +69,14 @@ public class StockService {
                 totalCount
         );
     }
+
+//    public StockListResponse getAll(String symbol,
+//                                    int page,
+//                                    int size,
+//                                    String sortBy,
+//                                    String order) {
+//        Sort sort = Sort.by(sortBy, order);
+//        Pageable pageable = PageRequest.of(page - 1, size, sort);
+//
+//    }
 }

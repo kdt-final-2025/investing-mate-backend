@@ -20,7 +20,7 @@ public class StockQueryRepository {
         this.queryFactory = queryFactory;
     }
 
-    public List<Stock> getAll(String userId, Pageable pageable) {
+    public List<Stock> getFavoriteAll(String userId, Pageable pageable) {
         // --- Pageable 에서 Sort 꺼내서 QueryDSL OrderSpecifier 로 변환 ---
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
         Sort sort = pageable.getSort();
@@ -73,4 +73,8 @@ public class StockQueryRepository {
                 .fetchOne();
         return count != null ? count : 0L;
     }
+
+//    public List<Stock> getAll(String symbol, Pageable pageable) {
+//
+//    }
 }
