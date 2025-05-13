@@ -81,7 +81,8 @@ public class StockService {
                 .map(stock -> new StockResponse(
                         stock.getName(),
                         stock.getSymbol(),
-                        stock.getMarketCap()
+                        stock.getMarketCap(),
+                        stock.getExchange()
                 ))
                 .toList();
         Long totalCount = stockQueryRepository.totalCount(symbol);

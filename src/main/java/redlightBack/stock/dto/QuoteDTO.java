@@ -8,7 +8,7 @@ public record QuoteDTO(
         String symbol,
         String name,
         @JsonProperty("marketCap") BigDecimal marketCap,
-        String type
+        String exchange
 ) {
 
 }

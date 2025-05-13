@@ -28,16 +28,20 @@ public class Stock {
 
     private LocalDateTime updatedAt;
 
-    public Stock(String symbol, String name, BigDecimal marketCap) {
+    private String exchange;
+
+    public Stock(String symbol, String name, BigDecimal marketCap, String exchange) {
         this.symbol = symbol;
         this.name = name;
         this.marketCap = marketCap;
         this.updatedAt = LocalDateTime.now();
+        this.exchange = exchange;
     }
 
-    public void update(String name, BigDecimal cap) {
+    public void update(String name, BigDecimal cap, String exchange) {
         this.name = name;
         this.marketCap = cap;
         this.updatedAt = LocalDateTime.now();
+        this.exchange = exchange;
     }
 }
