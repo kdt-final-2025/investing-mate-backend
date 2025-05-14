@@ -43,10 +43,10 @@ public class PostLikeQueryRepository {
 
     public long countLikedPosts(String userId) {
         Long total = queryFactory
-                .select(qPostLike.count())                     // ← QPost → QPostLike
+                .select(qPostLike.count())
                 .from(qPostLike)
                 .where(qPostLike.userId.eq(userId),
-                        qPostLike.post.deletedAt.isNull())      // soft-delete 체크
+                        qPostLike.post.deletedAt.isNull())
                 .fetchOne();
         return total != null ? total : 0L;
     }
