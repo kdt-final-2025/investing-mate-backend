@@ -255,6 +255,43 @@ public class BoardApiTest extends AcceptanceTest {
         assertThat(postListResponses.size()).isEqualTo(7);
     }
 
+    @DisplayName("게시물 조회수 증가 테스트")
+    @Test
+    public void 게시물_조회수_증가_테스트() {
+        // 1) 회원 및 게시판·게시글 준비
+        createMember("user1");
+        BoardResponse board = createBoard("테스트게시판");
+        Long boardId = board.id();
+        PostResponse post = createPost(new CreatePostRequest(
+                boardId, "제목", "내용", List.of("img1", "img2")
+        ));
+        Long postId = post.id();
+
+        // 2) 첫 번째 조회: viewCount == 1 이어야 함
+        PostResponse firstView = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("postId", postId)
+                .when()
+                .get("/posts/{postId}")
+                .then().log().all()
+                .statusCode(200)
+                .extract().as(PostResponse.class);
+
+        assertThat(firstView.viewCount()).isEqualTo(1);
+
+        // 3) 두 번째 조회: viewCount == 2 이어야 함
+        PostResponse secondView = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("postId", postId)
+                .when()
+                .get("/posts/{postId}")
+                .then().log().all()
+                .statusCode(200)
+                .extract().as(PostResponse.class);
+
+        assertThat(secondView.viewCount()).isEqualTo(2);
+    }
+
     @DisplayName("게시물 검색 테스트")
     @Test
     public void 게시물_검색_테스트() {

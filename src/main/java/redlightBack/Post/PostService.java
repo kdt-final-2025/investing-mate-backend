@@ -27,7 +27,7 @@ public class PostService {
     private final PostLikeQueryRepository postLikeQueryRepository;
 
     //게시물 생성
-    public PostResponse create (String userId, CreatePostRequest request){
+    public PostResponse create(String userId, CreatePostRequest request) {
 
         Board board = boardRepository.findById(request.boardId()).orElseThrow(
                 () -> new NoSuchElementException("존재하지 않는 게시판입니다."));
@@ -44,25 +44,26 @@ public class PostService {
     }
 
     //게시물 상세조회
-    @Transactional(readOnly = true)
-    public PostResponse getDetailPost (Long postId){
+    @Transactional
+    public PostResponse getDetailPost(Long postId) {
+        Post post = postRepository
+                .findByIdAndDeletedAtIsNull(postId)
+                .orElseThrow(() -> new NoSuchElementException("해당 게시물이 존재하지 않습니다."));
 
-        Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
-                () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
-        );
+        post.increaseViewCount();
 
         return postMapper.toPostResponse(post);
     }
 
     //게시물 수정
     @Transactional
-    public PostResponse update (String userId, Long postId, CreatePostRequest request){
+    public PostResponse update(String userId, Long postId, CreatePostRequest request) {
 
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
-        if(!post.getUserId().equals(userId)){
+        if (post.isAuthor(userId)) {
             throw new NoSuchElementException("게시물 수정은 작성자만 할 수 있습니다.");
         }
 
@@ -75,13 +76,13 @@ public class PostService {
 
     //게시물 삭제
     @Transactional
-    public DeletePostResponse delete (String userId, Long postId){
+    public DeletePostResponse delete(String userId, Long postId) {
 
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NoSuchElementException("해당 게시물이 존재하지 않습니다.")
         );
 
-        if(!post.getUserId().equals(userId)){
+        if (post.isAuthor(userId)) {
             throw new NoSuchElementException("게시물 삭제는 작성자만 할 수 있습니다.");
         }
 
@@ -125,19 +126,19 @@ public class PostService {
                 pageable.getPageSize(),
                 totalElements,
                 totalPages
-                );
+        );
 
         return new PostListAndPagingResponse(board.getBoardName(), responseList, pageInfo);
     }
 
     //사용자가 좋아요 누른 게시글 목록 보기
-    public PostsLikedAndPagingResponse likedPostList (String userId, Pageable pageable){
+    public PostsLikedAndPagingResponse likedPostList(String userId, Pageable pageable) {
 
         Member member = memberRepository.findByUserId(userId).orElseThrow(
                 () -> new NoSuchElementException("유효하지 않은 사용자입니다.")
         );
 
-        int pageNumber = pageable.getPageNumber();
+        int pageNumber = pageable.getPageNumber() + 1;
         int size = pageable.getPageSize();
         long offset = pageable.getOffset();
         long totalElements = postLikeQueryRepository.countLikedPosts(userId);
