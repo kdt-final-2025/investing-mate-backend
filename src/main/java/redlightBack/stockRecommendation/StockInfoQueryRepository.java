@@ -4,6 +4,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -44,15 +45,13 @@ public class StockInfoQueryRepository {
 
         Order direction = Order.valueOf(sortDirection.name());
 
-        if(sortBy.equals(SortBy.PRICEGAP)){
+        if(sortBy == SortBy.PRICEGAP){
             return new OrderSpecifier<>(
                     direction,
                     qStockRecommendation.currentPrice.divide(qStockRecommendation.highPrice1y)
             );
-        } else if(sortBy.equals(SortBy.RISK)){
-            return new OrderSpecifier<>(
-                    direction,
-                    new CaseBuilder()
+        } else if(sortBy == SortBy.RISK){
+                    NumberExpression<Integer> riskScore = new CaseBuilder()
                             .when(
                                     qStockRecommendation.dividendYield.gt(4.0)
                                             .and(qStockRecommendation.currentPrice.divide(qStockRecommendation.highPrice1y).gt(0.9))
@@ -60,8 +59,9 @@ public class StockInfoQueryRepository {
                             .when(qStockRecommendation.dividendYield.gt(2.0)
                                     .and(qStockRecommendation.currentPrice.divide((qStockRecommendation.highPrice1y)).gt(0.85))
                             ).then(1)
-                            .otherwise(2)
-            );
+                            .otherwise(2);
+
+                    return new OrderSpecifier<>(direction, riskScore);
         }else{
             return new OrderSpecifier<>(
                     direction,
