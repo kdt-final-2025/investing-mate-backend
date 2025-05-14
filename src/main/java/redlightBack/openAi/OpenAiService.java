@@ -3,11 +3,8 @@ package redlightBack.openAi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import redlightBack.openAi.dto.StockForChatBotDto;
 
@@ -54,19 +51,17 @@ public class OpenAiService {
                 "max_tokens", 500
         );
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
+        RestClient restClient = RestClient.create();
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        Map response = restClient.post()
+                .uri("https://api.openai.com/v1/chat/completions")
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-type", "application/json")
+                .body(requestBody)
+                .retrieve()
+                .body(Map.class);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "https://api.openai.com/v1/chat/completions",
-                entity,
-                Map.class
-        );
-
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
         Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
         return message.get("content").toString();
     }
