@@ -4,6 +4,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import redlightBack.stockRecommendation.dto.SortBy;
+import redlightBack.stockRecommendation.dto.SortDirection;
 
 import java.util.List;
 
@@ -16,10 +18,10 @@ public class StockInfoQueryRepository {
     private final QStockRecommendation qStockRecommendation = QStockRecommendation.stockRecommendation;
 
 
-    public List<StockRecommendation> recommend(Double minDividend, Double maxPriceRatio, int limit){
+    public List<StockRecommendation> recommend(Double minDividend, Double maxPriceRatio, SortBy sortBy, SortDirection sortDirection, int limit){
         return queryFactory.selectFrom(qStockRecommendation)
                 .where(byDividend(minDividend), byPriceRatio(maxPriceRatio))
-                .orderBy(qStockRecommendation.dividendYield.desc())
+                .orderBy(orderSpecifier(sortBy, sortDirection))
                 .limit(limit)
                 .fetch();
     }

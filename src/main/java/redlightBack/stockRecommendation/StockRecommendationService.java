@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import redlightBack.openAi.OpenAiService;
 import redlightBack.openAi.dto.StockForChatBotDto;
+import redlightBack.stockRecommendation.dto.SortBy;
+import redlightBack.stockRecommendation.dto.SortDirection;
 import redlightBack.stockRecommendation.dto.StockRecommendationAndExplanationResponse;
 import redlightBack.stockRecommendation.dto.StockRecommendationResponse;
 
@@ -20,15 +22,15 @@ public class StockRecommendationService {
 
 
     //추천 받은 주식 list return
-    public List<StockRecommendationResponse> getRecommend (Double minDividend, Double maxPriceRatio, int limit){
-        List<StockRecommendation> recommend = stockInfoQueryRepository.recommend(minDividend, maxPriceRatio, limit);
+    public List<StockRecommendationResponse> getRecommend (Double minDividend, Double maxPriceRatio, SortBy sortBy, SortDirection sortDirection, int limit){
+        List<StockRecommendation> recommend = stockInfoQueryRepository.recommend(minDividend, maxPriceRatio, sortBy, sortDirection, limit);
 
         return recommend.stream().map(
                 stock -> {
                     Double ratio = stock.generatePriceGapRatio();
                     String reason = stock.generateReason();
                     String detail = stock.generateDetail();
-                    String riskLevel = stock.generateRiskLevel();
+                    String riskLevel = stock.generateRiskLevel().name();
 
                     return new StockRecommendationResponse(
                             stock.getId(),
@@ -46,8 +48,8 @@ public class StockRecommendationService {
     }
 
     //추천 받은 주식 list를 gpt에 넘기는 로직
-    public StockRecommendationAndExplanationResponse getRecommendWithExplanation(Double minDividend, Double maxPriceRatio, int limit){
-        List<StockRecommendationResponse> stocks = getRecommend(minDividend, maxPriceRatio, limit);
+    public StockRecommendationAndExplanationResponse getRecommendWithExplanation(Double minDividend, Double maxPriceRatio, SortBy sortBy, SortDirection sortDirection, int limit){
+        List<StockRecommendationResponse> stocks = getRecommend(minDividend, maxPriceRatio, sortBy, sortDirection, limit);
 
         List<StockForChatBotDto> forChatBot = stocks.stream().map(stock -> new StockForChatBotDto(
                 stock.name(),

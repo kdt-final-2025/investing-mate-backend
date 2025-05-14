@@ -2,6 +2,8 @@ package redlightBack.stockRecommendation;
 
 import jakarta.persistence.*;
 import lombok.*;
+import redlightBack.stockRecommendation.dto.RiskLevel;
+import redlightBack.stockRecommendation.dto.Tag;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,22 +58,22 @@ public class StockRecommendation {
             reasons.add("고배당");
         }
         if(generatePriceGapRatio() < 0.85){
-            reasons.add("저평가");
+            reasons.add(Tag.저평가.toString());
         }
         return String.join("+", reasons);
     }
 
     //위험성향 판단
-    public String generateRiskLevel(){
-        Double dividend = getDividendYield();
+    public RiskLevel generateRiskLevel(){
+
         double ratio = generatePriceGapRatio();
 
-        if(dividend != null && dividend > 4 && ratio > 0.9){
-            return "Low";
-        }else if(dividend != null && dividend > 2 && ratio > 0.85){
-            return "MEDIUM";
+        if(dividendYield != null && dividendYield > 4 && ratio > 0.9){
+            return RiskLevel.LOW;
+        }else if(dividendYield != null && dividendYield > 2 && ratio > 0.85){
+            return RiskLevel.MEDIUM;
         }else {
-            return "HIGH";
+            return RiskLevel.HIGH;
         }
     }
 

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import redlightBack.stockRecommendation.StockRecommendationService;
+import redlightBack.stockRecommendation.dto.SortBy;
+import redlightBack.stockRecommendation.dto.SortDirection;
 import redlightBack.stockRecommendation.dto.StockRecommendationAndExplanationResponse;
 
 import java.util.Map;
@@ -37,8 +39,10 @@ public class ChatController {
 
         double minDividend = Double.parseDouble(condition.get("minDividend").toString());
         double macPriceRatio = Double.parseDouble(condition.get("maxPriceRatio").toString());
+        SortBy sortBy = SortBy.valueOf(condition.get("sortBy").toString().toUpperCase());
+        SortDirection sortDirection = SortDirection.valueOf(condition.get("sortDirection").toString().toUpperCase());
 
         //조건 기반 추천 로직 + GPT 설명
-        return stockRecommendationService.getRecommendWithExplanation(minDividend, macPriceRatio, 3);
+        return stockRecommendationService.getRecommendWithExplanation(minDividend, macPriceRatio, sortBy, sortDirection, 3);
     }
 }
