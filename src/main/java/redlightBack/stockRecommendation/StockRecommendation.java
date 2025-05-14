@@ -48,14 +48,14 @@ public class StockRecommendation {
 
     //고점 대비 저평가율
     public Double generatePriceGapRatio (){
-        return getCurrentPrice() / getHighPrice1y();
+        return currentPrice / highPrice1y;
     }
 
     //"고배당 + 저평가" 태그 생성
     public String generateReason(){
         List<String> reasons = new ArrayList<>();
-        if(getDividendYield() != null && getDividendYield() > 4){
-            reasons.add("고배당");
+        if(dividendYield != null && dividendYield > 4){
+            reasons.add(Tag.고배당.toString());
         }
         if(generatePriceGapRatio() < 0.85){
             reasons.add(Tag.저평가.toString());
@@ -81,8 +81,8 @@ public class StockRecommendation {
     public String generateDetail(){
         List<String> details = new ArrayList<>();
 
-        if(getDividendYield() != null){
-            String formattedYield = String.format("배당률 %.2f%%", getDividendYield());
+        if(dividendYield != null){
+            String formattedYield = String.format("배당률 %.2f%%", dividendYield);
             details.add(formattedYield);
         }
         if(generatePriceGapRatio() < 1.0){
