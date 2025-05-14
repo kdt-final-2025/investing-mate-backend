@@ -1,6 +1,9 @@
 package redlightBack.stockRecommendation;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -36,5 +39,37 @@ public class StockInfoQueryRepository {
     private BooleanExpression byPriceRatio(Double maxRatio){
         return (maxRatio != null) ? qStockRecommendation.currentPrice.divide(qStockRecommendation.highPrice1y).lt(maxRatio) : null;
     }
+
+    private OrderSpecifier<?> orderSpecifier (SortBy sortBy, SortDirection sortDirection){
+
+        Order direction = Order.valueOf(sortDirection.name());
+
+        if(sortBy.equals(SortBy.PRICEGAP)){
+            return new OrderSpecifier<>(
+                    direction,
+                    qStockRecommendation.currentPrice.divide(qStockRecommendation.highPrice1y)
+            );
+        } else if(sortBy.equals(SortBy.RISK)){
+            return new OrderSpecifier<>(
+                    direction,
+                    new CaseBuilder()
+                            .when(
+                                    qStockRecommendation.dividendYield.gt(4.0)
+                                            .and(qStockRecommendation.currentPrice.divide(qStockRecommendation.highPrice1y).gt(0.9))
+                            ).then(0)
+                            .when(qStockRecommendation.dividendYield.gt(2.0)
+                                    .and(qStockRecommendation.currentPrice.divide((qStockRecommendation.highPrice1y)).gt(0.85))
+                            ).then(1)
+                            .otherwise(2)
+            );
+        }else{
+            return new OrderSpecifier<>(
+                    direction,
+                    qStockRecommendation.dividendYield
+            );
+        }
+    }
+
+
 
 }
