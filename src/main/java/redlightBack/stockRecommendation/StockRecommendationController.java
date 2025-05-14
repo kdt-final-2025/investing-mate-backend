@@ -18,7 +18,7 @@ public class StockRecommendationController {
     private final StockRecommendationService stockInfoService;
 
     //기본 주식 추천 List
-    @GetMapping("stockRecommendations")
+    @GetMapping("stock-recommendations")
     public List<StockRecommendationResponse> getRecommendations (@RequestParam(required = false) Double dividendMin,
                                                                  @RequestParam(required = false) Double priceRatioMax,
                                                                  @RequestParam(required = false) SortBy sortBy,
@@ -29,7 +29,7 @@ public class StockRecommendationController {
     }
 
     //GPT한테 넘기는 주식 추천 List
-    @GetMapping("/stockRecommendationsWithGpt")
+    @GetMapping("/stock-recommendations-with-gpt")
     public StockRecommendationAndExplanationResponse getRecommendationsWithGpt (@RequestParam(required = false) Double dividendMin,
                                                                                 @RequestParam(required = false) Double priceRatioMax,
                                                                                 @RequestParam(required = false) SortBy sortBy,
