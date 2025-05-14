@@ -11,6 +11,7 @@ import redlightBack.comment.dto.QCommentSortedByLikesResponse;
 
 import java.util.List;
 
+
 @Repository
 public class LikeCountRepository {
     private final JPAQueryFactory jpaQueryFactory;

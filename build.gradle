@@ -14,9 +14,9 @@ java {
 }
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
 }
 
 repositories {
@@ -51,6 +51,31 @@ dependencies {
 
 	//AI API
 	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
+	//websocket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	// WebFlux (ReactorNettyWebSocketClient 포함)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// Jackson
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	// OkHttp3
+	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+
+	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+
+	//cache
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	implementation 'com.opencsv:opencsv:5.7.1'
+
+	// partition
+	implementation 'com.google.guava:guava:32.1.2-jre'
+
 }
 
 tasks.named('test') {

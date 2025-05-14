@@ -2,9 +2,9 @@ package redlightBack.stock.dto;
 
 import java.math.BigDecimal;
 
-public record FavoriteStockResponse(
+public record StockResponse(
         String name,
-        String code,
+        String symbol,
         BigDecimal marketCap
 ) {
 }

@@ -6,9 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import redlightBack.stock.dto.FavoriteStockListResponse;
-import redlightBack.stock.dto.FavoriteStockRequest;
-import redlightBack.stock.dto.FavoriteStockResponse;
+import redlightBack.stock.dto.*;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -42,22 +40,23 @@ public class StockService {
         favoriteStockRepository.deleteByStock_IdAndUserId(stock.getId(), userId);
     }
 
-    public FavoriteStockListResponse getAll(String userId,
-                                            int page,
-                                            int size,
-                                            String sortBy,
-                                            String order) {
-        Sort sort = Sort.by(sortBy, order);
+    public FavoriteStockListResponse getFavoriteAll(String userId,
+                                                    int page,
+                                                    int size,
+                                                    String sortBy,
+                                                    String order) {
+        Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
+        Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
-        List<Stock> stocks = stockQueryRepository.getAll(
+        List<Stock> stocks = stockQueryRepository.getFavoriteAll(
                 userId,
                 pageable);
-        long totalCount = stockQueryRepository.totalCount(userId);
+        long totalCount = stockQueryRepository.favoriteTotalCount(userId);
         long totalPages = (totalCount + size - 1) / size;
         List<FavoriteStockResponse> responses = stocks.stream()
                 .map(stock -> new FavoriteStockResponse(
                         stock.getName(),
-                        stock.getCode(),
+                        stock.getSymbol(),
                         stock.getMarketCap()))
                 .toList();
         return new FavoriteStockListResponse(
@@ -67,5 +66,25 @@ public class StockService {
                 totalPages,
                 totalCount
         );
+    }
+
+    public StockListResponse getAll(String symbol,
+                                    int page,
+                                    int size,
+                                    String sortBy,
+                                    String order) {
+        Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        List<Stock> stocks = stockQueryRepository.getAll(symbol, pageable);
+        List<StockResponse> list = stocks.stream()
+                .map(stock -> new StockResponse(
+                        stock.getName(),
+                        stock.getSymbol(),
+                        stock.getMarketCap()
+                ))
+                .toList();
+        Long totalCount = stockQueryRepository.totalCount(symbol);
+        return new StockListResponse(list, totalCount);
     }
 }
