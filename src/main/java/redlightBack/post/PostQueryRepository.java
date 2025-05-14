@@ -94,9 +94,4 @@ public class PostQueryRepository {
 
         return totalElements != null ? totalElements : 0L;
     }
-
 }
-
-
-
-

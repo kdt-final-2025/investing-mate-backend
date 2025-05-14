@@ -21,6 +21,7 @@ public class PostLikeQueryRepository {
     public List<PostLikeDto> findPostsLikedByUser (String userId, Long offset, int size){
 
         return queryFactory.select(Projections.constructor(PostLikeDto.class,
+                        qPost.id,
                         qBoard.id,
                         qBoard.boardName,
                         qPost.postTitle,
@@ -40,15 +41,13 @@ public class PostLikeQueryRepository {
                 .fetch();
     }
 
-    public long countLikedPosts(String userId){
-        Long totalLikedElements = queryFactory.select(qPost.count())
+    public long countLikedPosts(String userId) {
+        Long total = queryFactory
+                .select(qPostLike.count())
                 .from(qPostLike)
-                .join(qPostLike.post, qPost)
                 .where(qPostLike.userId.eq(userId),
-                        qPostLike.liked.isTrue(),
-                        qPost.deletedAt.isNull())
+                        qPostLike.post.deletedAt.isNull())
                 .fetchOne();
-
-        return totalLikedElements != null ? totalLikedElements : 0L;
+        return total != null ? total : 0L;
     }
 }

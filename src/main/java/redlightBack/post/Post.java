@@ -79,4 +79,12 @@ public class Post extends BaseEntity {
         likeCount ++;
     }
 
+    // 작성자 비교 메서드
+    public boolean isAuthor(String candidateUserId) {
+        return !this.userId.equals(candidateUserId);
+    }
+
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
 }

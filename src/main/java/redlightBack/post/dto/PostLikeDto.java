@@ -2,7 +2,8 @@ package redlightBack.post.dto;
 
 import java.time.LocalDateTime;
 
-public record PostLikeDto(Long boardId,
+public record PostLikeDto(Long postId,
+                          Long boardId,
                           String boardName,
                           String postTitle,
                           String userId,

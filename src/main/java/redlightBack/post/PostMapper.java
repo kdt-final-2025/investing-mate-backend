@@ -24,16 +24,19 @@ public class PostMapper {
                 post.getCommentCount());
     }
 
-    public List<PostsLikedResponse> toListPostLikeResponse (List<PostLikeDto> posts){
+    public List<PostsLikedResponse> toListPostLikeResponse(List<PostLikeDto> posts) {
         return posts.stream()
-                .map(post -> new PostsLikedResponse(post.boardId(),
-                        post.boardName(),
-                        post.postTitle(),
-                        post.userId(),
-                        post.viewCount(),
-                        post.commentCount(),
-                        (int) post.likeCount(),
-                        post.createdAt())
-                ).toList();
+                .map(dto -> new PostsLikedResponse(
+                        dto.postId(),
+                        dto.boardId(),
+                        dto.boardName(),
+                        dto.postTitle(),
+                        dto.userId(),
+                        dto.viewCount(),
+                        dto.commentCount(),
+                        dto.likeCount(),
+                        dto.createdAt()
+                ))
+                .toList();
     }
 }
