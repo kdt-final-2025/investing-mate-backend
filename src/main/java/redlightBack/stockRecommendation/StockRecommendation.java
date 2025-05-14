@@ -22,10 +22,8 @@ public class StockRecommendation {
     @Column(name = "ticker", nullable = false, unique = true)
     private String ticker;  //종목코드
 
-    @Column(name = "name")
     private String name;  //종목이름
 
-    @Column(name = "current_price")
     private Double currentPrice;  //현재가
 
     @Column(name = "high_price_6m")
@@ -40,10 +38,8 @@ public class StockRecommendation {
     @Column(name = "high_price_5y")
     private Double highPrice5y;
 
-    @Column(name = "dividend_yield")
     private Double dividendYield;  //연배당수익률
 
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     //고점 대비 저평가율
