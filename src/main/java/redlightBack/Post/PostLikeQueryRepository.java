@@ -41,15 +41,13 @@ public class PostLikeQueryRepository {
                 .fetch();
     }
 
-    public long countLikedPosts(String userId){
-        Long totalLikedElements = queryFactory.select(qPost.count())
+    public long countLikedPosts(String userId) {
+        Long total = queryFactory
+                .select(qPostLike.count())                     // ← QPost → QPostLike
                 .from(qPostLike)
-                .join(qPostLike.post, qPost)
                 .where(qPostLike.userId.eq(userId),
-                        qPostLike.liked.isTrue(),
-                        qPost.deletedAt.isNull())
+                        qPostLike.post.deletedAt.isNull())      // soft-delete 체크
                 .fetchOne();
-
-        return totalLikedElements != null ? totalLikedElements : 0L;
+        return total != null ? total : 0L;
     }
 }
