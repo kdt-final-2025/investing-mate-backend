@@ -9,6 +9,7 @@ public record CommentResponse(
         String content,
         int likeCount,
         boolean likeByMe,
+        Long parentId,
         LocalDateTime createdAt,
         List<CommentResponse> children
 
