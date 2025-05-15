@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  updater:
+    build: .
+    container_name: sp500-updater
+    env_file:
+      - .env
+    networks:
+      - java_default
+    environment:
+      DB_HOST: postgres-db
+networks:
+  java_default:
+    external: true

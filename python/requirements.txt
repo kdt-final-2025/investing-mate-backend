@@ -1,0 +1,6 @@
+pandas
+yfinance
+psycopg2-binary
+pytz
+python-dotenv
+lxml
