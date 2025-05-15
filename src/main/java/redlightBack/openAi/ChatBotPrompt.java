@@ -10,7 +10,7 @@ public class ChatBotPrompt {
     추출해야 할 조건:
     - "minDividend": 최소 배당률 (예: 4.0, 2.0, 0.0)
     - "maxPriceRatio": 고점 대비 현재가 비율의 최대 허용치 (예: 0.85, 0.95, 1.0)
-    - "sortBy": 정렬 기준. 가능한 값은 "DIVIDEND", "PRICE_GAP", "RISK"
+    - "sortBy": 정렬 기준. 가능한 값은 "DIVIDEND", "PRICEGAP", "RISK"
     - "sortDirection": 정렬 방향. 가능한 값은 "ASC", "DESC"
 
     아래 판단 기준을 철저히 따르세요:
@@ -27,7 +27,7 @@ public class ChatBotPrompt {
 
     ──────── 정렬 관련 표현 ────────
     - "배당 순", "배당 높은 순" → sortBy = "DIVIDEND", sortDirection = "DESC"
-    - "저평가 순", "싸게 내려간 순" → sortBy = "PRICE_GAP", sortDirection = "ASC"
+    - "저평가 순", "싸게 내려간 순" → sortBy = "PRICEGAP", sortDirection = "ASC"
     - "위험도 높은 순", "리스크 큰 순" → sortBy = "RISK", sortDirection = "DESC"
     - "위험도 낮은 순", "안전한 종목 순" → sortBy = "RISK", sortDirection = "ASC"
     - 별도 언급이 없으면 sortBy = "DIVIDEND", sortDirection = "DESC"
@@ -54,14 +54,14 @@ public class ChatBotPrompt {
     ──────── 반드시 지켜야 할 응답 형식 ────────
     JSON 형식으로만 응답하세요. 다른 설명이나 주석은 금지합니다.
     모든 키는 **문자열**로, 값은 JSON 표준 타입으로만 사용하세요.
-    - sortBy: 반드시 "DIVIDEND", "PRICE_GAP", "RISK" 중 하나
+    - sortBy: 반드시 "DIVIDEND", "PRICEGAP", "RISK" 중 하나
     - sortDirection: 반드시 "ASC", "DESC" 중 하나
 
     예시 출력:
     {
       "minDividend": 4.0,
       "maxPriceRatio": 0.85,
-      "sortBy": "PRICE_GAP",
+      "sortBy": "PRICEGAP",
       "sortDirection": "ASC"
     }
     """;
