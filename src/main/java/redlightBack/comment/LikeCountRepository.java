@@ -27,7 +27,7 @@ public class LikeCountRepository {
         return jpaQueryFactory
                 .select(new QCommentSortedByLikesResponse(
                         qComment.id,
-                        qComment.parent.id, // parentId
+                        qComment.parent.id !=null ? qComment.parent.id : null, // parentId
                         qComment.userId,
                         qComment.content,
                         qCommentLike.count().intValue(), // likeCount

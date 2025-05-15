@@ -5,13 +5,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import redlightBack.comment.domain.Comment;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment,Long> {
 
     Page<Comment> findByPostId(Long postId, Pageable pageable);
-    Optional<Comment> findByIdAndDeleteIsNull(Long id);
-
+    Optional<Comment> findByIdAndDeleteIsNull(Long commentId);
+    List<Comment> findByPostIdAndDeleteIsNull(Long postId);
 }
 
 
