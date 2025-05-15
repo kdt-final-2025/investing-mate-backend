@@ -1,7 +1,6 @@
 package redlightBack.comment;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +32,13 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
         Comment parent = null;
+
         if (request.parentId() != null) {
             parent = commentRepository.findById(request.parentId())
                     .orElseThrow(() -> new IllegalArgumentException("부모 댓글이 존재하지 않습니다."));
+            if (parent.getParent() != null) {
+                throw new IllegalArgumentException("답글에는 답글을 달 수 없습니다.");
+            }
         }
 
         Comment comment = new Comment(
@@ -46,12 +49,13 @@ public class CommentService {
         );
 
         commentRepository.save(comment);
-
+        Long parentId = comment.getParent() != null ? comment.getParent().getId() : null;
         return new CommentResponse(comment.getId(),
                 comment.getUserId(),
                 comment.getContent(),
                 comment.getLikeCount(),
                 false,
+                parentId,
                 comment.getCreatedAt(),
                 List.of());
     }
@@ -81,7 +85,7 @@ public class CommentService {
     //댓글수정
     @Transactional
     public void updateComment(CreateCommentRequest request, String userId, Long commentId) throws AccessDeniedException {
-        Comment comment = commentRepository.findById(commentId)
+        Comment comment = commentRepository.findByIdAndDeleteIsNull(commentId)
                 .orElseThrow(() -> new NoSuchElementException("댓글을 찾을 수 없습니다. commentId: " + commentId));
 
         if (comment.getUserId() == null || !comment.getUserId().equals(userId)) {
@@ -96,7 +100,7 @@ public class CommentService {
     public CommentLikeResponse toggleLikeComment(String userId, Long commentId) {
 
         // 댓글 조회
-        Comment comment = commentRepository.findById(commentId)
+        Comment comment = commentRepository.findByIdAndDeleteIsNull(commentId)
                 .orElseThrow(() -> new NoSuchElementException("댓글이 없습니다. id=" + commentId));
 
         // 기존 좋아요 여부 확인
@@ -155,13 +159,19 @@ public class CommentService {
         } else {
 
             // 시간순 조회 (기존 로직)
-            Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
+            List<Comment> commentPage = commentRepository.findByPostIdAndDeleteIsNull(postId);
 
-            List<CommentResponse> comments = commentTreeBuilder.build(commentPage.getContent());
+            long totalElements = likeCountRepository.countCommentsByPostId(postId);
+
+            List<CommentResponse> comments = commentTreeBuilder.build(commentPage);
+            // CommentResponse로 변환 (children도 재귀적으로 변환)
+            List<CommentResponse> commentResponses = comments.stream()
+                    .map(this::convertToCommentResponse)
+                    .toList();
 
             pageMeta = new PageMeta(
-                    commentPage.getTotalPages(),
-                    commentPage.getTotalElements(),
+                    (int) Math.ceil((double) totalElements / pageable.getPageSize()),
+                    totalElements,
                     pageable.getPageNumber(),
                     pageable.getPageSize()
             );
@@ -183,7 +193,25 @@ public class CommentService {
                 response.getContent(),
                 response.getLikeCount(),
                 response.isLikedByMe(),
+                response.getParentId() != null ? response.getParentId() : null,
                 response.getCreatedAt(),
+                children
+        );
+    }
+    private CommentResponse convertToCommentResponse(CommentResponse response) {
+        List<CommentResponse> children = response.children() == null ? List.of() :
+                response.children().stream()
+                        .map(this::convertToCommentResponse)
+                        .toList();
+
+        return new CommentResponse(
+                response.commentId(),
+                response.userId(),
+                response.content(),
+                response.likeCount(),
+                response.likeByMe(),
+                response.parentId() != null ? response.parentId() : null,
+                response.createdAt(),
                 children
         );
     }
