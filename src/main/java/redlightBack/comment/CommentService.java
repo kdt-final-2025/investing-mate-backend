@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import redlightBack.comment.domain.Comment;
 import redlightBack.comment.domain.CommentLike;
 import redlightBack.comment.dto.*;
-import redlightBack.Post.Post;
-import redlightBack.Post.PostRepository;
+import redlightBack.post.Post;
+import redlightBack.post.PostRepository;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;

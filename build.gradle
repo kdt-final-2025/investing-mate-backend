@@ -49,6 +49,9 @@ dependencies {
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
+	//AI API
+	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
 	//websocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
@@ -72,6 +75,7 @@ dependencies {
 
 	// partition
 	implementation 'com.google.guava:guava:32.1.2-jre'
+
 }
 
 tasks.named('test') {
