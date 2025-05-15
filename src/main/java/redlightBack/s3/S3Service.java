@@ -22,7 +22,7 @@ import java.util.UUID;
 @Slf4j
 public class S3Service {
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
 
     private final S3Client s3Client;
