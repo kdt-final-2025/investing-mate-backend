@@ -27,7 +27,6 @@ public class S3Config {
         return S3Client.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(creds))
-                // → endpointOverride나 pathStyleAccessEnabled 설정 제거
                 .build();
     }
 }
