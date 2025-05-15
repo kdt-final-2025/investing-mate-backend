@@ -18,12 +18,14 @@ public class CommentTreeBuilder {
 
         // 1차로 Comment → CommentResponse로 변환하며 map에 담기
         for (Comment comment : flatComments) {
+            Long parentId = comment.getParent() != null ? comment.getParent().getId() : null;
             CommentResponse response = new CommentResponse(
                     comment.getId(),
                     comment.getUserId(),
                     comment.getContent(),
                     comment.getLikeCount(),
                     false,
+                    parentId,
                     comment.getCreatedAt(),
                     new ArrayList<>() // 자식 리스트 초기화
             );
