@@ -2,14 +2,13 @@ package redlightBack.s3;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
@@ -34,6 +33,7 @@ public class S3Service {
                     .bucket(bucket)
                     .key(key)
                     .contentType(file.getContentType())
+                    .acl(ObjectCannedACL.PUBLIC_READ)      // ← 이 줄을 추가!
                     .build();
             s3Client.putObject(req, RequestBody.fromInputStream(in, file.getSize()));
         } catch (IOException e) {
