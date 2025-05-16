@@ -36,12 +36,13 @@ public class StockRestController {
     }
 
     @GetMapping("/stocks")
-    public StockListResponse getAll(@RequestParam(required = false) String symbol,
+    public StockListResponse getAll(@LoginMemberId(required = false) String userId,
+                                    @RequestParam(required = false) String symbol,
                                     @RequestParam(required = false, defaultValue = "0") int page,
                                     @RequestParam(required = false, defaultValue = "20") int size,
                                     @RequestParam(required = false, defaultValue = "marketCap") String sortBy,
                                     @RequestParam(required = false, defaultValue = "desc") String order) {
-        return stockService.getAll(symbol, page, size, sortBy, order);
+        return stockService.getAll(userId, symbol, page, size, sortBy, order);
     }
 
     @GetMapping("stocks/symbol")

@@ -27,14 +27,17 @@ public class LoginMemberResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        String bearerToken = webRequest.getHeader(HttpHeaders.AUTHORIZATION);
-
-        // 토큰 추출 및 검증
-        String token = extractToken(bearerToken);
-        if (!jwtProvider.isValidToken(token)) {
+        LoginMemberId ann = parameter.getParameterAnnotation(LoginMemberId.class);
+        String header = webRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            if (!ann.required()) return null;
             throw new IllegalArgumentException(INVALID_TOKEN_MESSAGE);
         }
-
+        String token = header.substring(7);
+        if (!jwtProvider.isValidToken(token)) {
+            if (!ann.required()) return null;
+            throw new IllegalArgumentException(INVALID_TOKEN_MESSAGE);
+        }
         return jwtProvider.getUserId(token);
     }
 

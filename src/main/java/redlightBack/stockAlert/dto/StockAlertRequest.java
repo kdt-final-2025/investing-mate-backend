@@ -2,7 +2,7 @@ package redlightBack.stockAlert.dto;
 
 public record StockAlertRequest(
         double targetPrice,
-        Long stockId,
+        String symbol,
         boolean above
 ) {
 }
