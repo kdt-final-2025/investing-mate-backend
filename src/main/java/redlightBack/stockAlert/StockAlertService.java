@@ -27,7 +27,7 @@ public class StockAlertService {
 
     @Transactional
     public StockAlertResponse create(String userId, StockAlertRequest request) {
-        Stock stock = stockRepository.findById(request.stockId()).orElseThrow(
+        Stock stock = stockRepository.findBySymbol(request.symbol()).orElseThrow(
                 () -> new NoSuchElementException("해당하는 주식이 없습니다."));
         if (stockAlertRepository.existsByUserIdAndSymbolAndTargetPrice(userId, stock.getSymbol(), request.targetPrice())) {
             throw new IllegalArgumentException("해당하는 알람이 이미 존재합니다.");

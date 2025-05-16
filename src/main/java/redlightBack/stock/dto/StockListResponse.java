@@ -4,6 +4,7 @@ import java.util.List;
 
 public record StockListResponse(
         List<StockResponse> stockResponses,
-        Long totalCount
+        Long totalCount,
+        List<FavoriteStockResponse> favoriteStockResponses
 ) {
 }

@@ -43,7 +43,6 @@ public class PostController {
     @DeleteMapping("posts/{postId}")
     public DeletePostResponse deletePost (@LoginMemberId String userId,
                                           @PathVariable Long postId){
-
         return postService.delete(userId, postId);
     }
 

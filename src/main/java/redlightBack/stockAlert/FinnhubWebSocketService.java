@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 
@@ -65,32 +66,70 @@ public class FinnhubWebSocketService {
             }
 
             @Override
-            public void onMessage(WebSocket ws, String text) {
+            public void onMessage(WebSocket webSocket, String text) {
                 try {
-                    handleMessage(text);
+                    log.info("[웹소켓] 수신 원시 메시지: {}", text);
+
+                    JsonNode root = mapper.readTree(text);
+                    JsonNode dataArray = root.path("data");
+
+                    for (JsonNode item : dataArray) {
+                        String symbol = item.path("s").asText();
+                        double price = item.path("p").asDouble();
+
+                        log.info("[웹소켓] 심볼={}, 가격={}", symbol, price);
+
+                        List<StockAlert> alerts = alertRepository.findBySymbolAndTriggeredFalse(symbol);
+                        log.info("→ 조회된 알림 개수: {} (symbol={})", alerts.size(), symbol);
+
+                        for (StockAlert alert : alerts) {
+                            log.info("   • alert[id={}, above={}, targetPrice={}, triggered={}]",
+                                    alert.getId(),
+                                    alert.isAbove(),
+                                    alert.getTargetPrice(),
+                                    alert.isTriggered());
+
+                            boolean shouldTrigger =
+                                    (alert.isAbove() && price >= alert.getTargetPrice()) ||
+                                            (!alert.isAbove() && price <= alert.getTargetPrice());
+
+                            if (shouldTrigger) {
+                                log.info("✔ 조건 만족! alert[id={}] 트리거 실행 (price={} {}, targetPrice={})",
+                                        alert.getId(),
+                                        price,
+                                        alert.isAbove() ? ">=" : "<=",
+                                        alert.getTargetPrice());
+
+                                alert.markTriggered();
+                                alertRepository.save(alert);
+
+                                emitterService.sendAlert(alert.getUserId(), symbol, price);
+                            }
+                        }
+                    }
                 } catch (JsonProcessingException e) {
-                    e.printStackTrace();
+                    log.error("❌ 메시지 파싱 실패: {}", e.getMessage(), e);
+                } catch (Exception e) {
+                    log.error("❌ onMessage 처리 중 예외 발생: {}", e.getMessage(), e);
                 }
             }
 
             @Override
             public void onFailure(WebSocket ws, Throwable t, Response resp) {
-                // 1) 로깅 전략
                 log.error("❌ WebSocket failure (code={}), will retry in {}s",
                         resp != null ? resp.code() : -1,
-                        5,
+                        60,  
                         t);
-                // 2) 재연결 스케줄
                 scheduler.schedule(this::retryConnect,
-                        Instant.now().plusSeconds(5));
+                        Instant.now().plusSeconds(60)); 
             }
 
             @Override
             public void onClosed(WebSocket ws, int code, String reason) {
                 log.warn("⚠️ WebSocket closed (code={}, reason={}), retrying in {}s",
-                        code, reason, 5);
+                        code, reason, 60); 
                 scheduler.schedule(this::retryConnect,
-                        Instant.now().plusSeconds(5));
+                        Instant.now().plusSeconds(60)); 
             }
 
             private void retryConnect() {
