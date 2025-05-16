@@ -1,7 +1,5 @@
-// src/main/java/redlightBack/s3/S3TestController.java
 package redlightBack.s3;
 
-import io.awspring.cloud.s3.S3Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -9,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -16,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/s3")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Slf4j
 public class S3TestController {
@@ -34,12 +34,16 @@ public class S3TestController {
         }
     }
 
-    // 새로 추가된 삭제 엔드포인트
-    @DeleteMapping("/delete/{key}")
-    public ResponseEntity<Void> deleteFile(@PathVariable String key) {
+    /**
+     * imageUrl 파라미터로부터 객체 키를 추출해 삭제합니다.
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteFile(@RequestParam("imageUrl") String imageUrl) {
+        // URL에서 마지막 경로 부분을 키로 사용
+        String key = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
         try {
             s3Service.delete(key);
-            return ResponseEntity.noContent().build(); // 204 No Content
+            return ResponseEntity.noContent().build();
         } catch (S3Exception e) {
             log.error("파일 삭제 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
