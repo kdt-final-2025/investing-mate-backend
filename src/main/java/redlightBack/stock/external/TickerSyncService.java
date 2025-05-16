@@ -12,7 +12,10 @@ import redlightBack.stock.dto.QuoteDTO;
 import redlightBack.stock.dto.SymbolDTO;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 
@@ -27,48 +30,24 @@ public class TickerSyncService {
     // 동기화 엔드포인트를 직접 호출
     @Scheduled(cron = "0 0 3 * * *")
     public void sync() {
-        // 1) NASDAQ 상위 1000개 시가총액 대형주
-        List<SymbolDTO> nasdaq = WebClient.create()
-                .get()
-                .uri("https://financialmodelingprep.com/api/v3/stock-screener"
-                        + "?exchange=NASDAQ"
-                        + "&limit=1000"
-                        + "&sort=marketCap"
-                        + "&order=desc"
-                        + "&marketCapMoreThan=1"
-                        + "&apikey=" + apiKey)
-                .retrieve()
-                .bodyToFlux(SymbolDTO.class)
-                .collectList()
-                .block();
+        // 1) NASDAQ, 2) NYSE 스크리너 호출
+        List<SymbolDTO> nasdaq = fetchSymbols("NASDAQ");
+        List<SymbolDTO> nyse = fetchSymbols("NYSE");
 
-        // 2) NYSE 상위 1000개
-        List<SymbolDTO> nyse = WebClient.create()
-                .get()
-                .uri("https://financialmodelingprep.com/api/v3/stock-screener"
-                        + "?exchange=NYSE"
-                        + "&limit=1000"
-                        + "&sort=marketCap"
-                        + "&order=desc"
-                        + "&apikey=" + apiKey)
-                .retrieve()
-                .bodyToFlux(SymbolDTO.class)
-                .collectList()
-                .block();
+        // 3) 심볼 → 거래소 맵
+        Map<String, String> symbolToExchange = new HashMap<>();
+        nasdaq.forEach(s -> symbolToExchange.put(s.symbol(), "NASDAQ"));
+        nyse.forEach(s -> symbolToExchange.put(s.symbol(), "NYSE"));
 
-        // 3) 중복 제거 후 심볼 목록 추출
-        List<String> symbols = Stream.concat(nasdaq.stream(), nyse.stream())
-                .map(SymbolDTO::symbol)
-                .distinct()
-                .toList();
+        // 4) 중복 제거된 심볼 리스트
+        List<String> symbols = new ArrayList<>(symbolToExchange.keySet());
 
-        // 4) 1000개씩 잘라서 quote API 호출
+        // 5) 1000개씩 잘라서 시가총액 조회
         for (List<String> chunk : Lists.partition(symbols, 1000)) {
-            String joined = String.join(",", chunk);
             List<QuoteDTO> quotes = WebClient.create()
                     .get()
                     .uri("https://financialmodelingprep.com/api/v3/quote/"
-                            + joined
+                            + String.join(",", chunk)
                             + "?apikey=" + apiKey)
                     .retrieve()
                     .bodyToFlux(QuoteDTO.class)
@@ -79,17 +58,34 @@ public class TickerSyncService {
                 quotes.stream()
                         .filter(q -> !q.name().contains("Fund"))
                         .filter(q-> !q.name().contains("Vanguard"))
-                        .filter(q -> q.marketCap() != null)                                  // null 제거
-                        .filter(q -> q.marketCap().compareTo(BigDecimal.ZERO) > 0)            // 0 이하 제거
+                        .filter(q -> q.marketCap() != null && q.marketCap().compareTo(BigDecimal.ZERO) > 0)
                         .forEach(q -> {
+                            String exch = q.exchange() != null
+                                    ? q.exchange()
+                                    : symbolToExchange.getOrDefault(q.symbol(), "UNKNOWN");
+
                             stockRepository.findBySymbol(q.symbol())
                                     .ifPresentOrElse(
-                                            existing -> existing.update(q.name(), q.marketCap()),
-                                            () -> stockRepository.save(new Stock(q.symbol(), q.name(), q.marketCap()))
+                                            existing -> existing.update(q.name(), q.marketCap(), exch),
+                                            () -> stockRepository.save(
+                                                    new Stock(q.symbol(), q.name(), q.marketCap(), exch))
                                     );
                         });
             }
         }
+    }
+
+    private List<SymbolDTO> fetchSymbols(String exchange) {
+        return WebClient.create()
+                .get()
+                .uri("https://financialmodelingprep.com/api/v3/stock-screener"
+                        + "?exchange=" + exchange
+                        + "&limit=1000&sort=marketCap&order=desc"
+                        + "&apikey=" + apiKey)
+                .retrieve()
+                .bodyToFlux(SymbolDTO.class)
+                .collectList()
+                .block();
     }
 }
 

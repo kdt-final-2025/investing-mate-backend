@@ -39,8 +39,8 @@ public class StockRestController {
     public StockListResponse getAll(@RequestParam(required = false) String symbol,
                                     @RequestParam(required = false, defaultValue = "0") int page,
                                     @RequestParam(required = false, defaultValue = "20") int size,
-                                    @RequestParam(required = false, defaultValue = "id") String sortBy,
-                                    @RequestParam(required = false, defaultValue = "asc") String order) {
+                                    @RequestParam(required = false, defaultValue = "marketCap") String sortBy,
+                                    @RequestParam(required = false, defaultValue = "desc") String order) {
         return stockService.getAll(symbol, page, size, sortBy, order);
     }
 
