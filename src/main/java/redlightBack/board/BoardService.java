@@ -24,7 +24,7 @@ public class BoardService {
     public BoardResponse create(String userId, CreateBoardRequest request) {
 
         // ADMINISTRATOR 권한이 아니면 예외
-        if (!memberRepository.existsByUserIdAndRole(userId, Role.ADMINISTRATOR)) {
+        if (!hasAdministratorAccess(userId)) {
 
             throw new AccessDeniedException("접근 권한이 없습니다.");
         }
@@ -37,6 +37,10 @@ public class BoardService {
                 board.getBoardName(),
                 board.getPostCount()
         );
+    }
+
+    public boolean hasAdministratorAccess(String userId) {
+        return memberRepository.existsByUserIdAndRole(userId, Role.ADMINISTRATOR);
     }
 
     //게시판 목록조회
