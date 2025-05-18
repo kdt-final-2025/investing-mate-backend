@@ -39,11 +39,6 @@ public class BoardService {
         );
     }
 
-//    private boolean hasAdministratorAccess(String userId) {
-//        return memberRepository
-//                .existsByUserIdAndRole(userId, Role.ADMINISTRATOR);
-//    }
-
     //게시판 목록조회
     public List<BoardResponse> getBoardList() {
         return boardRepository.findAll().stream().map(
