@@ -24,7 +24,8 @@ public class BoardService {
     public BoardResponse create(String userId, CreateBoardRequest request) {
 
         // ADMINISTRATOR 권한이 아니면 예외
-        if (!hasAdministratorAccess(userId)) {
+        if (!memberRepository.existsByUserIdAndRole(userId, Role.ADMINISTRATOR)) {
+
             throw new AccessDeniedException("접근 권한이 없습니다.");
         }
 
@@ -38,17 +39,17 @@ public class BoardService {
         );
     }
 
-    private boolean hasAdministratorAccess(String userId) {
-        return memberRepository
-                .existsByUserIdAndRole(userId, Role.ADMINISTRATOR);
-    }
+//    private boolean hasAdministratorAccess(String userId) {
+//        return memberRepository
+//                .existsByUserIdAndRole(userId, Role.ADMINISTRATOR);
+//    }
 
     //게시판 목록조회
-    public List<BoardResponse> getBoardList (){
+    public List<BoardResponse> getBoardList() {
         return boardRepository.findAll().stream().map(
                 board -> new BoardResponse(board.getId(),
                         board.getBoardName(),
-                        (int)postQueryRepository.countPosts(board.getId(), null, null))
+                        (int) postQueryRepository.countPosts(board.getId(), null, null))
 
         ).toList();
     }
