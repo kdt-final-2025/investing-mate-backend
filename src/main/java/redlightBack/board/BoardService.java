@@ -3,10 +3,11 @@ package redlightBack.board;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import redlightBack.board.dto.CreateBoardRequest;
 import redlightBack.board.dto.BoardResponse;
-import redlightBack.post.PostQueryRepository;
+import redlightBack.board.dto.CreateBoardRequest;
 import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Role;
+import redlightBack.post.PostQueryRepository;
 
 import java.util.List;
 
@@ -18,19 +19,28 @@ public class BoardService {
     private final PostQueryRepository postQueryRepository;
     private final MemberRepository memberRepository;
 
-    //게시판 생성
-    public BoardResponse create (String userId, CreateBoardRequest request){
+
+    // 게시판 생성 (관리자만)
+    public BoardResponse create(String userId, CreateBoardRequest request) {
+
+        // ADMINISTRATOR 권한이 아니면 예외
+        if (!hasAdministratorAccess(userId)) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
+        }
+
         Board board = new Board(request.boardName());
-
-        memberRepository.findByUserId(userId).orElseThrow(
-                () -> new AccessDeniedException("접근 권한이 없습니다.")
-        );
-
         boardRepository.save(board);
 
-        return new BoardResponse(board.getId(),
+        return new BoardResponse(
+                board.getId(),
                 board.getBoardName(),
-                board.postCount);
+                board.getPostCount()
+        );
+    }
+
+    private boolean hasAdministratorAccess(String userId) {
+        return memberRepository
+                .existsByUserIdAndRole(userId, Role.ADMINISTRATOR);
     }
 
     //게시판 목록조회
