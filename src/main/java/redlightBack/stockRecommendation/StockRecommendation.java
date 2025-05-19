@@ -40,6 +40,11 @@ public class StockRecommendation {
 
     private Double dividendYield;  //연배당수익률
 
+    private Double currentToHighRatio;  //저평가율
+
+    @Enumerated(EnumType.STRING)
+    private RiskLevel riskLevel;  //위험도
+
     private LocalDateTime updatedAt;
 
     //고점 대비 저평가율
