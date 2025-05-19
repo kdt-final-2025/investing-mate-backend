@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import redlightBack.stockRecommendation.dto.SortBy;
-import redlightBack.stockRecommendation.dto.SortDirection;
-import redlightBack.stockRecommendation.dto.StockRecommendationAndExplanationResponse;
-import redlightBack.stockRecommendation.dto.StockRecommendationResponse;
+import redlightBack.stockRecommendation.dto.*;
 
 import java.util.List;
 
