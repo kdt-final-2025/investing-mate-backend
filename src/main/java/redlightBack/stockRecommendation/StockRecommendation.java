@@ -47,11 +47,6 @@ public class StockRecommendation {
 
     private LocalDateTime updatedAt;
 
-    //고점 대비 저평가율
-    public Double generatePriceGapRatio (){
-        return currentPrice / highPrice1y;
-    }
-
     //"고배당 + 저평가" 태그 생성
     public String generateReason(){
         List<String> reasons = new ArrayList<>();
@@ -62,20 +57,6 @@ public class StockRecommendation {
             reasons.add(Tag.저평가.toString());
         }
         return String.join("+", reasons);
-    }
-
-    //위험성향 판단
-    public RiskLevel generateRiskLevel(){
-
-        double ratio = generatePriceGapRatio();
-
-        if(dividendYield != null && dividendYield > 4 && ratio > 0.9){
-            return RiskLevel.LOW;
-        }else if(dividendYield != null && dividendYield > 2 && ratio > 0.85){
-            return RiskLevel.MEDIUM;
-        }else {
-            return RiskLevel.HIGH;
-        }
     }
 
     //챗봇에 넘길 문장 생성
