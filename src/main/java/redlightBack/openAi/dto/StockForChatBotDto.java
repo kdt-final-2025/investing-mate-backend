@@ -1,8 +1,10 @@
 package redlightBack.openAi.dto;
 
+import redlightBack.stockRecommendation.dto.RiskLevel;
+
 public record StockForChatBotDto(String name,
                                  String recommendReason,
                                  String detail,
-                                 String riskLevel) {
+                                 RiskLevel riskLevel) {
 }
 

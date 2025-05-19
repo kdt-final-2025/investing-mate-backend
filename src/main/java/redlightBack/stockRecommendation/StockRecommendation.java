@@ -58,7 +58,7 @@ public class StockRecommendation {
         if(dividendYield != null && dividendYield > 4){
             reasons.add(Tag.고배당.toString());
         }
-        if(generatePriceGapRatio() < 0.85){
+        if(currentToHighRatio < 0.85){
             reasons.add(Tag.저평가.toString());
         }
         return String.join("+", reasons);
@@ -86,8 +86,8 @@ public class StockRecommendation {
             String formattedYield = String.format("배당률 %.2f%%", dividendYield);
             details.add(formattedYield);
         }
-        if(generatePriceGapRatio() < 1.0){
-            double dropPercent = (1.0 - generatePriceGapRatio()) * 100;
+        if(currentToHighRatio < 1.0){
+            double dropPercent = (1.0 - currentToHighRatio) * 100;
             String formattedDrop = String.format("고점 대비 -%.0f%%", dropPercent);
             details.add(formattedDrop);
         }

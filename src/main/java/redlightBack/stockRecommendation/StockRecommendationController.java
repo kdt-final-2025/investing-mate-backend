@@ -21,22 +21,20 @@ public class StockRecommendationController {
     @GetMapping("stock-recommendations")
     public List<StockRecommendationResponse> getRecommendations (@RequestParam(required = false) Double dividendMin,
                                                                  @RequestParam(required = false) Double priceRatioMax,
-                                                                 @RequestParam(required = false) SortBy sortBy,
-                                                                 @RequestParam(required = false) SortDirection sortDirection,
+                                                                 @RequestParam(required = false) RiskLevel riskLevel,
                                                                  @RequestParam(required = false, defaultValue = "3") Integer limit){
 
-        return stockInfoService.getRecommend(dividendMin, priceRatioMax, sortBy, sortDirection, limit);
+        return stockInfoService.getRecommend(dividendMin, priceRatioMax, riskLevel, limit);
     }
 
     //GPT한테 넘기는 주식 추천 List
     @GetMapping("/stock-recommendations-with-gpt")
     public StockRecommendationAndExplanationResponse getRecommendationsWithGpt (@RequestParam(required = false) Double dividendMin,
                                                                                 @RequestParam(required = false) Double priceRatioMax,
-                                                                                @RequestParam(required = false) SortBy sortBy,
-                                                                                @RequestParam(required = false) SortDirection sortDirection,
+                                                                                @RequestParam(required = false) RiskLevel riskLevel,
                                                                                 @RequestParam(required = false, defaultValue = "3") Integer limit){
 
-        return stockInfoService.getRecommendWithExplanation(dividendMin, priceRatioMax, sortBy, sortDirection, limit);
+        return stockInfoService.getRecommendWithExplanation(dividendMin, priceRatioMax, riskLevel, limit);
     }
 
 }

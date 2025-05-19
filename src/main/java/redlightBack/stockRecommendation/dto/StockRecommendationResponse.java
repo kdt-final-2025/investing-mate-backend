@@ -6,9 +6,9 @@ public record StockRecommendationResponse(Long id,
                                           Double currentPrice,
                                           Double highPrice1y,
                                           Double dividendYield,
-                                          Double priceGapRatio,
+                                          Double currentToHighRatio,
+                                          RiskLevel riskLevel,
                                           String recommendReason,
-                                          String riskLevel,
                                           String detail
                                 ) {
 }
