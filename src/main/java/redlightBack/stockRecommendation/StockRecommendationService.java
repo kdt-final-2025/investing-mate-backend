@@ -34,7 +34,7 @@ public class StockRecommendationService {
                             stock.getCurrentPrice(),
                             round(stock.getHighPrice1y(), 2),
                             round(stock.getDividendYield(), 2),
-                            round(maxPriceRatio, 3),
+                            round(stock.getCurrentToHighRatio(), 3),
                             riskLevel,
                             reason,
                             detail
