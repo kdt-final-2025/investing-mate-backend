@@ -85,9 +85,9 @@ def generate_current_to_high_ratio(current_price, high_price_1y):
 def generate_risk_level(dividend_yield, current_to_high_ratio):
     if dividend_yield is None or current_to_high_ratio is None:
         return None
-    if dividend_yield > 4.0 and current_to_high_ratio < 0.9:
+    if dividend_yield > 4.0 and current_to_high_ratio >= 0.9:
         return "LOW"
-    elif dividend_yield > 2.0 and current_to_high_ratio < 0.85:
+    elif dividend_yield > 2.0 and current_to_high_ratio >= 0.85:
         return "MEDIUM"
     else:
         return "HIGH"
@@ -96,9 +96,9 @@ def generate_risk_level(dividend_yield, current_to_high_ratio):
 # DB에 데이터 저장
 def save_to_db(conn, ticker, name, data):
     current_to_high_ratio = generate_current_to_high_ratio(data["current_price"], data["high_price_1y"])
-    risk_level = generate_risk_level(data["dividend_yield"], generate_current_to_high_ratio(data["current_price"], data["high_price_1y"]))
-    print("🔍 저장할 current_to_high_ratio:", current_to_high_ratio)
-    print("🔍 저장할 risk_level:", risk_level)
+    risk_level = generate_risk_level(data["dividend_yield"], current_to_high_ratio)
+    logging.debug("🔍 저장할 current_to_high_ratio:", current_to_high_ratio)
+    logging.debug("🔍 저장할 risk_level:", risk_level)
     
     with conn.cursor() as cursor:
         cursor.execute("""
