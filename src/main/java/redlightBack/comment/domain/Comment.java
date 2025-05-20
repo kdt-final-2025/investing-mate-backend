@@ -33,19 +33,8 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private int likeCount = 0;//좋아요
 
-
-
-
+    @Column(nullable = true)
     private LocalDateTime delete = null;
-
-
-    public Comment(Long id, String userId, String content, int likeCount) {
-        this.id = id;
-        this.userId = userId;
-        this.content = content;
-        this.likeCount = likeCount;
-
-    }
 
     public Comment(String userId, String content, Long postId, Comment parent) {
         this.userId = userId;

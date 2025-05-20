@@ -30,7 +30,7 @@ public class CommentService {
 
         Post post = postRepository.findById(request.postId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-
+        post.increaseCommentCount();
         Comment parent = null;
 
         if (request.parentId() != null) {
@@ -76,7 +76,9 @@ public class CommentService {
 
         // 삭제 처리 (소프트 삭제)
         comment.delete();
-
+        Post post = postRepository.findById(comment.getPostId())
+                .orElseThrow(() -> new NoSuchElementException("게시글을 찾을 수 없습니다. postId: " + comment.getPostId()));
+        post.decreaseCommentCount();
         // 댓글 저장 (소프트 삭제된 상태로)
         commentRepository.save(comment);
     }
