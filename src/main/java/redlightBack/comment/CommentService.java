@@ -159,7 +159,7 @@ public class CommentService {
         } else {
 
             // 시간순 조회 (기존 로직)
-            List<Comment> commentPage = commentRepository.findByPostIdAndDeleteIsNull(postId);
+            List<Comment> commentPage = commentRepository.findByPostIdAndDeleteIsNullOrderByCreatedAtDesc(postId);
 
             long totalElements = likeCountRepository.countCommentsByPostId(postId);
 

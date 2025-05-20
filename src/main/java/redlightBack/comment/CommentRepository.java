@@ -10,9 +10,8 @@ import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment,Long> {
 
-    Page<Comment> findByPostId(Long postId, Pageable pageable);
     Optional<Comment> findByIdAndDeleteIsNull(Long commentId);
-    List<Comment> findByPostIdAndDeleteIsNull(Long postId);
+    List<Comment> findByPostIdAndDeleteIsNullOrderByCreatedAtDesc(Long postId);
 }
 
 
