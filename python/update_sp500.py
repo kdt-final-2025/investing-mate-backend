@@ -9,8 +9,12 @@ import pandas as pd
 import yfinance as yf
 import psycopg2
 import pytz
+import redis
+import logging
 from datetime import datetime, timedelta
 from dotenv import load_dotenv  # 추가 (선택)
+
+logging.basicConfig(level=logging.DEBUG)
 
 load_dotenv()
 print(os.getenv("DB_NAME"))
@@ -155,6 +159,12 @@ def main():
 
     conn.close()
     print("🎉 전체 완료!")
+
+# GPT 설명 캐시 키 삭제
+r = redis.Redis(host='my-redis', port=6379, db=0)
+for key in r.scan_iter("GPT_EXPLAIN:*"):
+    r.delete(key)
+print("✅ GPT 설명 캐시 삭제 완료")
 
 if __name__ == "__main__":
     main()
