@@ -76,8 +76,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests
-        run: ./gradlew test --no-daemon \
-          -Dspring.datasource.url=jdbc:postgresql://localhost:5432/redlight \
-          -Dspring.datasource.username=user123 \
-          -Dspring.datasource.password=password \
-          -Dspring.elasticsearch.rest.uris=http://localhost:9200
+        run: |
+          chmod +x gradlew
+          ./gradlew \
+            -Dspring.datasource.url=jdbc:postgresql://localhost:5432/redlight \
+            -Dspring.datasource.username=user123 \
+            -Dspring.datasource.password=password \
+            -Dspring.elasticsearch.rest.uris=http://localhost:9200 \
+            test \
+            --no-daemon
