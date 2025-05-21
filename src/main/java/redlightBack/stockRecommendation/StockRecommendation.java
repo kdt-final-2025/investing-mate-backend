@@ -2,7 +2,6 @@ package redlightBack.stockRecommendation;
 
 import jakarta.persistence.*;
 import lombok.*;
-import redlightBack.stockRecommendation.dto.RiskLevel;
 import redlightBack.stockRecommendation.dto.Tag;
 
 import java.time.LocalDateTime;
@@ -40,12 +39,12 @@ public class StockRecommendation {
 
     private Double dividendYield;  //연배당수익률
 
-    private LocalDateTime updatedAt;
+    private Double currentToHighRatio;  //저평가율
 
-    //고점 대비 저평가율
-    public Double generatePriceGapRatio (){
-        return currentPrice / highPrice1y;
-    }
+    @Enumerated(EnumType.STRING)
+    private RiskLevel riskLevel;  //위험도
+
+    private LocalDateTime updatedAt;
 
     //"고배당 + 저평가" 태그 생성
     public String generateReason(){
@@ -53,24 +52,10 @@ public class StockRecommendation {
         if(dividendYield != null && dividendYield > 4){
             reasons.add(Tag.고배당.toString());
         }
-        if(generatePriceGapRatio() < 0.85){
+        if(currentToHighRatio < 0.85){
             reasons.add(Tag.저평가.toString());
         }
         return String.join("+", reasons);
-    }
-
-    //위험성향 판단
-    public RiskLevel generateRiskLevel(){
-
-        double ratio = generatePriceGapRatio();
-
-        if(dividendYield != null && dividendYield > 4 && ratio > 0.9){
-            return RiskLevel.LOW;
-        }else if(dividendYield != null && dividendYield > 2 && ratio > 0.85){
-            return RiskLevel.MEDIUM;
-        }else {
-            return RiskLevel.HIGH;
-        }
     }
 
     //챗봇에 넘길 문장 생성
@@ -81,8 +66,8 @@ public class StockRecommendation {
             String formattedYield = String.format("배당률 %.2f%%", dividendYield);
             details.add(formattedYield);
         }
-        if(generatePriceGapRatio() < 1.0){
-            double dropPercent = (1.0 - generatePriceGapRatio()) * 100;
+        if(currentToHighRatio < 1.0){
+            double dropPercent = (1.0 - currentToHighRatio) * 100;
             String formattedDrop = String.format("고점 대비 -%.0f%%", dropPercent);
             details.add(formattedDrop);
         }
