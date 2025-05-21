@@ -10,6 +10,7 @@ import redlightBack.post.dto.PostDto;
 import redlightBack.post.enums.Direction;
 import redlightBack.post.enums.SortBy;
 
+import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -53,31 +54,32 @@ public class PostQueryRepository {
 
     // 제목 필터 대신 ES 에서 뽑아온 ID 리스트로만 조회할 오버로드
     public List<PostDto> searchAndOrderingPosts(
-            Long boardId, String postTitle, String userId,
-            SortBy sortBy, Direction direction,
-            Long offset, int size,
-            List<Long> includeIds
+            Long boardId,
+            String userId,
+            SortBy sortBy,
+            Direction direction,
+            Long offset,
+            int size,
+            List<Long> idList
     ) {
-        BooleanExpression inList = (includeIds == null || includeIds.isEmpty())
-                ? null
-                : qPost.id.in(includeIds);
-
-        return queryFactory
-                .select(Projections.constructor(PostDto.class,    // ← 여기!
+        if (idList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return queryFactory.select(Projections.constructor(PostDto.class,
                         qPost.id,
                         qPost.postTitle,
                         qPost.userId,
                         qPost.viewCount,
                         qPost.commentCount,
                         qPostLike.id.count(),
-                        qPost.createdAt))
+                        qPost.createdAt
+                ))
                 .from(qPost)
                 .where(
                         qPost.boardId.eq(boardId),
                         qPost.deletedAt.isNull(),
-                        searchByTitle(postTitle),
                         searchByUserId(userId),
-                        inList                                     // ← ID 필터 추가
+                        qPost.id.in(idList)
                 )
                 .leftJoin(qPostLike).on(qPostLike.post.id.eq(qPost.id))
                 .groupBy(qPost.id)
@@ -142,25 +144,20 @@ public class PostQueryRepository {
     }
 
     // 오버로드된 count: includeIds 로 필터링
-    public long countPosts(
-            Long boardId, String postTitle, String userId,
-            List<Long> includeIds
-    ) {
-        BooleanExpression inList = (includeIds == null || includeIds.isEmpty())
-                ? null
-                : qPost.id.in(includeIds);
-
-        Long cnt = queryFactory.select(qPost.count())
+    public long countPosts(Long boardId, String userId, List<Long> idList) {
+        if (idList.isEmpty()) {
+            return 0L;
+        }
+        Long cnt = queryFactory
+                .select(qPost.count())
                 .from(qPost)
                 .where(
                         qPost.boardId.eq(boardId),
                         qPost.deletedAt.isNull(),
-                        searchByTitle(postTitle),
                         searchByUserId(userId),
-                        inList                 // ← ID 필터 추가
+                        qPost.id.in(idList)
                 )
                 .fetchOne();
-
-        return cnt == null ? 0L : cnt;
+        return cnt != null ? cnt : 0L;
     }
 }

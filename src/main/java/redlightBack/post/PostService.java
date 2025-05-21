@@ -121,28 +121,36 @@ public class PostService {
         long totalElements;
         List<PostDto> posts;
 
-        // --- 1) 제목 검색 파라미터가 있을 때: ES → DB (ID IN) ---
         if (postTitle != null && !postTitle.isBlank()) {
-            // 1. ES 인덱스 리프레시 (테스트 환경)
+            // 1) ES 색인 리프레시 (테스트 환경에서만)
             esOps.indexOps(PostDocument.class).refresh();
 
-            // 2. ES 에서 제목으로 검색 → ID 리스트만 추출
-            List<Long> idList = postDocumentRepository.findByPostTitleContainingIgnoreCase(postTitle)
+            // 2) ES에서 제목으로 검색 → ID 리스트
+            List<Long> idList = postDocumentRepository
+                    .findByPostTitleContainingIgnoreCase(postTitle)
                     .stream()
                     .map(PostDocument::getId)
                     .toList();
 
-            // 3. DB 에서 ID 리스트로 count & 조회
-            totalElements = postQueryRepository.countPosts(
-                    boardId,
-                    null,
-                    userId,
-                    idList
-            );
+            // ★ 제목으로 매칭되는 게 하나도 없으면 바로 빈 결과 리턴
+            if (idList.isEmpty()) {
+                PageInfo emptyPage = new PageInfo(
+                        pageable.getPageNumber() + 1,
+                        pageable.getPageSize(),
+                        0L,
+                        0
+                );
+                return new PostListAndPagingResponse(
+                        board.getBoardName(),
+                        List.of(),      // 빈 리스트
+                        emptyPage
+                );
+            }
 
+            // 3) DB에서 ID 리스트로 count & 조회
+            totalElements = postQueryRepository.countPosts(boardId, userId, idList);
             posts = postQueryRepository.searchAndOrderingPosts(
                     boardId,
-                    null,
                     userId,
                     sortBy,
                     direction,
@@ -150,14 +158,9 @@ public class PostService {
                     pageable.getPageSize(),
                     idList
             );
-        }
-        // --- 2) 제목 검색 파라미터가 없을 때: 기존 DB 쿼리 그대로 ---
-        else {
-            totalElements = postQueryRepository.countPosts(
-                    boardId,
-                    null,
-                    userId
-            );
+        } else {
+            // 제목 검색이 없을 땐 기존 DB-only 로직
+            totalElements = postQueryRepository.countPosts(boardId, null, userId);
             posts = postQueryRepository.searchAndOrderingPosts(
                     boardId,
                     null,
@@ -169,6 +172,7 @@ public class PostService {
             );
         }
 
+        // DTO → Response 변환
         List<PostListResponse> responseList = posts.stream()
                 .map(dto -> new PostListResponse(
                         dto.id(),

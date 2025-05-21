@@ -48,7 +48,7 @@ public class BoardService {
         return boardRepository.findAll().stream().map(
                 board -> new BoardResponse(board.getId(),
                         board.getBoardName(),
-                        (int) postQueryRepository.countPosts(board.getId(), null, null))
+                        (int) postQueryRepository.countPosts(board.getId(),null, (String) null))
 
         ).toList();
     }

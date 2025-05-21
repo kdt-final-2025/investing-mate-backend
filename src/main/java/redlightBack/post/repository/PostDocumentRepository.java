@@ -7,7 +7,7 @@ import redlightBack.post.document.PostDocument;
 import java.util.List;
 
 @Repository
-public interface PostDocumentRepository extends ElasticsearchRepository<PostDocument, Long> {
-    // Spring Data Elasticsearch 가 자동으로 구현해 줍니다
+public interface PostDocumentRepository
+        extends ElasticsearchRepository<PostDocument, Long> {
     List<PostDocument> findByPostTitleContainingIgnoreCase(String postTitle);
 }
