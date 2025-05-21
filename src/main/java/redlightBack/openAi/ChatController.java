@@ -53,6 +53,7 @@ public class ChatController {
 
         long recommendStart = System.currentTimeMillis();
         //조건 기반 추천 로직 + GPT 설명
+
         StockRecommendationAndExplanationResponse recommendWithExplanation = stockRecommendationService.getRecommendWithExplanation(minDividend, maxPriceRatio, riskLevel, 3);
         long recommendEnd = System.currentTimeMillis();
         log.info("⏰조건 기반 추천 로직 + GPT 설명 호출 소요시간: {} ms", (recommendEnd - recommendStart));
