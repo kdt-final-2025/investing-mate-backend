@@ -106,7 +106,6 @@ public class PostService {
 
 
     //게시글 목록 조회(제목 검색, userId 검색, 좋아요 정렬, 최신순 정렬)
-
     @Transactional(readOnly = true)
     public PostListAndPagingResponse getPosts(
             String userId,
@@ -136,20 +135,20 @@ public class PostService {
             // 3. DB 에서 ID 리스트로 count & 조회
             totalElements = postQueryRepository.countPosts(
                     boardId,
-                    null,       // 제목 필터는 이미 ES 에서 처리했으므로 null
+                    null,
                     userId,
-                    idList      // 새로 추가된 파라미터
+                    idList
             );
 
             posts = postQueryRepository.searchAndOrderingPosts(
                     boardId,
-                    null,       // 제목 필터 대신 idList 사용
+                    null,
                     userId,
                     sortBy,
                     direction,
                     pageable.getOffset(),
                     pageable.getPageSize(),
-                    idList      // 마지막 파라미터로 idList 를 넘겨주세요!
+                    idList
             );
         }
         // --- 2) 제목 검색 파라미터가 없을 때: 기존 DB 쿼리 그대로 ---
@@ -170,7 +169,6 @@ public class PostService {
             );
         }
 
-        // DTO 변환
         List<PostListResponse> responseList = posts.stream()
                 .map(dto -> new PostListResponse(
                         dto.id(),
