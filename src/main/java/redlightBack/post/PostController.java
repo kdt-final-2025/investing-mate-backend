@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import redlightBack.loginUtils.LoginMemberId;
 import redlightBack.post.dto.*;
@@ -58,8 +57,7 @@ public class PostController {
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Sort sort = Sort.by(Sort.Direction.fromString(direction.name()), sortBy.name().toLowerCase());
-        Pageable pageable = PageRequest.of(pageNumber - 1, size, sort);
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
         return postService.getPosts(userId, boardId, postTitle, sortBy, direction, pageable);
     }
 
