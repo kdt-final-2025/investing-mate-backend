@@ -1,5 +1,7 @@
 package redlightBack.stockRecommendation.dto;
 
+import redlightBack.stockRecommendation.RiskLevel;
+
 public record StockRecommendationResponse(Long id,
                                           String ticker,
                                           String name,

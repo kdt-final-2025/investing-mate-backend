@@ -2,7 +2,6 @@ package redlightBack.stockRecommendation;
 
 import jakarta.persistence.*;
 import lombok.*;
-import redlightBack.stockRecommendation.dto.RiskLevel;
 import redlightBack.stockRecommendation.dto.Tag;
 
 import java.time.LocalDateTime;

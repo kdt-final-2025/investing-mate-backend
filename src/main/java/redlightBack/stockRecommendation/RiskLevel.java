@@ -1,4 +1,4 @@
-package redlightBack.stockRecommendation.dto;
+package redlightBack.stockRecommendation;
 
 public enum RiskLevel {
     LOW,
