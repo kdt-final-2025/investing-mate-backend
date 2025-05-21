@@ -7,16 +7,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import redlightBack.board.dto.BoardResponse;
 import redlightBack.board.dto.CreateBoardRequest;
 import redlightBack.comment.dto.CommentResponse;
 import redlightBack.comment.dto.CreateCommentRequest;
 import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Member;
 import redlightBack.member.memberEntity.Role;
+import redlightBack.post.document.PostDocument;
 import redlightBack.post.dto.*;
 import redlightBack.post.enums.Direction;
 import redlightBack.post.enums.SortBy;
-import redlightBack.member.memberEntity.Member;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,9 @@ public class BoardApiTest extends AcceptanceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private ElasticsearchOperations esOps;
 
     private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJleGFtcGxlMUBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.47l3xzbylBcWghRGY2gR9jUsy_gUa4s1wUJLduzvo7Y";
 
@@ -316,7 +321,7 @@ public class BoardApiTest extends AcceptanceTest {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
-        PostResponse post1 = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        PostResponse post1 = createPost(new CreatePostRequest(boardId, "나는 나비", "내용1", List.of("img1", "img2", "img3")));
         PostResponse post2 = createPost(new CreatePostRequest(boardId, "제목2", "내용2", List.of("img1", "img2", "img3")));
         PostResponse post3 = createPost(new CreatePostRequest(boardId, "제목3", "내용3", List.of("img1", "img2", "img3")));
         PostResponse post4 = createPost(new CreatePostRequest(boardId, "제목4", "내용4", List.of("img1", "img2", "img3")));
@@ -325,10 +330,12 @@ public class BoardApiTest extends AcceptanceTest {
         PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
         PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
 
+        esOps.indexOps(PostDocument.class).refresh();
+
         PostListAndPagingResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("boardId", boardId)
-                .queryParam("postTitle", "제목1")
+                .queryParam("postTitle", "나비")
                 .when()
                 .get("/posts")
                 .then().log().all()
@@ -339,7 +346,7 @@ public class BoardApiTest extends AcceptanceTest {
         List<PostListResponse> postListResponses = response.postListResponse();
 
         assertThat(postListResponses.size()).isEqualTo(1);
-        assertThat(postListResponses).anyMatch(post -> post.postTitle().equals("제목1"));
+        assertThat(postListResponses).anyMatch(post -> post.postTitle().equals("나는 나비"));
     }
 
     @DisplayName("게시물 정렬 테스트")

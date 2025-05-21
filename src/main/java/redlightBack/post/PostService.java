@@ -2,15 +2,18 @@ package redlightBack.post;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redlightBack.board.Board;
 import redlightBack.board.BoardRepository;
+import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Member;
+import redlightBack.post.document.PostDocument;
 import redlightBack.post.dto.*;
 import redlightBack.post.enums.Direction;
 import redlightBack.post.enums.SortBy;
-import redlightBack.member.MemberRepository;
-import redlightBack.member.memberEntity.Member;
+import redlightBack.post.repository.PostDocumentRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,6 +28,8 @@ public class PostService {
     private final PostMapper postMapper;
     private final MemberRepository memberRepository;
     private final PostLikeQueryRepository postLikeQueryRepository;
+    private final PostDocumentRepository postDocumentRepository;
+    private final ElasticsearchOperations esOps;
 
     //게시물 생성
     public PostResponse create(String userId, CreatePostRequest request) {
@@ -39,6 +44,10 @@ public class PostService {
                 request.imageUrls());
 
         postRepository.save(post);
+
+        // ES에 간단 문서 저장 및 샤드 리프레시
+        postDocumentRepository.save(PostDocument.fromEntity(post));
+        esOps.indexOps(PostDocument.class).refresh();
 
         return postMapper.toPostResponse(post);
     }
@@ -71,6 +80,10 @@ public class PostService {
                 request.content(),
                 request.imageUrls());
 
+        // ES에 간단 문서 저장 및 샤드 리프레시
+        postDocumentRepository.save(PostDocument.fromEntity(post));
+        esOps.indexOps(PostDocument.class).refresh();
+
         return postMapper.toPostResponse(post);
     }
 
@@ -93,42 +106,96 @@ public class PostService {
 
 
     //게시글 목록 조회(제목 검색, userId 검색, 좋아요 정렬, 최신순 정렬)
-    public PostListAndPagingResponse getPosts(String userId,
-                                              Long boardId,
-                                              String postTitle,
-                                              SortBy sortBy,
-                                              Direction direction,
-                                              Pageable pageable) {
 
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new NoSuchElementException("해당 게시판을 찾을 수 없습니다.")
-        );
+    @Transactional(readOnly = true)
+    public PostListAndPagingResponse getPosts(
+            String userId,
+            Long boardId,
+            String postTitle,
+            SortBy sortBy,
+            Direction direction,
+            Pageable pageable
+    ) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new NoSuchElementException("해당 게시판을 찾을 수 없습니다."));
 
+        long totalElements;
+        List<PostDto> posts;
 
-        int size = pageable.getPageSize();
-        Long offset = pageable.getOffset();
-        long totalElements = postQueryRepository.countPosts(boardId, postTitle, userId);
-        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+        // --- 1) 제목 검색 파라미터가 있을 때: ES → DB (ID IN) ---
+        if (postTitle != null && !postTitle.isBlank()) {
+            // 1. ES 인덱스 리프레시 (테스트 환경)
+            esOps.indexOps(PostDocument.class).refresh();
 
-        List<PostDto> posts = postQueryRepository.searchAndOrderingPosts(boardId, postTitle, userId, sortBy, direction, offset, size);
+            // 2. ES 에서 제목으로 검색 → ID 리스트만 추출
+            List<Long> idList = postDocumentRepository.findByPostTitleContainingIgnoreCase(postTitle)
+                    .stream()
+                    .map(PostDocument::getId)
+                    .toList();
 
+            // 3. DB 에서 ID 리스트로 count & 조회
+            totalElements = postQueryRepository.countPosts(
+                    boardId,
+                    null,       // 제목 필터는 이미 ES 에서 처리했으므로 null
+                    userId,
+                    idList      // 새로 추가된 파라미터
+            );
+
+            posts = postQueryRepository.searchAndOrderingPosts(
+                    boardId,
+                    null,       // 제목 필터 대신 idList 사용
+                    userId,
+                    sortBy,
+                    direction,
+                    pageable.getOffset(),
+                    pageable.getPageSize(),
+                    idList      // 마지막 파라미터로 idList 를 넘겨주세요!
+            );
+        }
+        // --- 2) 제목 검색 파라미터가 없을 때: 기존 DB 쿼리 그대로 ---
+        else {
+            totalElements = postQueryRepository.countPosts(
+                    boardId,
+                    null,
+                    userId
+            );
+            posts = postQueryRepository.searchAndOrderingPosts(
+                    boardId,
+                    null,
+                    userId,
+                    sortBy,
+                    direction,
+                    pageable.getOffset(),
+                    pageable.getPageSize()
+            );
+        }
+
+        // DTO 변환
         List<PostListResponse> responseList = posts.stream()
-                .map(list -> new PostListResponse(list.id(),
-                        list.postTitle(),
-                        list.userId(),
-                        list.viewCount(),
-                        list.commentCount(),
-                        list.likeCount(),
-                        list.createdAt())
-                ).toList();
+                .map(dto -> new PostListResponse(
+                        dto.id(),
+                        dto.postTitle(),
+                        dto.userId(),
+                        dto.viewCount(),
+                        dto.commentCount(),
+                        dto.likeCount(),
+                        dto.createdAt()
+                ))
+                .toList();
 
-        PageInfo pageInfo = new PageInfo(pageable.getPageNumber() + 1,
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+        PageInfo pageInfo = new PageInfo(
+                pageable.getPageNumber() + 1,
                 pageable.getPageSize(),
                 totalElements,
                 totalPages
         );
 
-        return new PostListAndPagingResponse(board.getBoardName(), responseList, pageInfo);
+        return new PostListAndPagingResponse(
+                board.getBoardName(),
+                responseList,
+                pageInfo
+        );
     }
 
     //사용자가 좋아요 누른 게시글 목록 보기
