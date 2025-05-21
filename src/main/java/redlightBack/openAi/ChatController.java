@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import redlightBack.stockRecommendation.RiskLevel;
 import redlightBack.stockRecommendation.StockRecommendationService;
-import redlightBack.stockRecommendation.dto.RiskLevel;
 import redlightBack.stockRecommendation.dto.StockRecommendationAndExplanationResponse;
 
 import java.util.Map;
