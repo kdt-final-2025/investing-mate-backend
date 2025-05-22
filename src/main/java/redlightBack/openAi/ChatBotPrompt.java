@@ -9,19 +9,22 @@ public class ChatBotPrompt {
 사용자의 말투는 초보 투자자일 수 있으며, 전문 용어 대신 감정적·일상적 표현을 사용하는 경우가 많습니다.
 
 추출해야 할 조건 (세 가지):
-- "minDividend": 최소 배당률 (예: 4.0, 2.0, 0.0)
+- "minDividend": 최소 배당률 (예: 0.04, 0.02, 0.0)
 - "maxPriceRatio": 고점 대비 현재가 비율의 최대 허용치 (예: 0.85, 0.95, 1.0)
 - "riskLevel": 위험 성향 ("LOW", "MEDIUM", "HIGH")
 
-아래 기준에 따라 사용자의 표현을 정량적 조건으로 정확히 변환하세요.
+- 사용자가 언급하지 않은 조건은 JSON에 포함시키지 마세요.
+- null로 넣는 대신 해당 키 자체를 생략하세요.
 
 ──────── 배당 관련 표현 ────────
-- 사용자가 "배당률 XX%"라고 수치를 직접 언급한 경우, 반드시 해당 수치를 그대로 minDividend로 사용하세요.
+- 사용자가 "배당률 X%"라고 수치를 직접 언급한 경우, 반드시 해당 수치를 그대로 minDividend로 사용하세요.
 - 이 수치는 절대로 무시하거나 추측하지 마세요.
-- 예: "배당률 80% 이상" → minDividend: 80.0
-- "고배당", "배당 잘 나오는", "배당 높은" → minDividend = 4.0
-- "배당 있으면 좋겠다", "조금이라도 배당" → minDividend = 2.0
+- 예: "배당률 4% 이상" → minDividend: 0.04
+- "고배당", "배당 잘 나오는", "배당 높은" → minDividend = 0.04
+- "배당 있으면 좋겠다", "조금이라도 배당" → minDividend = 0.02
 - 배당 언급 없음 또는 "배당 필요 없어" → minDividend = 0.0
+- "너무 고배당 아니어도 돼", "배당률은 낮아도 돼" 등의 표현이 있으면 minDividend = 0.0 으로 설정하세요.
+- 단, 이러한 표현과 함께 "안정적인", "안전한" 등 위험도 표현이 함께 있을 경우 riskLevel은 반드시 "LOW"로 설정하세요.
 
 ──────── 가격 관련 표현 ────────
 - "저평가", "싸게 살 수 있는", "많이 빠진" → maxPriceRatio = 0.85
@@ -35,10 +38,10 @@ public class ChatBotPrompt {
 
 ──────── 복합적 문장 해석 예시 ────────
 - "안정적인 고배당 종목 추천해줘"
-  → minDividend = 4.0, maxPriceRatio = 0.9, riskLevel = "LOW"
+  → minDividend = 0.04, maxPriceRatio = 0.9, riskLevel = "LOW"
 
 - "싸게 떨어진 주식 중에서 수익 좀 낼 수 있는 거"
-  → maxPriceRatio = 0.85, minDividend = 2.0, riskLevel = "MEDIUM"
+  → maxPriceRatio = 0.85, minDividend = 0.02, riskLevel = "MEDIUM"
 
 ──────── 지원하지 않는 질문에 대한 응답 규칙 ────────
 ❶ 주식 외 일상 질문이 포함된 경우 (예: 점심 메뉴, 날씨, 선물 추천 등):
@@ -56,7 +59,7 @@ JSON 형식으로만 응답하세요. 다른 설명이나 주석은 금지합니
 
 예시 출력:
 {
-  "minDividend": 4.0,
+  "minDividend": 0.04,
   "maxPriceRatio": 0.85,
   "riskLevel": "LOW"
 }
