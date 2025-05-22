@@ -29,6 +29,10 @@ public class StockRecommendationService {
     public List<StockRecommendationResponse> getRecommend (Double minDividend, Double maxPriceRatio, RiskLevel riskLevel,  int limit){
         List<StockRecommendation> recommend = stockInfoQueryRepository.recommend(minDividend, maxPriceRatio, riskLevel, limit);
 
+        for (StockRecommendation stock : recommend) {
+            log.info(" {} / riskLevel = {}", stock.getName(), stock.getRiskLevel());
+        }
+
         return recommend.stream().map(
                 stock -> {
                     String reason = stock.generateReason();
@@ -42,7 +46,7 @@ public class StockRecommendationService {
                             round(stock.getHighPrice1y(), 2),
                             round(stock.getDividendYield(), 2),
                             round(stock.getCurrentToHighRatio(), 3),
-                            riskLevel,
+                            stock.getRiskLevel(),
                             reason,
                             detail
                     );
@@ -59,6 +63,10 @@ public class StockRecommendationService {
         long dbEnd = System.currentTimeMillis();
         log.info("📊 추천 종목 수: {}", stocks.size());
         log.info("⏰ DB 조회 소요 시간: {} ms", (dbEnd - dbStart));
+
+        for (StockRecommendationResponse stock : stocks) {
+            log.info("✅ {} / riskLevel {}", stock.name(), stock.riskLevel());
+        }
 
         // 2. 빈 리스트 처리
         if (stocks.isEmpty()) {
@@ -104,6 +112,10 @@ public class StockRecommendationService {
         String explanation = openAiService.askExplanation(message);
         long gptEnd = System.currentTimeMillis();
         log.info("⏰ GPT 설명 생성 소요시간: {} ms", (gptEnd - gptStart));
+
+        for (StockForChatBotDto stock : forChatBot) {
+            log.info("😭 {} / riskLevel {}", stock.name(), stock.riskLevel());
+        }
 
         // 6. 캐싱
         try {

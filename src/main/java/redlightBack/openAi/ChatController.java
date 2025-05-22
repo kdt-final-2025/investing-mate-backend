@@ -44,9 +44,14 @@ public class ChatController {
         log.info("⏰GPT로 조건 추출 소요시간: {} ms", (conditionEnd - conditionStart));
 
         Map<String, Object> condition = objectMapper.readValue(conditionJson, Map.class);
-        double minDividend = Double.parseDouble(condition.get("minDividend").toString());
-        double maxPriceRatio = Double.parseDouble(condition.get("maxPriceRatio").toString());
-        RiskLevel riskLevel = RiskLevel.valueOf(condition.get("riskLevel").toString().toUpperCase());
+        double minDividend = condition.containsKey("minDividend")
+                ? Double.parseDouble(condition.get("minDividend").toString()) : 0;
+
+        double maxPriceRatio = condition.containsKey("maxPriceRatio") ?
+                Double.parseDouble(condition.get("maxPriceRatio").toString()) : 1;
+
+        RiskLevel riskLevel = condition.containsKey("riskLevel") ?
+                RiskLevel.valueOf(condition.get("riskLevel").toString().toUpperCase()) : null;
 
         log.info("🔍 conditionJson: {}", conditionJson);
         log.info("🔍 parsed condition map: {}", condition);
