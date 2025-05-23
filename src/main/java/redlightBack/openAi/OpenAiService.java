@@ -47,7 +47,7 @@ public class OpenAiService {
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-3.5-turbo",
                 "messages", messages,
-                "temperature", 0.7,
+                "temperature", 0,
                 "max_tokens", 500
         );
 

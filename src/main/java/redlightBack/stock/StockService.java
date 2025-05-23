@@ -48,6 +48,7 @@ public class StockService {
                                                     int size,
                                                     String sortBy,
                                                     String order) {
+        System.out.println("userId = " + userId);
         Sort.Direction direction = Sort.Direction.fromString(order.toUpperCase());
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);

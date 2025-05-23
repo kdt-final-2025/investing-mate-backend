@@ -7,14 +7,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import redlightBack.board.dto.BoardResponse;
 import redlightBack.board.dto.CreateBoardRequest;
 import redlightBack.comment.dto.CommentResponse;
 import redlightBack.comment.dto.CreateCommentRequest;
+import redlightBack.member.MemberRepository;
+import redlightBack.member.memberEntity.Member;
+import redlightBack.member.memberEntity.Role;
+import redlightBack.post.document.PostDocument;
 import redlightBack.post.dto.*;
 import redlightBack.post.enums.Direction;
 import redlightBack.post.enums.SortBy;
-import redlightBack.member.memberEntity.Member;
 
 import java.util.List;
 import java.util.Map;
@@ -29,11 +33,27 @@ public class BoardApiTest extends AcceptanceTest {
     @Autowired
     DatabaseCleanup databaseCleanup;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ElasticsearchOperations esOps;
+
+    private static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJleGFtcGxlMUBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.47l3xzbylBcWghRGY2gR9jUsy_gUa4s1wUJLduzvo7Y";
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         databaseCleanup.execute();
+
+        Member admin = Member.builder()
+                .userId("1234567890")
+                .email("example1@email.com")
+                .fullname("Admin User")
+                .role(Role.ADMINISTRATOR)
+                .build();
+
+        memberRepository.save(admin);
     }
 
     @DisplayName("게시판 생성 테스트")
@@ -78,7 +98,6 @@ public class BoardApiTest extends AcceptanceTest {
         PostResponse post6 = createPost(new CreatePostRequest(boardId, "제목6", "내용6", List.of("img1", "img2", "img3")));
         PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
         PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
-
 
 
         List<BoardResponse> boards = RestAssured.given().log().all()
@@ -302,7 +321,7 @@ public class BoardApiTest extends AcceptanceTest {
         BoardResponse board = createBoard("자유게시판");
         Long boardId = board.id();
 
-        PostResponse post1 = createPost(new CreatePostRequest(boardId, "제목1", "내용1", List.of("img1", "img2", "img3")));
+        PostResponse post1 = createPost(new CreatePostRequest(boardId, "나는 나비", "내용1", List.of("img1", "img2", "img3")));
         PostResponse post2 = createPost(new CreatePostRequest(boardId, "제목2", "내용2", List.of("img1", "img2", "img3")));
         PostResponse post3 = createPost(new CreatePostRequest(boardId, "제목3", "내용3", List.of("img1", "img2", "img3")));
         PostResponse post4 = createPost(new CreatePostRequest(boardId, "제목4", "내용4", List.of("img1", "img2", "img3")));
@@ -311,10 +330,12 @@ public class BoardApiTest extends AcceptanceTest {
         PostResponse post7 = createPost(new CreatePostRequest(boardId, "제목7", "내용7", List.of("img1", "img2", "img3")));
         PostResponse post8 = createPost(new CreatePostRequest(boardId, "제목8", "내용8", List.of("img1", "img2", "img3")));
 
+        esOps.indexOps(PostDocument.class).refresh();
+
         PostListAndPagingResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .queryParam("boardId", boardId)
-                .queryParam("postTitle", "제목1")
+                .queryParam("postTitle", "나비")
                 .when()
                 .get("/posts")
                 .then().log().all()
@@ -325,7 +346,7 @@ public class BoardApiTest extends AcceptanceTest {
         List<PostListResponse> postListResponses = response.postListResponse();
 
         assertThat(postListResponses.size()).isEqualTo(1);
-        assertThat(postListResponses).anyMatch(post -> post.postTitle().equals("제목1"));
+        assertThat(postListResponses).anyMatch(post -> post.postTitle().equals("나는 나비"));
     }
 
     @DisplayName("게시물 정렬 테스트")
@@ -405,7 +426,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("좋아요 테스트")
     @Test
-    public void 좋아요_테스트 (){
+    public void 좋아요_테스트() {
 
         createMember("user1");
         BoardResponse board = createBoard("자유게시판");
@@ -432,7 +453,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("좋아요 취소 테스트")
     @Test
-    public void 좋아요_취소_테스트 (){
+    public void 좋아요_취소_테스트() {
 
         createMember("user1");
         BoardResponse board = createBoard("자유게시판");
@@ -451,7 +472,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("여러 사용자의 좋아요 테스트")
     @Test
-    public void 여러_사용자의_좋아요_테스트 (){
+    public void 여러_사용자의_좋아요_테스트() {
 
         createMember("user1");
         BoardResponse board = createBoard("자유게시판");
@@ -475,7 +496,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("여러 사용자의 좋아요 테스트2")
     @Test
-    public void 여러_사용자의_좋아요_테스트2 (){
+    public void 여러_사용자의_좋아요_테스트2() {
 
         createMember("user1");
         BoardResponse board = createBoard("자유게시판");
@@ -505,7 +526,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("좋아요순으로 목록 조회 테스트")
     @Test
-    public void 좋아요순으로_목록_조회_테스트 (){
+    public void 좋아요순으로_목록_조회_테스트() {
 
         createMember("user1");
         BoardResponse board = createBoard("자유게시판");
@@ -569,7 +590,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("좋아요순 오래된 게시물 순서로 목록 조회")
     @Test
-    public void 좋아요와_오래된_게시물_순서로_목록_조회 (){
+    public void 좋아요와_오래된_게시물_순서로_목록_조회() {
 
         createMember("user1");
         BoardResponse board = createBoard("자유게시판");
@@ -635,7 +656,7 @@ public class BoardApiTest extends AcceptanceTest {
 
     @DisplayName("사용자가 좋아요 누른 게시글 목록 보기")
     @Test
-    public void 사용자가_좋아요_누른_게시글_목록_보기 (){
+    public void 사용자가_좋아요_누른_게시글_목록_보기() {
 
         createMember("user1");
 
@@ -661,7 +682,6 @@ public class BoardApiTest extends AcceptanceTest {
         toggleLike(postId8, generateTestTokens("user6"));
         toggleLike(postId2, generateTestTokens("user6"));
         toggleLike(postId3, generateTestTokens("user6"));
-
 
 
         PostsLikedAndPagingResponse likedPosts = RestAssured.given().log().all()
@@ -783,7 +803,6 @@ public class BoardApiTest extends AcceptanceTest {
     }
 
 
-
     @Test
     public void 댓글_수정_테스트() {
         createMember("user1");
@@ -840,21 +859,20 @@ public class BoardApiTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + validJwtToken)
-                .pathParam("commentId",1L)
+                .pathParam("commentId", 1L)
                 .when()
-                .delete("/comments/{commentId}" )
+                .delete("/comments/{commentId}")
                 .then().log().all()
                 .statusCode(200);  // 정상 삭제
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + validJwtToken)
-                .pathParam("commentId",2L)
+                .pathParam("commentId", 2L)
                 .when()
-                .delete("/comments/{commentId}" )
+                .delete("/comments/{commentId}")
                 .then().log().all()
                 .statusCode(200);  // 정상 삭제
-
 
 
         // 7. 좋아요순 댓글 + 대댓글 조회 API 호출 및 검증
@@ -1044,25 +1062,24 @@ public class BoardApiTest extends AcceptanceTest {
         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiaWF0IjoxNzQ1NDUyODAwLCJleHAiOjE3NzY5ODg4MDB9.P4f4xRaylLo8QXIqDxW8dFlLAEITtJr-hep4Ohyh42U";
     }
 
-      public CommentResponse createComment(CreateCommentRequest commentRequest) {
+    public CommentResponse createComment(CreateCommentRequest commentRequest) {
 
-          String token = generateTestToken();
+        String token = generateTestToken();
 
-          return RestAssured.given().log().all()
-                  .contentType(ContentType.JSON)
-                  .header("Authorization", "Bearer " + token)
-                  .body(commentRequest)
-                  .when()
-                  .post("/comments")
-                  .then().log().all()
-                  .statusCode(200)
-                  .extract()
-                  .as(CommentResponse.class);
-      }
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(commentRequest)
+                .when()
+                .post("/comments")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(CommentResponse.class);
+    }
 
 
-
-    public PostLikeResponse toggleLike(Long postId, String token){
+    public PostLikeResponse toggleLike(Long postId, String token) {
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -1076,7 +1093,7 @@ public class BoardApiTest extends AcceptanceTest {
                 .as(PostLikeResponse.class);
     }
 
-    public Member createMember (String userId){
+    public Member createMember(String userId) {
 
         String token = generateTestTokens(userId);
 
@@ -1092,7 +1109,7 @@ public class BoardApiTest extends AcceptanceTest {
     }
 
     private Map<String, String> tokens = Map.of(
-            "user1", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJleGFtcGxlMUBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.47l3xzbylBcWghRGY2gR9jUsy_gUa4s1wUJLduzvo7Y",
+            "user1", ADMIN_TOKEN,
             "user2", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMzQ1Njc4OTAxIiwiZW1haWwiOiJleGFtcGxlMkBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.Fr2sLUf7mxbk9vcd0_LzmgCd3MLVNN21FWJamtTkI6U",
             "user3", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDU2Nzg5MDEyIiwiZW1haWwiOiJleGFtcGxlM0BlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.TbTxngE22J8J-dBpgGRLY9wxeuK0h9fmQtY78wPqb5s",
             "user4", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTY3ODkwMTIzIiwiZW1haWwiOiJleGFtcGxlNEBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.kuPJaoaDpyKbIRGS9auIZAYXTho05VYndZr59D2gE9I",
@@ -1100,7 +1117,7 @@ public class BoardApiTest extends AcceptanceTest {
             "user6", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2Nzg5MDEyMzQ1IiwiZW1haWwiOiJleGFtcGxlNkBlbWFpbC5jb20iLCJpYXQiOjE1MTYyMzkwMjJ9.OGQpY8Zri7UWugvOiohjCXdHg14MLn07N1vadRo-tfQ"
     );
 
-    public String generateTestTokens(String userId){
+    public String generateTestTokens(String userId) {
         return tokens.get(userId);
 
     }
