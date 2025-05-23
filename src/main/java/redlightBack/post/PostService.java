@@ -45,9 +45,8 @@ public class PostService {
 
         postRepository.save(post);
 
-        // ES에 간단 문서 저장 및 샤드 리프레시
+        // ES에 간단 문서 저장
         postDocumentRepository.save(PostDocument.fromEntity(post));
-        esOps.indexOps(PostDocument.class).refresh();
 
         return postMapper.toPostResponse(post);
     }
@@ -80,9 +79,8 @@ public class PostService {
                 request.content(),
                 request.imageUrls());
 
-        // ES에 간단 문서 저장 및 샤드 리프레시
+        // ES에 간단 문서 저장
         postDocumentRepository.save(PostDocument.fromEntity(post));
-        esOps.indexOps(PostDocument.class).refresh();
 
         return postMapper.toPostResponse(post);
     }
