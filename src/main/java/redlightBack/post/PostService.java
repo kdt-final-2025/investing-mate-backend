@@ -3,6 +3,10 @@ package redlightBack.post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redlightBack.board.Board;
@@ -120,17 +124,45 @@ public class PostService {
         List<PostDto> posts;
 
         if (postTitle != null && !postTitle.isBlank()) {
-            // 1) ES 색인 리프레시 (테스트 환경에서만)
-            esOps.indexOps(PostDocument.class).refresh();
 
-            // 2) ES에서 제목으로 검색 → ID 리스트
-            List<Long> idList = postDocumentRepository
-                    .findByPostTitleContainingIgnoreCase(postTitle)
-                    .stream()
+            // 1) 정확 문구(phrase) 검색
+            String phraseJson = """
+                      { "match_phrase": { "postTitle": "%s" } }
+                    """.formatted(postTitle);
+            StringQuery phraseQuery = new StringQuery(phraseJson);
+            List<Long> phraseIds = esOps.search(phraseQuery, PostDocument.class)
+                    .map(SearchHit::getContent)
                     .map(PostDocument::getId)
                     .toList();
 
-            // ★ 제목으로 매칭되는 게 하나도 없으면 바로 빈 결과 리턴
+            List<Long> idList;
+            if (!phraseIds.isEmpty()) {
+                // 문장 그대로 매칭된 게 있으면 이 결과만
+                idList = phraseIds;
+            } else {
+                // 2) 형태소(token) 검색
+                String cleaned = postTitle.replace("\"", "");
+                Criteria tokenCrit = Criteria.where("postTitle")
+                        .expression(cleaned);
+                List<Long> tokenIds = esOps.search(new CriteriaQuery(tokenCrit), PostDocument.class)
+                        .map(SearchHit::getContent)
+                        .map(PostDocument::getId)
+                        .toList();
+
+                if (!tokenIds.isEmpty()) {
+                    idList = tokenIds;
+                } else {
+                    // 3) substring(와일드카드) 검색 – “이” → *이* 매칭
+                    Criteria subCrit = Criteria.where("postTitle")
+                            .contains(cleaned);
+                    idList = esOps.search(new CriteriaQuery(subCrit), PostDocument.class)
+                            .map(SearchHit::getContent)
+                            .map(PostDocument::getId)
+                            .toList();
+                }
+            }
+
+            // ★ 매칭되는 게 없으면 빈 결과 리턴
             if (idList.isEmpty()) {
                 PageInfo emptyPage = new PageInfo(
                         pageable.getPageNumber() + 1,
@@ -140,12 +172,12 @@ public class PostService {
                 );
                 return new PostListAndPagingResponse(
                         board.getBoardName(),
-                        List.of(),      // 빈 리스트
+                        List.of(),
                         emptyPage
                 );
             }
 
-            // 3) DB에서 ID 리스트로 count & 조회
+            // 4) 기존 DB 조회 로직 그대로
             totalElements = postQueryRepository.countPosts(boardId, userId, idList);
             posts = postQueryRepository.searchAndOrderingPosts(
                     boardId,

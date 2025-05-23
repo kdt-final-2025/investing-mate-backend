@@ -26,6 +26,7 @@ public class CommentService {
     public final LikeSortedCommentTreeBuilder likeSortedCommentTreeBuilder;
 
     //생성
+    @Transactional
     public CommentResponse save(String userId, CreateCommentRequest request) {
 
         Post post = postRepository.findById(request.postId())
@@ -63,7 +64,6 @@ public class CommentService {
 
 
     //댓글 삭제(대댓글 남기고)
-    @Transactional
     public void deleteComment(Long commentId, String userId) throws AccessDeniedException {
         // 댓글 조회
         Comment comment = commentRepository.findByIdAndDeleteIsNull(commentId)
