@@ -6,9 +6,9 @@ services:
     env_file:
       - .env
     networks:
-      - java_default
+      - redlight_default
     environment:
-      DB_HOST: postgres-db
+      DB_HOST: redlight
 networks:
-  java_default:
+  redlight_default:
     external: true
