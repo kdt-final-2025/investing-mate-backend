@@ -20,12 +20,13 @@ import java.util.Optional;
 public class CommentService {
     public final CommentRepository commentRepository;
     public final CommentLikeRepository commentLikeRepository;
-    public final  PostRepository postRepository;
+    public final PostRepository postRepository;
     public final CommentTreeBuilder commentTreeBuilder;
     public final LikeCountRepository likeCountRepository;
     public final LikeSortedCommentTreeBuilder likeSortedCommentTreeBuilder;
 
     //생성
+    @Transactional
     public CommentResponse save(String userId, CreateCommentRequest request) {
 
         Post post = postRepository.findById(request.postId())
@@ -61,9 +62,7 @@ public class CommentService {
     }
 
 
-
     //댓글 삭제(대댓글 남기고)
-    @Transactional
     public void deleteComment(Long commentId, String userId) throws AccessDeniedException {
         // 댓글 조회
         Comment comment = commentRepository.findByIdAndDeleteIsNull(commentId)
@@ -131,6 +130,7 @@ public class CommentService {
                 nowLiked
         );
     }
+
     //좋아요 순 조회
     @Transactional
     public CommentResponseAndPaging getCommentTree(Long postId, Pageable pageable, String sortType) {
@@ -183,6 +183,7 @@ public class CommentService {
 
 
     }
+
     private CommentResponse convertToCommentResponse(CommentSortedByLikesResponse response) {
         List<CommentResponse> children = response.getChildren() == null ? List.of() :
                 response.getChildren().stream()
@@ -200,6 +201,7 @@ public class CommentService {
                 children
         );
     }
+
     private CommentResponse convertToCommentResponse(CommentResponse response) {
         List<CommentResponse> children = response.children() == null ? List.of() :
                 response.children().stream()
