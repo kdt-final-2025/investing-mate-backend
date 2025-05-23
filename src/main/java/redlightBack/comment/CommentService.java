@@ -26,11 +26,13 @@ public class CommentService {
     public final LikeSortedCommentTreeBuilder likeSortedCommentTreeBuilder;
 
     //생성
+    @Transactional
     public CommentResponse save(String userId, CreateCommentRequest request) {
 
         Post post = postRepository.findById(request.postId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
+        post.increaseCommentCount();
         Comment parent = null;
 
         if (request.parentId() != null) {
@@ -63,7 +65,6 @@ public class CommentService {
 
 
     //댓글 삭제(대댓글 남기고)
-    @Transactional
     public void deleteComment(Long commentId, String userId) throws AccessDeniedException {
         // 댓글 조회
         Comment comment = commentRepository.findByIdAndDeleteIsNull(commentId)
@@ -76,7 +77,9 @@ public class CommentService {
 
         // 삭제 처리 (소프트 삭제)
         comment.delete();
-
+        Post post = postRepository.findById(comment.getPostId())
+                .orElseThrow(() -> new NoSuchElementException("게시글을 찾을 수 없습니다. postId: " + comment.getPostId()));
+        post.decreaseCommentCount();
         // 댓글 저장 (소프트 삭제된 상태로)
         commentRepository.save(comment);
     }
@@ -159,7 +162,7 @@ public class CommentService {
         } else {
 
             // 시간순 조회 (기존 로직)
-            List<Comment> commentPage = commentRepository.findByPostIdAndDeleteIsNull(postId);
+            List<Comment> commentPage = commentRepository.findByPostIdAndDeleteIsNullOrderByCreatedAtDesc(postId);
 
             long totalElements = likeCountRepository.countCommentsByPostId(postId);
 
@@ -181,6 +184,7 @@ public class CommentService {
 
 
     }
+
     private CommentResponse convertToCommentResponse(CommentSortedByLikesResponse response) {
         List<CommentResponse> children = response.getChildren() == null ? List.of() :
                 response.getChildren().stream()

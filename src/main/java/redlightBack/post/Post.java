@@ -87,4 +87,13 @@ public class Post extends BaseEntity {
     public void increaseViewCount() {
         this.viewCount++;
     }
+
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decreaseCommentCount() {
+        if (this.commentCount > 0) this.commentCount--;
+    }
+
 }
