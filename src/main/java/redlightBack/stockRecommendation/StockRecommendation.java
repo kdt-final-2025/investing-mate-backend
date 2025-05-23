@@ -49,7 +49,7 @@ public class StockRecommendation {
     //"고배당 + 저평가" 태그 생성
     public String generateReason(){
         List<String> reasons = new ArrayList<>();
-        if(dividendYield != null && dividendYield > 4){
+        if(dividendYield != null && dividendYield > 0.04){
             reasons.add(Tag.고배당.toString());
         }
         if(currentToHighRatio < 0.85){

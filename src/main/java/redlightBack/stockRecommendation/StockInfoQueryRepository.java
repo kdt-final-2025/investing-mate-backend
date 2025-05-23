@@ -1,5 +1,6 @@
 package redlightBack.stockRecommendation;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class StockInfoQueryRepository {
                 .where(byDividend(minDividend),
                         byPriceRatio(maxPriceRatio),
                         byRiskLevel(riskLevel))
-                .orderBy(qStockRecommendation.dividendYield.desc())
+                .orderBy(getOrderBy(riskLevel))
                 .limit(limit)
                 .fetch();
     }
@@ -37,12 +38,25 @@ public class StockInfoQueryRepository {
     // 기간 고점 대비 저평가된 종목
     // 예: maxRatio = 0.8 이면, 현재가가 1년 고가의 80% 이하인 종목만 반환
     private BooleanExpression byPriceRatio(Double maxRatio){
-        return (maxRatio != null) ? qStockRecommendation.currentPrice.divide(qStockRecommendation.highPrice1y).loe(maxRatio) : null;
+        return (maxRatio != null) ? qStockRecommendation.currentToHighRatio.loe(maxRatio) : null;
     }
 
     //위험도 조건
     private BooleanExpression byRiskLevel(RiskLevel level){
         return (level != null) ? qStockRecommendation.riskLevel.eq(level) : null;
+    }
+
+    private OrderSpecifier<?>[] getOrderBy (RiskLevel level){
+
+        if(level == RiskLevel.LOW)
+            return new OrderSpecifier<?>[]{
+                    qStockRecommendation.riskLevel.asc(),
+                    qStockRecommendation.dividendYield.asc()
+            };
+
+        else return new OrderSpecifier<?>[]{
+                qStockRecommendation.dividendYield.desc()
+        };
     }
 
 }
