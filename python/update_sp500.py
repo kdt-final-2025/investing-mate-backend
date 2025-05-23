@@ -9,8 +9,12 @@ import pandas as pd
 import yfinance as yf
 import psycopg2
 import pytz
+import redis
+import logging
 from datetime import datetime, timedelta
 from dotenv import load_dotenv  # 추가 (선택)
+
+logging.basicConfig(level=logging.DEBUG)
 
 load_dotenv()
 print(os.getenv("DB_NAME"))
@@ -61,9 +65,9 @@ def get_stock_data(ticker):
         if raw_yield is None:
             dividend_yield = 0.0
         elif raw_yield < 1.0:
-            dividend_yield = raw_yield * 100
+            dividend_yield = raw_yield
         else:
-            dividend_yield = raw_yield  # 이미 퍼센트인 경우
+            dividend_yield = raw_yield / 100 # 이미 퍼센트인 경우
 
         return {
             "current_price": info.get("currentPrice"),
@@ -85,9 +89,9 @@ def generate_current_to_high_ratio(current_price, high_price_1y):
 def generate_risk_level(dividend_yield, current_to_high_ratio):
     if dividend_yield is None or current_to_high_ratio is None:
         return None
-    if dividend_yield > 4.0 and current_to_high_ratio >= 0.9:
+    if dividend_yield > 0.04 and current_to_high_ratio >= 0.9:
         return "LOW"
-    elif dividend_yield > 2.0 and current_to_high_ratio >= 0.85:
+    elif dividend_yield > 0.02 and current_to_high_ratio >= 0.85:
         return "MEDIUM"
     else:
         return "HIGH"
@@ -155,6 +159,12 @@ def main():
 
     conn.close()
     print("🎉 전체 완료!")
+
+# GPT 설명 캐시 키 삭제
+r = redis.Redis(host='my-redis', port=6379, db=0)
+for key in r.scan_iter("GPT_EXPLAIN:*"):
+    r.delete(key)
+print("✅ GPT 설명 캐시 삭제 완료")
 
 if __name__ == "__main__":
     main()
