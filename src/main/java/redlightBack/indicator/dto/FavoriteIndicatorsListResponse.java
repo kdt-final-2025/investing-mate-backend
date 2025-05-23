@@ -3,7 +3,7 @@ package redlightBack.indicator.dto;
 import java.util.List;
 
 public record FavoriteIndicatorsListResponse(
-        List<FavoriteIndicatorResponse> responses,
+        List<IndicatorResponse> responses,
         long currentPage,
         long pageSize,
         long totalPages,

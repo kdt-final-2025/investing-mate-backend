@@ -68,20 +68,26 @@ public class FinnhubWebSocketService {
             @Override
             public void onMessage(WebSocket webSocket, String text) {
                 try {
+                    // 1) 원시 메시지 로깅
                     log.info("[웹소켓] 수신 원시 메시지: {}", text);
 
+                    // 2) JSON 파싱
                     JsonNode root = mapper.readTree(text);
                     JsonNode dataArray = root.path("data");
 
+                    // 3) 각 데이터 아이템 처리
                     for (JsonNode item : dataArray) {
                         String symbol = item.path("s").asText();
                         double price = item.path("p").asDouble();
 
+                        // 심볼·가격 로깅
                         log.info("[웹소켓] 심볼={}, 가격={}", symbol, price);
 
+                        // 4) 미트리거(triggered=false) 알림 조회
                         List<StockAlert> alerts = alertRepository.findBySymbolAndTriggeredFalse(symbol);
                         log.info("→ 조회된 알림 개수: {} (symbol={})", alerts.size(), symbol);
 
+                        // 5) 조건 체크 및 트리거
                         for (StockAlert alert : alerts) {
                             log.info("   • alert[id={}, above={}, targetPrice={}, triggered={}]",
                                     alert.getId(),
@@ -100,9 +106,11 @@ public class FinnhubWebSocketService {
                                         alert.isAbove() ? ">=" : "<=",
                                         alert.getTargetPrice());
 
+                                // 6) 상태 업데이트 및 저장
                                 alert.markTriggered();
                                 alertRepository.save(alert);
 
+                                // 7) SSE로 클라이언트에 알림 전송
                                 emitterService.sendAlert(alert.getUserId(), symbol, price);
                             }
                         }
@@ -118,18 +126,18 @@ public class FinnhubWebSocketService {
             public void onFailure(WebSocket ws, Throwable t, Response resp) {
                 log.error("❌ WebSocket failure (code={}), will retry in {}s",
                         resp != null ? resp.code() : -1,
-                        60,  
+                        60,  // ⬅ 변경됨
                         t);
                 scheduler.schedule(this::retryConnect,
-                        Instant.now().plusSeconds(60)); 
+                        Instant.now().plusSeconds(60)); // ⬅ 변경됨
             }
 
             @Override
             public void onClosed(WebSocket ws, int code, String reason) {
                 log.warn("⚠️ WebSocket closed (code={}, reason={}), retrying in {}s",
-                        code, reason, 60); 
+                        code, reason, 60); // ⬅ 변경됨
                 scheduler.schedule(this::retryConnect,
-                        Instant.now().plusSeconds(60)); 
+                        Instant.now().plusSeconds(60)); // ⬅ 변경됨
             }
 
             private void retryConnect() {
